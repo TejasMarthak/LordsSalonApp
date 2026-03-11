@@ -1,6 +1,7 @@
 import express from "express";
 import Booking from "../models/Booking.js";
 import Service from "../models/Service.js";
+import { adminAuth } from "../middleware/adminAuth.js";
 
 const router = express.Router();
 
@@ -45,10 +46,11 @@ router.post("/", async (req, res) => {
 
     await booking.save();
 
+    const whatsappPhone = process.env.SALON_PHONE || "919733681843";
     res.status(201).json({
       message: "Booking created successfully",
       booking,
-      whatsappLink: `https://wa.me/919733681843?text=Hi%20Lords%20Salon,%20I%20have%20booked%20${service.name}%20on%20${bookingDate}`,
+      whatsappLink: `https://wa.me/${whatsappPhone}?text=Hi%20Lords%20Salon,%20I%20have%20booked%20${service.name}%20on%20${bookingDate}`,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -78,8 +80,8 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update booking status
-router.patch("/:id", async (req, res) => {
+// Update booking status (admin only)
+router.patch("/:id", adminAuth, async (req, res) => {
   try {
     const { status, assignedStaff, paymentStatus } = req.body;
 
@@ -97,8 +99,8 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
-// Cancel booking
-router.delete("/:id", async (req, res) => {
+// Cancel booking (admin only)
+router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,

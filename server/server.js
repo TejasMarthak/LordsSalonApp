@@ -12,6 +12,9 @@ import staffRoutes from "./routes/staff.js";
 import bookingsRoutes from "./routes/bookings.js";
 import ratingsRoutes from "./routes/ratings.js";
 import sitemapRoutes from "./routes/sitemap.js";
+import contentRoutes from "./routes/content.js";
+import siteSettingsRoutes from "./routes/site-settings.js";
+import uploadRoutes from "./routes/upload.js";
 
 dotenv.config();
 
@@ -37,6 +40,9 @@ app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/bookings", bookingsRoutes);
 app.use("/api/ratings", ratingsRoutes);
+app.use("/api/content", contentRoutes);
+app.use("/api/site-settings", siteSettingsRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // SEO Routes (sitemap & robots.txt)
 app.use("/", sitemapRoutes);

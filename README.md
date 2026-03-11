@@ -10,10 +10,13 @@
 Lords is a decoupled MERN (MongoDB, Express, React, Node.js) architecture designed specifically for a premium makeup studio. The platform features:
 
 - **Client-Facing Website**: Aesthetic, mobile-first portal showcasing services and portfolio
-- **Admin Dashboard**: Secure interface for content management
+- **Admin Dashboard**: Secure interface for complete content management
+- **Contact & Business Info Management**: Control all contact details, hours, and social media from admin
+- **Real-Time Update System**: Changes sync to website within 30 seconds
 - **Unified API**: Single backend serving both frontends
 - **MongoDB Database**: Scalable NoSQL storage
 - **Google Maps Integration**: Custom, minimalist location display
+- **Social Media Integration**: Professional SVG icons with direct links
 
 ## 🎯 Brand Identity
 
@@ -22,32 +25,55 @@ Lords is a decoupled MERN (MongoDB, Express, React, Node.js) architecture design
 - **Color Palette**: Alabaster, cream, sage green, muted clay, stark black
 - **Layout**: Wide margins, asymmetrical balance, smooth scrolling
 
+## ✨ Key Features
+
+### Admin Dashboard Features ✅
+
+- **Contact Management**: Phone, email, address, map coordinates
+- **Business Hours**: 7-day schedule with closed day support
+- **Social Media Links**: Instagram, Facebook, WhatsApp, Twitter
+- **Pages & Sections**: Full website content builder
+- **Services**: Complete service catalog with categories
+- **Portfolio**: Showcase your best work with local image uploads
+- **Branding**: Customize colors and site appearance
+- **Appearance Settings**: Global styling and theme management
+
+### Website Features ✅
+
+- **Dynamic Footer**: Contact info and social icons from admin panel
+- **Location Section**: Interactive Google Maps with hours and contact
+- **Responsive Design**: Optimized for all devices
+- **Professional Icons**: SVG-based social media icons (not text badges)
+- **Real-Time Updates**: Website reflects admin changes in 30 seconds
+
 ## 🏗️ Architecture
 
 ```
 Lords Salon/
 ├── 📚 Documentation (12+ guides)
-│   ├── INDEX.md                     ← START HERE for navigation
+│   ├── INDEX.md                        ← START HERE for navigation
 │   ├── README.md (this file)
 │   ├── QUICK_START.md
+│   ├── CONTACT_MANAGEMENT_GUIDE.md     ← NEW: Feature guide
 │   ├── DEPLOYMENT_GUIDE.md
 │   ├── ARCHITECTURE.md
 │   ├── SETUP_COMPLETE.md
 │   ├── PROJECT_INVENTORY.md
 │   ├── MAPS_INTEGRATION_GUIDE.md
 │   └── SEO_*.md (5 guides for SEO optimization)
-├── client/                 # Client-facing website (React/Vite)
+├── client/                  # Client-facing website (React/Vite)
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── layout/    (Header, Footer)
-│   │   │   ├── sections/  (Hero, Services, Lookbook, Location)
-│   │   │   └── utils/     (SEO, OptimizedImage)
-│   │   ├── utils/         (jsonLdSchema)
-│   │   ├── pages/         (ServiceDetail, PortfolioDetail)
+│   │   │   ├── layout/     (Header, Footer - now with dynamic data)
+│   │   │   ├── sections/   (Hero, Services, Lookbook, Location - responsive)
+│   │   │   └── utils/      (SEO, OptimizedImage, Icons)
+│   │   ├── hooks/          (useSiteData - API data fetching)
+│   │   ├── utils/          (jsonLdSchema)
+│   │   ├── pages/          (ServiceDetail, PortfolioDetail)
 │   │   └── App.jsx
 │   ├── index.html
 │   └── tailwind.config.js
-├── admin/                  # Owner's admin dashboard (React/Vite)
+├── admin/                   # Owner's admin dashboard (React/Vite)
 │   ├── src/
 │   │   ├── components/    (Layout, Modules)
 │   │   ├── pages/         (Login, Dashboard)

@@ -153,4 +153,77 @@ router.delete("/admins/:id", adminAuth, async (req, res) => {
   }
 });
 
+// Delete own account
+router.delete("/account", adminAuth, async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res
+        .status(400)
+        .json({ error: "Password required for account deletion" });
+    }
+
+    const admin = await Admin.findById(req.adminId);
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    const isPasswordValid = await admin.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    await Admin.findByIdAndDelete(req.adminId);
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Google OAuth Callback Handler
+router.post("/oauth/google", async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ error: "ID token required" });
+    }
+
+    // In production, verify the ID token with Google
+    // For now, we'll create/update admin based on Google info
+    // You'll need to add google-auth-library to verify tokens properly
+
+    const token = generateToken(null); // Temporary token
+    res.json({
+      message: "OAuth endpoint ready",
+      token,
+      note: "Implement Google Auth Library for production",
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Google OAuth Token Exchange (for authorization code flow)
+router.post("/oauth/google/callback", async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ error: "Authorization code required" });
+    }
+
+    // In production, exchange code for tokens with Google OAuth API
+    // This is a placeholder implementation
+
+    res.status(501).json({
+      error: "OAuth callback processing requires backend configuration",
+      note: "Set up Google OAuth credentials and implement token exchange",
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

@@ -23,7 +23,7 @@ export default function AdminManager({ admin }) {
       setLoading(true);
       const token = localStorage.getItem('adminToken');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/auth/admins`,
+        `${adminConfig.api.baseUrl}/api/auth/admins`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

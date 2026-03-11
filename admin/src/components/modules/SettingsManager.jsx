@@ -5,36 +5,73 @@ import { AdminInput, AdminButton } from '../common/FormComponents';
 
 export default function SettingsManager() {
   const [settings, setSettings] = useState({
-    salonName: '',
-    phone: '',
-    email: '',
-    address: '',
-    hours: 'Mon-Fri: 10am-8pm, Sat: 11am-9pm, Sun: 12pm-7pm',
-    instagram: '',
-    facebook: '',
-    whatsapp: '',
+    contact: { phone: '', email: '', address: '', latitude: '', longitude: '' },
+    social: { instagram: '', facebook: '', whatsapp: '', twitter: '' },
+    businessHours: [
+      { day: 'Monday', open: '10:00', close: '20:00', isClosed: false },
+      { day: 'Tuesday', open: '10:00', close: '20:00', isClosed: false },
+      { day: 'Wednesday', open: '10:00', close: '20:00', isClosed: false },
+      { day: 'Thursday', open: '10:00', close: '20:00', isClosed: false },
+      { day: 'Friday', open: '10:00', close: '20:00', isClosed: false },
+      { day: 'Saturday', open: '11:00', close: '21:00', isClosed: false },
+      { day: 'Sunday', open: '12:00', close: '19:00', isClosed: false },
+    ],
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const handleSettingChange = (field, value) => {
+  // Load settings on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await axios.get(`${adminConfig.api.baseUrl}/api/site-settings`);
+        setSettings((prev) => ({
+          ...prev,
+          contact: response.data.contact || prev.contact,
+          social: response.data.social || prev.social,
+          businessHours: response.data.businessHours || prev.businessHours,
+        }));
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleContactChange = (field, value) => {
     setSettings((prev) => ({
       ...prev,
-      [field]: value,
+      contact: { ...prev.contact, [field]: value },
     }));
   };
 
+  const handleSocialChange = (field, value) => {
+    setSettings((prev) => ({
+      ...prev,
+      social: { ...prev.social, [field]: value },
+    }));
+  };
+
+  const handleBusinessHourChange = (index, field, value) => {
+    const newHours = [...settings.businessHours];
+    newHours[index] = { ...newHours[index], [field]: value };
+    setSettings((prev) => ({ ...prev, businessHours: newHours }));
+  };
+
   const handleSave = async () => {
-    setLoading(true);
+    setSaving(true);
     setError('');
     setSuccess('');
 
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.post(
-        `${adminConfig.api.baseUrl}/api/settings`,
+      await axios.put(
+        `${adminConfig.api.baseUrl}/api/site-settings`,
         settings,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -43,12 +80,12 @@ export default function SettingsManager() {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to save settings');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    setLoading(true);
+    setSaving(true);
     setError('');
     setSuccess('');
 
@@ -58,7 +95,7 @@ export default function SettingsManager() {
       
       if (!confirmPassword) {
         setError('Deletion cancelled');
-        setLoading(false);
+        setSaving(false);
         return;
       }
 
@@ -78,10 +115,18 @@ export default function SettingsManager() {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to delete account');
     } finally {
-      setLoading(false);
+      setSaving(false);
       setShowDeleteConfirm(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: adminConfig.colors.primary }}></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -91,7 +136,7 @@ export default function SettingsManager() {
           Business Settings
         </h2>
         <p className="font-inter text-sm mt-2" style={{ color: adminConfig.colors.textLight }}>
-          Manage your salon information and account settings
+          Manage your salon information, contact details, business hours, and social media
         </p>
       </div>
 
@@ -124,137 +169,202 @@ export default function SettingsManager() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Salon Information */}
-        <div 
-          className="rounded-lg border p-6"
+      {/* Contact Information */}
+      <div 
+        className="rounded-lg border p-6"
+        style={{
+          backgroundColor: adminConfig.colors.background,
+          borderColor: adminConfig.colors.border,
+        }}
+      >
+        <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
+          📞 Contact Information
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <AdminInput
+            label="Phone"
+            type="tel"
+            value={settings.contact.phone}
+            onChange={(e) => handleContactChange('phone', e.target.value)}
+            placeholder="+1 (555) 123-4567"
+          />
+
+          <AdminInput
+            label="Email"
+            type="email"
+            value={settings.contact.email}
+            onChange={(e) => handleContactChange('email', e.target.value)}
+            placeholder="contact@salon.com"
+          />
+
+          <AdminInput
+            label="Address"
+            type="textarea"
+            value={settings.contact.address}
+            onChange={(e) => handleContactChange('address', e.target.value)}
+            placeholder="123 Main Street, City, State 12345"
+            rows={3}
+            className="md:col-span-2"
+          />
+
+          <AdminInput
+            label="Latitude (for Map)"
+            type="number"
+            step="0.00001"
+            value={settings.contact.latitude}
+            onChange={(e) => handleContactChange('latitude', e.target.value)}
+            placeholder="40.7128"
+          />
+
+          <AdminInput
+            label="Longitude (for Map)"
+            type="number"
+            step="0.00001"
+            value={settings.contact.longitude}
+            onChange={(e) => handleContactChange('longitude', e.target.value)}
+            placeholder="-74.0060"
+          />
+        </div>
+      </div>
+
+      {/* Social Media */}
+      <div 
+        className="rounded-lg border p-6"
+        style={{
+          backgroundColor: adminConfig.colors.background,
+          borderColor: adminConfig.colors.border,
+        }}
+      >
+        <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
+          🌐 Social Media Links
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <AdminInput
+            label="Instagram"
+            type="url"
+            value={settings.social.instagram}
+            onChange={(e) => handleSocialChange('instagram', e.target.value)}
+            placeholder="https://instagram.com/yoursalon"
+          />
+
+          <AdminInput
+            label="Facebook"
+            type="url"
+            value={settings.social.facebook}
+            onChange={(e) => handleSocialChange('facebook', e.target.value)}
+            placeholder="https://facebook.com/yoursalon"
+          />
+
+          <AdminInput
+            label="WhatsApp"
+            type="tel"
+            value={settings.social.whatsapp}
+            onChange={(e) => handleSocialChange('whatsapp', e.target.value)}
+            placeholder="+1 (555) 123-4567"
+          />
+
+          <AdminInput
+            label="Twitter"
+            type="url"
+            value={settings.social.twitter}
+            onChange={(e) => handleSocialChange('twitter', e.target.value)}
+            placeholder="https://twitter.com/yoursalon"
+          />
+        </div>
+      </div>
+
+      {/* Business Hours */}
+      <div 
+        className="rounded-lg border p-6"
+        style={{
+          backgroundColor: adminConfig.colors.background,
+          borderColor: adminConfig.colors.border,
+        }}
+      >
+        <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
+          ⏰ Business Hours
+        </h3>
+
+        <div className="space-y-4">
+          {settings.businessHours.map((hour, index) => (
+            <div key={index} className="border rounded-lg p-4" style={{ borderColor: adminConfig.colors.border }}>
+              <div className="flex items-center gap-4 flex-wrap">
+                <label className="font-inter font-semibold min-w-24" style={{ color: adminConfig.colors.primary }}>
+                  {hour.day}
+                </label>
+
+                {!hour.isClosed ? (
+                  <>
+                    <input
+                      type="time"
+                      value={hour.open}
+                      onChange={(e) => handleBusinessHourChange(index, 'open', e.target.value)}
+                      className="px-3 py-2 border rounded-lg font-inter text-sm"
+                      style={{ borderColor: adminConfig.colors.border }}
+                    />
+                    <span className="font-inter">to</span>
+                    <input
+                      type="time"
+                      value={hour.close}
+                      onChange={(e) => handleBusinessHourChange(index, 'close', e.target.value)}
+                      className="px-3 py-2 border rounded-lg font-inter text-sm"
+                      style={{ borderColor: adminConfig.colors.border }}
+                    />
+                  </>
+                ) : (
+                  <span className="font-inter font-semibold" style={{ color: adminConfig.colors.warning }}>
+                    CLOSED
+                  </span>
+                )}
+
+                <label className="flex items-center gap-2 cursor-pointer ml-auto">
+                  <input
+                    type="checkbox"
+                    checked={hour.isClosed}
+                    onChange={(e) => handleBusinessHourChange(index, 'isClosed', e.target.checked)}
+                    className="w-5 h-5 cursor-pointer"
+                  />
+                  <span className="font-inter text-sm">Closed</span>
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div 
+        className="rounded-lg border p-6"
+        style={{
+          backgroundColor: '#FFF5F5',
+          borderColor: adminConfig.colors.warning,
+        }}
+      >
+        <h3 className="font-playfair text-lg font-bold mb-4" style={{ color: adminConfig.colors.warning }}>
+          Danger Zone
+        </h3>
+        <p className="font-inter text-sm mb-4" style={{ color: adminConfig.colors.textLight }}>
+          Permanently delete your account and all associated data.
+        </p>
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          className="w-full px-4 py-3 font-inter text-sm font-semibold uppercase tracking-wider rounded-lg transition-all"
           style={{
-            backgroundColor: adminConfig.colors.background,
-            borderColor: adminConfig.colors.border,
+            backgroundColor: adminConfig.colors.warning,
+            color: adminConfig.colors.white,
           }}
         >
-          <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
-            Salon Information
-          </h3>
-
-          <div className="space-y-4">
-            <AdminInput
-              label="Salon Name"
-              type="text"
-              value={settings.salonName}
-              onChange={(e) => handleSettingChange('salonName', e.target.value)}
-              placeholder="Enter your salon name"
-            />
-
-            <AdminInput
-              label="Phone"
-              type="tel"
-              value={settings.phone}
-              onChange={(e) => handleSettingChange('phone', e.target.value)}
-              placeholder="+1 (555) 123-4567"
-            />
-
-            <AdminInput
-              label="Email"
-              type="email"
-              value={settings.email}
-              onChange={(e) => handleSettingChange('email', e.target.value)}
-              placeholder="contact@salon.com"
-            />
-
-            <AdminInput
-              label="Address"
-              type="textarea"
-              value={settings.address}
-              onChange={(e) => handleSettingChange('address', e.target.value)}
-              placeholder="Enter your salon address"
-              rows={3}
-            />
-
-            <AdminInput
-              label="Business Hours"
-              type="text"
-              value={settings.hours}
-              onChange={(e) => handleSettingChange('hours', e.target.value)}
-              placeholder="Mon-Fri: 10am-8pm, Sat: 11am-9pm, Sun: 12pm-7pm"
-            />
-          </div>
-        </div>
-
-        {/* Social Media & Account */}
-        <div className="space-y-8">
-          {/* Social Media Links */}
-          <div 
-            className="rounded-lg border p-6"
-            style={{
-              backgroundColor: adminConfig.colors.background,
-              borderColor: adminConfig.colors.border,
-            }}
-          >
-            <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
-              Social Media
-            </h3>
-
-            <div className="space-y-4">
-              <AdminInput
-                label="Instagram"
-                type="url"
-                value={settings.instagram}
-                onChange={(e) => handleSettingChange('instagram', e.target.value)}
-                placeholder="https://instagram.com/yoursalon"
-              />
-
-              <AdminInput
-                label="Facebook"
-                type="url"
-                value={settings.facebook}
-                onChange={(e) => handleSettingChange('facebook', e.target.value)}
-                placeholder="https://facebook.com/yoursalon"
-              />
-
-              <AdminInput
-                label="WhatsApp"
-                type="tel"
-                value={settings.whatsapp}
-                onChange={(e) => handleSettingChange('whatsapp', e.target.value)}
-                placeholder="+1 (555) 123-4567"
-              />
-            </div>
-          </div>
-
-          {/* Danger Zone */}
-          <div 
-            className="rounded-lg border p-6"
-            style={{
-              backgroundColor: '#FFF5F5',
-              borderColor: adminConfig.colors.warning,
-            }}
-          >
-            <h3 className="font-playfair text-lg font-bold mb-4" style={{ color: adminConfig.colors.warning }}>
-              Danger Zone
-            </h3>
-            <p className="font-inter text-sm mb-4" style={{ color: adminConfig.colors.textLight }}>
-              Permanently delete your account and all associated data.
-            </p>
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="w-full px-4 py-3 font-inter text-sm font-semibold uppercase tracking-wider rounded-lg transition-all"
-              style={{
-                backgroundColor: adminConfig.colors.warning,
-                color: adminConfig.colors.white,
-              }}
-            >
-              Delete Account
-            </button>
-          </div>
-        </div>
+          Delete Account
+        </button>
       </div>
 
       {/* Save Button */}
       <div className="flex gap-4">
         <AdminButton
           onClick={handleSave}
-          loading={loading}
+          loading={saving}
           variant="primary"
           size="lg"
           className="flex-1"
@@ -286,7 +396,7 @@ export default function SettingsManager() {
               </AdminButton>
               <AdminButton
                 onClick={handleDeleteAccount}
-                loading={loading}
+                loading={saving}
                 variant="danger"
                 className="flex-1"
               >

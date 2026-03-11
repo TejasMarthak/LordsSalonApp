@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import adminConfig from '../../adminConfig';
 
 export default function Sidebar({ currentPage, onPageChange }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
     <aside 
@@ -11,10 +11,10 @@ export default function Sidebar({ currentPage, onPageChange }) {
         borderRightWidth: '1px',
         borderRightColor: adminConfig.colors.border,
       }}
-      className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen sticky top-0 transition-all duration-300 overflow-y-auto flex flex-col`}
+      className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen lg:sticky top-0 transition-all duration-300 overflow-y-auto flex flex-col`}
     >
       {/* Logo Section */}
-      <div className="p-6 border-b" style={{ borderBottomColor: adminConfig.colors.border }}>
+      <div className="p-4 sm:p-6 border-b" style={{ borderBottomColor: adminConfig.colors.border }}>
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div>
@@ -28,7 +28,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-gray-100 rounded transition-colors"
+            className="p-2 hover:bg-gray-100 rounded transition-colors hidden lg:block"
             title={isCollapsed ? 'Expand' : 'Collapse'}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
@@ -41,12 +41,12 @@ export default function Sidebar({ currentPage, onPageChange }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-3 sm:p-4 space-y-2 overflow-y-auto">
         {adminConfig.navigation.map((item) => (
           <button
             key={item.id}
             onClick={() => onPageChange(item.id)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-inter text-sm uppercase tracking-wider transition-all"
+            className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 rounded-lg font-inter text-xs sm:text-sm uppercase tracking-wider transition-all"
             style={{
               backgroundColor: currentPage === item.id 
                 ? adminConfig.colors.accent 
@@ -60,11 +60,11 @@ export default function Sidebar({ currentPage, onPageChange }) {
             }}
             title={item.label}
           >
-            <span className="text-lg flex-shrink-0">{item.icon}</span>
+            <span className="text-base sm:text-lg flex-shrink-0">{item.icon}</span>
             {!isCollapsed && (
               <div className="text-left">
-                <div className="font-semibold">{item.label}</div>
-                <div className="text-xs opacity-60">{item.description}</div>
+                <div className="font-semibold text-sm">{item.label}</div>
+                <div className="text-xs opacity-60 hidden sm:block">{item.description}</div>
               </div>
             )}
           </button>
@@ -73,7 +73,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
 
       {/* Footer Info */}
       {!isCollapsed && (
-        <div className="p-4 border-t" style={{ borderTopColor: adminConfig.colors.border }}>
+        <div className="p-3 sm:p-4 border-t" style={{ borderTopColor: adminConfig.colors.border }}>
           <p className="font-inter text-xs font-medium" style={{ color: adminConfig.colors.textLight }}>
             Beauty Studio Admin
           </p>

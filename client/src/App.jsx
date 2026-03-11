@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SEO from './components/utils/SEO';
 import config from './config';
 import { useJsonLd, generateLocalBusinessSchema, generateOrganizationSchema } from './utils/jsonLdSchema';
@@ -8,16 +8,54 @@ import HeroSectionNew from './components/sections/HeroSectionNew';
 import ServiceMenu from './components/sections/ServiceMenu';
 import Lookbook from './components/sections/Lookbook';
 import LocationContact from './components/sections/LocationContact';
+import axios from 'axios';
 
 export default function App() {
+  const [siteSettings, setSiteSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useJsonLd(generateLocalBusinessSchema());
   useJsonLd(generateOrganizationSchema());
+
+  // Fetch site settings and content from MongoDB on mount
+  useEffect(() => {
+    const fetchSiteData = async () => {
+      try {
+        // Fetch site settings from API
+        const settingsRes = await axios.get(`${config.api.baseUrl}/api/site-settings`);
+        setSiteSettings(settingsRes.data);
+        
+        // Update document title with salon name from settings
+        if (settingsRes.data?.branding?.siteName) {
+          document.title = `${settingsRes.data.branding.siteName} | Professional Beauty Studio`;
+        }
+      } catch (err) {
+        console.error('Error fetching site settings:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSiteData();
+    
+    // Refresh site settings every 30 seconds (in case admin makes changes)
+    const interval = setInterval(fetchSiteData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: config.colors.white }}>
+        <p className="font-inter" style={{ color: config.colors.secondary }}>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <SEO
-        title={`Professional Beauty Studio | ${config.salon.name}`}
-        description="Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare. Book your appointment now!"
+        title={`Professional Beauty Studio | ${siteSettings?.branding?.siteName || config.salon.name}`}
+        description={siteSettings?.branding?.tagline || "Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare. Book your appointment now!"}
         canonicalUrl={config.salon.website}
         keywords="makeup salon, bridal makeup, hair styling, skincare, beauty, makeup artist"
       />
@@ -33,10 +71,10 @@ export default function App() {
             <Lookbook />
           </section>
           <section id="location">
-            <LocationContact />
+            <LocationContact siteSettings={siteSettings} />
           </section>
         </main>
-        <Footer />
+        <Footer siteSettings={siteSettings} />
       </div>
     </>
   );

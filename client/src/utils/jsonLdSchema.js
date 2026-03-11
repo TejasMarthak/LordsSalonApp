@@ -7,6 +7,7 @@
  * Generate Local Business Schema
  * Returns JSON-LD markup for BeautySalon business
  */
+import React from "react";
 import config from "../config";
 
 export const generateLocalBusinessSchema = () => {

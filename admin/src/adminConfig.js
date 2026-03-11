@@ -32,6 +32,18 @@ const adminConfig = {
       description: "Overview & Analytics",
     },
     {
+      id: "site-builder",
+      label: "Site Builder",
+      icon: "🔨",
+      description: "Manage Page Sections",
+    },
+    {
+      id: "site-appearance",
+      label: "Appearance",
+      icon: "🎨",
+      description: "Colors & Branding",
+    },
+    {
       id: "hero",
       label: "Hero Section",
       icon: "🎯",

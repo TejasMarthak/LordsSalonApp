@@ -14,11 +14,7 @@ export const loadGoogleMaps = () => {
     // Security: Load API key from environment variables
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-    if (
-      !apiKey ||
-      apiKey === "your_google_maps_api_key" ||
-      apiKey === "GOOGLE_MAPS_API_KEY"
-    ) {
+    if (!apiKey) {
       console.warn(
         "⚠️ Google Maps API Key not configured. Please set VITE_GOOGLE_MAPS_API_KEY in .env.local",
       );

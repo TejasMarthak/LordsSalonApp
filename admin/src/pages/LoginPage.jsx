@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import adminConfig from '../adminConfig';
 
 export default function LoginPage({ onLogin }) {
   const [isSignup, setIsSignup] = useState(false);
@@ -21,19 +22,14 @@ export default function LoginPage({ onLogin }) {
 
     try {
       const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login';
-      const apiUrl = `${import.meta.env.VITE_API_URL}${endpoint}`;
+      const apiUrl = `${adminConfig.api.baseUrl}${endpoint}`;
       const payload = isSignup
         ? formData
         : { email: formData.email, password: formData.password };
 
-      // Debug: Log API call details
-      console.log('🔐 Auth Request:', { apiUrl, payload });
-
       const response = await axios.post(apiUrl, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
-
-      console.log('✅ Auth Success:', response.data);
 
       localStorage.setItem('adminToken', response.data.token);
       onLogin(response.data.admin);

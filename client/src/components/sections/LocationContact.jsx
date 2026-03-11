@@ -3,39 +3,65 @@ import config from '../../config';
 import loadGoogleMaps from '../../utils/loadGoogleMaps';
 import { PhoneIcon, EmailIcon, LocationIcon, InstagramIcon, FacebookIcon, WhatsAppIcon } from '../utils/Icons';
 
-export default function LocationContact() {
+export default function LocationContact({ siteSettings }) {
   const mapRef = useRef(null);
   const [map, setMap] = useState(null);
-  const [businessHours] = useState([
-    { day: 'Monday - Friday', hours: '10:00 AM - 8:00 PM' },
-    { day: 'Saturday', hours: '11:00 AM - 9:00 PM' },
-    { day: 'Sunday', hours: '12:00 PM - 7:00 PM' },
-  ]);
+  const [mapError, setMapError] = useState(null);
+  const [mapLoading, setMapLoading] = useState(true);
+  
+  // Use site settings if available, otherwise fall back to config
+  const contact = siteSettings?.contact || {
+    phone: config.salon.phone,
+    email: config.salon.email,
+    address: config.salon.address,
+    latitude: parseFloat(import.meta.env.VITE_SALON_LAT) || 23.0152,
+    longitude: parseFloat(import.meta.env.VITE_SALON_LNG) || 72.4644,
+  };
+  
+  const social = siteSettings?.social || config.social || {};
+  const businessHours = siteSettings?.businessHours || [
+    { day: 'Monday', open: '10:00', close: '20:00', isClosed: false },
+    { day: 'Tuesday', open: '10:00', close: '20:00', isClosed: false },
+    { day: 'Wednesday', open: '10:00', close: '20:00', isClosed: false },
+    { day: 'Thursday', open: '10:00', close: '20:00', isClosed: false },
+    { day: 'Friday', open: '10:00', close: '20:00', isClosed: false },
+    { day: 'Saturday', open: '11:00', close: '21:00', isClosed: false },
+    { day: 'Sunday', open: '12:00', close: '19:00', isClosed: false },
+  ];
 
   const salonCoordinates = {
-    lat: parseFloat(import.meta.env.VITE_SALON_LAT) || 23.0152,
-    lng: parseFloat(import.meta.env.VITE_SALON_LNG) || 72.4644,
+    lat: parseFloat(contact.latitude) || 23.0152,
+    lng: parseFloat(contact.longitude) || 72.4644,
   };
 
   const salonInfo = {
-    name: config.salon.name,
-    address: config.salon.address,
-    phone: config.salon.phone,
-    email: config.salon.email,
+    name: siteSettings?.branding?.siteName || config.salon.name,
+    address: contact.address,
+    phone: contact.phone,
+    email: contact.email,
   };
 
   useEffect(() => {
     initMap();
-  }, []);
+  }, [siteSettings]);
 
   const initMap = async () => {
     try {
+      setMapLoading(true);
+      setMapError(null);
+      
+      // Check if map container is available
+      if (!mapRef.current) {
+        console.warn('Map container not ready');
+        setMapLoading(false);
+        return;
+      }
+
       // Dynamically load Google Maps with secure API key
       await loadGoogleMaps();
       
       if (!window.google) {
-        console.error('Google Maps API not loaded');
-        return;
+        throw new Error('Google Maps API not loaded');
       }
 
       const mapInstance = new window.google.maps.Map(mapRef.current, {
@@ -107,8 +133,11 @@ export default function LocationContact() {
       // Open info window by default
       infoWindow.open(mapInstance, marker);
       setMap(mapInstance);
+      setMapLoading(false);
     } catch (err) {
       console.error('Error loading map:', err);
+      setMapError(err.message || 'Failed to load map');
+      setMapLoading(false);
     }
   };
 
@@ -146,7 +175,25 @@ export default function LocationContact() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Map - Full width on mobile, responsive height */}
           <div className="rounded-lg overflow-hidden shadow-xl" style={{ borderColor: config.colors.border, borderWidth: '1px' }}>
-            <div ref={mapRef} style={{ width: '100%', height: '300px', minHeight: '300px', backgroundColor: config.colors.light, '@media (min-width: 768px)': { height: '500px' } }}></div>
+            <div ref={mapRef} className="w-full md:h-96" style={{ height: '300px', backgroundColor: config.colors.light }}>
+              {mapLoading && (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: config.colors.accent }}></div>
+                </div>
+              )}
+              {mapError && (
+                <div className="w-full h-full flex items-center justify-center p-4">
+                  <div className="text-center">
+                    <p style={{ color: config.colors.secondary }} className="font-inter text-sm">
+                      📍 Map unavailable
+                    </p>
+                    <p style={{ color: config.colors.textLight }} className="font-inter text-xs mt-2">
+                      {salonInfo.address}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Contact Information */}
@@ -176,7 +223,9 @@ export default function LocationContact() {
                 {businessHours.map((hour, idx) => (
                   <div key={idx} className="flex justify-between font-inter">
                     <span style={{ color: config.colors.secondary }}>{hour.day}</span>
-                    <span style={{ color: config.colors.primary }} className="font-medium">{hour.hours}</span>
+                    <span style={{ color: hour.isClosed ? config.colors.warning : config.colors.primary }} className="font-medium">
+                      {hour.isClosed ? 'CLOSED' : `${hour.open} - ${hour.close}`}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -209,11 +258,11 @@ export default function LocationContact() {
                 <button
                   onClick={handleWhatsApp}
                   className="w-full flex items-center gap-4 p-4 rounded-lg transition-all hover:shadow-md active:scale-95"
-                  style={{ backgroundColor: '#E8F5E9', borderWidth: '1px', borderColor: '#4CAF50' }}
+                  style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
                 >
-                  <WhatsAppIcon size={24} color="#4CAF50" />
+                  <WhatsAppIcon size={24} color={config.colors.buttonColor} />
                   <div className="text-left">
-                    <p className="font-inter text-xs uppercase tracking-wider" style={{ color: '#2E7D32' }}>WhatsApp Us</p>
+                    <p className="font-inter text-xs uppercase tracking-wider" style={{ color: config.colors.secondary }}>WhatsApp Us</p>
                     <p className="font-inter font-medium" style={{ color: config.colors.primary }}>Quick messaging</p>
                   </div>
                 </button>
@@ -236,36 +285,42 @@ export default function LocationContact() {
               <div>
                 <p className="font-inter text-xs uppercase tracking-wider mb-4" style={{ color: config.colors.secondary }}>Follow Us</p>
                 <div className="flex gap-3 flex-wrap">
-                  <a
-                    href={config.social.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
-                    style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
-                    title="Instagram"
-                  >
-                    <InstagramIcon size={20} color={config.colors.buttonColor} />
-                  </a>
-                  <a
-                    href={config.social.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
-                    style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
-                    title="Facebook"
-                  >
-                    <FacebookIcon size={20} color={config.colors.buttonColor} />
-                  </a>
-                  <a
-                    href={config.social.whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
-                    style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
-                    title="WhatsApp"
-                  >
-                    <WhatsAppIcon size={20} color="#4CAF50" />
-                  </a>
+                  {social.instagram && (
+                    <a
+                      href={social.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
+                      style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
+                      title="Instagram"
+                    >
+                      <InstagramIcon size={20} color={config.colors.buttonColor} />
+                    </a>
+                  )}
+                  {social.facebook && (
+                    <a
+                      href={social.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
+                      style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
+                      title="Facebook"
+                    >
+                      <FacebookIcon size={20} color={config.colors.buttonColor} />
+                    </a>
+                  )}
+                  {social.whatsapp && (
+                    <a
+                      href={`https://wa.me/${social.whatsapp.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
+                      style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
+                      title="WhatsApp"
+                    >
+                      <WhatsAppIcon size={20} color={config.colors.buttonColor} />
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

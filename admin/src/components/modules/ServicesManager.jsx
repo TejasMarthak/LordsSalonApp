@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import adminConfig from '../../adminConfig';
 
 export default function ServicesManager() {
   const [services, setServices] = useState([]);
@@ -32,7 +33,7 @@ export default function ServicesManager() {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/services`);
+      const response = await axios.get(`${adminConfig.api.baseUrl}/api/services`);
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -93,7 +94,7 @@ export default function ServicesManager() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/services/${id}`, {
+      await axios.delete(`${adminConfig.api.baseUrl}/api/services/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchServices();
