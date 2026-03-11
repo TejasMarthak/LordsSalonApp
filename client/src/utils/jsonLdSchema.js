@@ -7,34 +7,36 @@
  * Generate Local Business Schema
  * Returns JSON-LD markup for BeautySalon business
  */
-import React from "react";
+import config from "../config";
+
 export const generateLocalBusinessSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "BeautySalon",
-    "@id": "https://lords-salon.com",
-    name: "Lords Professional Makeup Studio & Salon",
-    description: "Premium makeup and salon services in Vadodara, Gujarat",
-    url: "https://lords-salon.com",
-    telephone: "+91-9876543210",
-    email: "info@lords-salon.com",
-    image: "https://lords-salon.com/logo.jpg",
+    "@id": config.salon.website,
+    name: config.salon.name,
+    description:
+      "Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare.",
+    url: config.salon.website,
+    telephone: config.salon.phone,
+    email: config.salon.email,
+    image: `${config.salon.website}/logo.jpg`,
 
     // Address
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Your Street Address Here",
-      addressLocality: "Vadodara",
-      addressRegion: "Gujarat",
-      postalCode: "390001",
+      streetAddress: config.salon.address.split(",")[0] || "Your Address",
+      addressLocality: "Your City",
+      addressRegion: "Your State",
+      postalCode: "000000",
       addressCountry: "IN",
     },
 
     // Geo Coordinates
     geo: {
       "@type": "GeoCoordinates",
-      latitude: 22.3072,
-      longitude: 73.1812,
+      latitude: config.salon.lat,
+      longitude: config.salon.lng,
     },
 
     // Business Hours
@@ -63,18 +65,14 @@ export const generateLocalBusinessSchema = () => {
     priceRange: "$$",
 
     // Social Media Profiles
-    sameAs: [
-      "https://www.instagram.com/lords-salon",
-      "https://www.facebook.com/lords-salon",
-      "https://www.linkedin.com/company/lords-salon",
-    ],
+    sameAs: [config.social.instagram, config.social.facebook],
 
     // Contact Point
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "Customer Service",
-      telephone: "+91-8733681843",
-      email: "tejasmarthak1909@gmail.com",
+      telephone: config.salon.phone,
+      email: config.salon.email,
       areaServed: "IN",
       availableLanguage: "en-IN",
     },
@@ -87,23 +85,6 @@ export const generateLocalBusinessSchema = () => {
       bestRating: "5",
       worstRating: "1",
     },
-
-    // Reviews (sample reviews)
-    review: [
-      {
-        "@type": "Review",
-        reviewRating: {
-          "@type": "Rating",
-          ratingValue: "5",
-        },
-        reviewBody: "Absolutely beautiful work! Professional and courteous.",
-        author: {
-          "@type": "Person",
-          name: "Priya Sharma",
-        },
-        datePublished: "2024-01-15",
-      },
-    ],
 
     // Services (link to service list)
     hasOfferCatalog: {
@@ -148,16 +129,16 @@ export const generateServiceSchema = (service) => {
     description: service.description,
     provider: {
       "@type": "BeautySalon",
-      name: "Lords Professional Makeup Studio & Salon",
-      url: "https://lords-salon.com",
+      name: config.salon.name,
+      url: config.salon.website,
     },
-    image: service.imageUrl || "https://lords-salon.com/default-service.jpg",
+    image: service.imageUrl || `${config.salon.website}/default-service.jpg`,
     areaServed: {
       "@type": "City",
-      name: "Vadodara",
+      name: "Your City",
     },
-    priceRange: `Rs. ${service.price}`,
-    duration: `PT${service.duration}M`, // ISO 8601 format
+    priceRange: `Rs. ${service.price || "0"}`,
+    duration: `PT${service.duration || "60"}M`, // ISO 8601 format
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.8",
@@ -174,19 +155,17 @@ export const generateOrganizationSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Lords Professional Makeup Studio & Salon",
-    url: "https://lords-salon.com",
-    logo: "https://lords-salon.com/logo.png",
-    description: "Premium makeup and salon services in Vadodara, Gujarat",
-    sameAs: [
-      "https://www.instagram.com/lords-salon",
-      "https://www.facebook.com/lords-salon",
-      "https://www.linkedin.com/company/lords-salon",
-    ],
+    name: config.salon.name,
+    url: config.salon.website,
+    logo: `${config.salon.website}/logo.png`,
+    description:
+      "Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare.",
+    sameAs: [config.social.instagram, config.social.facebook],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "Customer Service",
-      telephone: "+91-9876543210",
+      telephone: config.salon.phone,
+      email: config.salon.email,
     },
   };
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import config from '../../config';
 
 /**
  * SEO Component for Dynamic Meta Tags & Head Management
@@ -7,23 +8,21 @@ import { Helmet } from 'react-helmet-async';
  * 
  * Usage:
  * <SEO 
- *   title="Bridal Makeup Services | Lords Salon"
- *   description="Professional bridal makeup in Vadodara"
- *   canonicalUrl="https://lords-salon.com/services/bridal-makeup"
- *   ogImage="https://lords-salon.com/images/bridal-makeup.jpg"
+ *   title="Bridal Makeup Services"
+ *   description="Professional bridal makeup services"
+ *   canonicalUrl="https://yourdomain.com/services/bridal-makeup"
+ *   ogImage="https://yourdomain.com/images/bridal-makeup.jpg"
  *   ogType="website"
- *   twitterHandle="@lordssalon"
  * />
  */
 const SEO = ({
-  title = 'Lords Professional Makeup Studio & Salon | Vadodara',
-  description = 'Premium makeup and salon services in Vadodara, Gujarat. Expert bridal makeup, hair styling, skincare treatments.',
-  keywords = 'makeup salon, bridal makeup, salon Vadodara, professional makeup artist',
+  title = `${config.salon.name} | Professional Beauty Services`,
+  description = 'Premium makeup and salon services. Expert bridal makeup, hair styling, skincare treatments.',
+  keywords = 'makeup salon, bridal makeup, professional makeup artist, salon services',
   canonicalUrl = typeof window !== 'undefined' ? window.location.href : '',
-  ogImage = 'https://lords-salon.com/og-image.jpg',
+  ogImage = '/og-image.jpg',
   ogType = 'website',
-  twitterHandle = '@lordssalon',
-  author = 'Lords Professional Makeup Studio & Salon',
+  author = config.salon.name,
 }) => {
   return (
     <Helmet>
@@ -46,14 +45,13 @@ const SEO = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
-      <meta property="og:site_name" content="Lords Professional Makeup Studio & Salon" />
+      <meta property="og:site_name" content={config.salon.name} />
 
       {/* Twitter Card Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
-      {twitterHandle && <meta name="twitter:creator" content={twitterHandle} />}
 
       {/* Additional Meta Tags */}
       <meta name="robots" content="index, follow" />

@@ -19,10 +19,10 @@ export default function Sidebar({ currentPage, onPageChange }) {
           {!isCollapsed && (
             <div>
               <h2 className="font-playfair text-lg font-bold" style={{ color: adminConfig.colors.primary }}>
-                Lords
+                Admin
               </h2>
               <p className="font-inter text-xs" style={{ color: adminConfig.colors.textLight }}>
-                Admin Panel
+                Dashboard
               </p>
             </div>
           )}
@@ -75,10 +75,10 @@ export default function Sidebar({ currentPage, onPageChange }) {
       {!isCollapsed && (
         <div className="p-4 border-t" style={{ borderTopColor: adminConfig.colors.border }}>
           <p className="font-inter text-xs font-medium" style={{ color: adminConfig.colors.textLight }}>
-            Lords Professional Makeup Studio
+            Beauty Studio Admin
           </p>
           <p className="font-inter text-xs mt-2" style={{ color: adminConfig.colors.textLight }}>
-            Professional & Minimal Admin Panel
+            Manage your salon
           </p>
         </div>
       )}

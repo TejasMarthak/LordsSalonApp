@@ -5,23 +5,20 @@ const config = {
     baseUrl: import.meta.env.VITE_API_URL || "http://localhost:5000",
   },
 
-  // Salon Business Information
+  // Salon Business Information - Load from environment variables (set by admin in Settings)
   salon: {
-    name: "Lords Professional Makeup Studio & Salon",
-    phone: "+91 9733681843",
-    email: "tejasmarthak1909@gmail.com",
-    address:
-      "104, First Floor, HarshEvoq, opp. Flora Ixora Road, nr. Meri Gold Circle, South Bopal, Bopal, Ahmedabad, Gujarat, India - 380058",
-    lat: 23.0152,
-    lng: 72.4644,
-    website: "http://localhost:3000",
+    name: import.meta.env.VITE_SALON_NAME || "Your Beauty Studio",
+    phone: import.meta.env.VITE_SALON_PHONE || "Contact Number",
+    email: import.meta.env.VITE_SALON_EMAIL || "contact@salon.com",
+    address: import.meta.env.VITE_SALON_ADDRESS || "Your Salon Address",
+    lat: parseFloat(import.meta.env.VITE_SALON_LAT) || 23.0152,
+    lng: parseFloat(import.meta.env.VITE_SALON_LNG) || 72.4644,
+    website: import.meta.env.VITE_WEBSITE_URL || "http://localhost:3000",
   },
 
   // Google Maps
   maps: {
-    apiKey:
-      import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
-      "AIzaSyBLSrAZWW6NQWR6Ck5YBbYn1HvmwQSo72E",
+    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "GOOGLE_MAPS_API_KEY",
   },
 
   // Branding Colors - Professional Luxury Minimal
@@ -53,18 +50,22 @@ const config = {
 
   // Social Media
   social: {
-    instagram: "https://instagram.com/lordssalon",
-    facebook: "https://facebook.com/lordssalon",
-    whatsapp: "+91 9733681843",
-    youtube: "https://youtube.com",
+    instagram: import.meta.env.VITE_SALON_INSTAGRAM || "https://instagram.com",
+    facebook: import.meta.env.VITE_SALON_FACEBOOK || "https://facebook.com",
+    whatsapp: import.meta.env.VITE_SALON_WHATSAPP || "Contact via WhatsApp",
+    youtube: import.meta.env.VITE_SALON_YOUTUBE || "https://youtube.com",
   },
 
-  // Cloudinary
+  // Cloudinary - Load from environment variables
   cloudinary: {
-    cloudName: "dsjfrpbsh",
-    apiKey: "591717727461881",
-    uploadPreset: "lords_salon", // You may need to create this
+    cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "cloudinary_name",
+    uploadPreset:
+      import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "default_preset",
   },
+
+  // Google Maps - Load from environment variables
+  googleMapsKey:
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "GOOGLE_MAPS_API_KEY",
 };
 
 export default config;

@@ -1,5 +1,6 @@
 import React from 'react';
 import SEO from '../components/utils/SEO';
+import config from '../config';
 import { useJsonLd, generateServiceSchema } from '../utils/jsonLdSchema';
 import OptimizedImage, { PortfolioImage } from '../components/utils/OptimizedImage';
 import axios from 'axios';
@@ -48,7 +49,7 @@ const PortfolioDetailPage = ({ itemId }) => {
       image: [item.imageUrl, item.beforeImageUrl].filter(Boolean),
       author: {
         '@type': 'Organization',
-        name: 'Lords Professional Makeup Studio & Salon',
+        name: config.salon.name,
       },
       datePublished: item.createdAt,
       dateModified: item.updatedAt,
@@ -63,17 +64,17 @@ const PortfolioDetailPage = ({ itemId }) => {
     return <div className="p-8 text-center">Portfolio item not found</div>;
   }
 
-  const canonicalUrl = `https://lords-salon.com/portfolio/${item._id}`;
+  const canonicalUrl = `${config.salon.website}/portfolio/${item._id}`;
 
   return (
     <>
       {/* SEO Meta Tags */}
       <SEO
-        title={`${item.title} | Portfolio | Lords Professional Makeup`}
+        title={`${item.title} | Portfolio | ${config.salon.name}`}
         description={item.description}
         canonicalUrl={canonicalUrl}
         ogImage={item.imageUrl}
-        keywords={`${item.category}, makeup, portfolio, Vadodara`}
+        keywords={`${item.category}, makeup, portfolio`}
       />
 
       {/* Main Content */}
@@ -165,7 +166,7 @@ const PortfolioDetailPage = ({ itemId }) => {
                     Makeup Artist
                   </p>
                   <p className="font-inter text-slate-950">
-                    {item.stylist || 'Lords Team'}
+                    {item.stylist || `${config.salon.name} Team`}
                   </p>
                 </div>
 

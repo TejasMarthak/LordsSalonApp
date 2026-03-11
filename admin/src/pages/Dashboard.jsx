@@ -204,32 +204,4 @@ export default function Dashboard({ admin }) {
       </div>
     </div>
   );
-            <p className="font-inter text-2xl mb-2">💇</p>
-            <p className="font-inter text-white text-sm">Manage Services</p>
-          </a>
-          <a
-            href="/dashboard/portfolio"
-            className="p-4 bg-slate-800 hover:bg-slate-700 rounded transition-colors"
-          >
-            <p className="font-inter text-2xl mb-2">📷</p>
-            <p className="font-inter text-white text-sm">Update Portfolio</p>
-          </a>
-          <a
-            href="/dashboard/staff"
-            className="p-4 bg-slate-800 hover:bg-slate-700 rounded transition-colors"
-          >
-            <p className="font-inter text-2xl mb-2">👥</p>
-            <p className="font-inter text-white text-sm">Staff Management</p>
-          </a>
-          <a
-            href="/dashboard/bookings"
-            className="p-4 bg-slate-800 hover:bg-slate-700 rounded transition-colors"
-          >
-            <p className="font-inter text-2xl mb-2">📅</p>
-            <p className="font-inter text-white text-sm">View Bookings</p>
-          </a>
-        </div>
-      </div>
-    </div>
-  );
 }

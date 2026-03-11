@@ -65,11 +65,12 @@ export default function PortfolioManager() {
   const uploadFile = async (file) => {
     const formDataUpload = new FormData();
     formDataUpload.append('file', file);
-    formDataUpload.append('upload_preset', 'lords_salon');
+    formDataUpload.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'default_preset');
 
     try {
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'cloudinary_name';
       const response = await axios.post(
-        'https://api.cloudinary.com/v1_1/dsjfrpbsh/image/upload',
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         formDataUpload,
         {
           onUploadProgress: (progressEvent) => {

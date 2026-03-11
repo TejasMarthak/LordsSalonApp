@@ -10,12 +10,12 @@ export const sendWhatsAppMessage = (message) => {
 
 // Generate booking WhatsApp message
 export const generateBookingMessage = (serviceName, date) => {
-  return `Hi Lords Salon, I'd like to book a session for ${serviceName} on ${date}. Please confirm availability. Thanks!`;
+  return `Hi ${config.salon.name}, I'd like to book a session for ${serviceName} on ${date}. Please confirm availability. Thanks!`;
 };
 
 // Generate service inquiry message
 export const generateServiceInquiry = (serviceName) => {
-  return `Hi Lords Salon, I'm interested in your ${serviceName} service. Can you provide more details and pricing? Thanks!`;
+  return `Hi ${config.salon.name}, I'm interested in your ${serviceName} service. Can you provide more details and pricing? Thanks!`;
 };
 
 // Call salon

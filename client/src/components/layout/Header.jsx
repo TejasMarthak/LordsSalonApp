@@ -18,10 +18,10 @@ export default function Header() {
         {/* Logo */}
         <a href="/" className="group">
           <div className="font-playfair text-2xl font-bold" style={{ color: config.colors.primary }}>
-            Lords
+            {config.salon.name.split(' ')[0] || 'Studio'}
           </div>
           <p className="font-inter text-xs tracking-wider uppercase font-semibold" style={{ color: config.colors.accent }}>
-            Professional Studio
+            Beauty Services
           </p>
         </a>
 

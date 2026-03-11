@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import config from '../../config';
+import loadGoogleMaps from '../../utils/loadGoogleMaps';
+import { PhoneIcon, EmailIcon, LocationIcon, InstagramIcon, FacebookIcon, WhatsAppIcon } from '../utils/Icons';
 
 export default function LocationContact() {
   const mapRef = useRef(null);
@@ -11,24 +13,26 @@ export default function LocationContact() {
   ]);
 
   const salonCoordinates = {
-    lat: 23.0152,
-    lng: 72.4644,
+    lat: parseFloat(import.meta.env.VITE_SALON_LAT) || 23.0152,
+    lng: parseFloat(import.meta.env.VITE_SALON_LNG) || 72.4644,
   };
 
   const salonInfo = {
-    name: 'Lords Professional Makeup Studio & Salon',
-    address: '104, First Floor, HarshEvoq, opp. Flora Ixora Road, nr. Meri Gold Circle, South Bopal, Bopal, Ahmedabad, Gujarat, India - 380058',
-    phone: '+91 9733681843',
-    email: 'tejasmarthak1909@gmail.com',
+    name: config.salon.name,
+    address: config.salon.address,
+    phone: config.salon.phone,
+    email: config.salon.email,
   };
 
   useEffect(() => {
     initMap();
   }, []);
 
-  const initMap = () => {
-    // Small delay to ensure Google Maps is loaded
-    setTimeout(() => {
+  const initMap = async () => {
+    try {
+      // Dynamically load Google Maps with secure API key
+      await loadGoogleMaps();
+      
       if (!window.google) {
         console.error('Google Maps API not loaded');
         return;
@@ -103,16 +107,18 @@ export default function LocationContact() {
       // Open info window by default
       infoWindow.open(mapInstance, marker);
       setMap(mapInstance);
-    }, 500);
+    } catch (err) {
+      console.error('Error loading map:', err);
+    }
   };
 
   const handleWhatsApp = () => {
-    const message = "Hi Lords Salon! I'd like to book an appointment or know more about your services.";
+    const message = `Hi ${config.salon.name}! I'd like to book an appointment or know more about your services.`;
     window.open(`https://wa.me/${salonInfo.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleEmail = () => {
-    window.location.href = `mailto:${salonInfo.email}?subject=Appointment Request - Lords Salon`;
+    window.location.href = `mailto:${salonInfo.email}?subject=Appointment Request - ${config.salon.name}`;
   };
 
   const handleCall = () => {
@@ -137,18 +143,18 @@ export default function LocationContact() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Map */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+          {/* Map - Full width on mobile, responsive height */}
           <div className="rounded-lg overflow-hidden shadow-xl" style={{ borderColor: config.colors.border, borderWidth: '1px' }}>
-            <div ref={mapRef} style={{ width: '100%', height: '500px', backgroundColor: config.colors.light }}></div>
+            <div ref={mapRef} style={{ width: '100%', height: '300px', minHeight: '300px', backgroundColor: config.colors.light, '@media (min-width: 768px)': { height: '500px' } }}></div>
           </div>
 
           {/* Contact Information */}
-          <div className="flex flex-col justify-center space-y-8">
+          <div className="flex flex-col justify-center space-y-6 md:space-y-8">
             {/* Address */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="font-inter text-xl" style={{ color: config.colors.accent }}>📍</span>
+                <LocationIcon size={28} color={config.colors.accent} />
                 <h3 className="font-playfair text-2xl" style={{ color: config.colors.primary }}>
                   Location
                 </h3>
@@ -179,7 +185,7 @@ export default function LocationContact() {
             {/* Contact Methods */}
             <div style={{ borderTopWidth: '1px', borderColor: config.colors.border, paddingTop: '2rem' }}>
               <div className="flex items-center gap-3 mb-6">
-                <span className="font-inter text-xl" style={{ color: config.colors.accent }}>✉️</span>
+                <EmailIcon size={28} color={config.colors.accent} />
                 <h3 className="font-playfair text-2xl" style={{ color: config.colors.primary }}>
                   Get In Touch
                 </h3>
@@ -189,10 +195,10 @@ export default function LocationContact() {
                 {/* Phone */}
                 <button
                   onClick={handleCall}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg transition-all"
+                  className="w-full flex items-center gap-4 p-4 rounded-lg transition-all hover:shadow-md active:scale-95"
                   style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
                 >
-                  <span className="text-2xl">📞</span>
+                  <PhoneIcon size={24} color={config.colors.buttonColor} />
                   <div className="text-left">
                     <p className="font-inter text-xs uppercase tracking-wider" style={{ color: config.colors.secondary }}>Call Us</p>
                     <p className="font-inter font-medium" style={{ color: config.colors.primary }}>{salonInfo.phone}</p>
@@ -202,10 +208,10 @@ export default function LocationContact() {
                 {/* WhatsApp */}
                 <button
                   onClick={handleWhatsApp}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg transition-all"
+                  className="w-full flex items-center gap-4 p-4 rounded-lg transition-all hover:shadow-md active:scale-95"
                   style={{ backgroundColor: '#E8F5E9', borderWidth: '1px', borderColor: '#4CAF50' }}
                 >
-                  <span className="text-2xl">💬</span>
+                  <WhatsAppIcon size={24} color="#4CAF50" />
                   <div className="text-left">
                     <p className="font-inter text-xs uppercase tracking-wider" style={{ color: '#2E7D32' }}>WhatsApp Us</p>
                     <p className="font-inter font-medium" style={{ color: config.colors.primary }}>Quick messaging</p>
@@ -215,10 +221,10 @@ export default function LocationContact() {
                 {/* Email */}
                 <button
                   onClick={handleEmail}
-                  className="w-full flex items-center gap-4 p-4 rounded-lg transition-all"
+                  className="w-full flex items-center gap-4 p-4 rounded-lg transition-all hover:shadow-md active:scale-95"
                   style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
                 >
-                  <span className="text-2xl">📧</span>
+                  <EmailIcon size={24} color={config.colors.buttonColor} />
                   <div className="text-left">
                     <p className="font-inter text-xs uppercase tracking-wider" style={{ color: config.colors.secondary }}>Email Us</p>
                     <p className="font-inter font-medium" style={{ color: config.colors.primary }}>{salonInfo.email}</p>
@@ -228,25 +234,37 @@ export default function LocationContact() {
 
               {/* Social Media */}
               <div>
-                <p className="font-inter text-xs uppercase tracking-wider mb-3" style={{ color: config.colors.secondary }}>Follow Us</p>
-                <div className="flex gap-4">
+                <p className="font-inter text-xs uppercase tracking-wider mb-4" style={{ color: config.colors.secondary }}>Follow Us</p>
+                <div className="flex gap-3 flex-wrap">
                   <a
-                    href="https://instagram.com/lordssalon"
+                    href={config.social.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-xl transition-all"
+                    className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
                     style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
+                    title="Instagram"
                   >
-                    Photo
+                    <InstagramIcon size={20} color={config.colors.buttonColor} />
                   </a>
                   <a
-                    href="https://facebook.com/lordssalon"
+                    href={config.social.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-xl transition-all"
+                    className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
                     style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
+                    title="Facebook"
                   >
-                    f
+                    <FacebookIcon size={20} color={config.colors.buttonColor} />
+                  </a>
+                  <a
+                    href={config.social.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:shadow-md hover:scale-110 active:scale-95"
+                    style={{ backgroundColor: config.colors.white, borderWidth: '1px', borderColor: config.colors.border }}
+                    title="WhatsApp"
+                  >
+                    <WhatsAppIcon size={20} color="#4CAF50" />
                   </a>
                 </div>
               </div>

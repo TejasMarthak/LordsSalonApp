@@ -56,7 +56,7 @@ export default function PhotoUpload({ onUploadComplete, onUploadError, multiple 
         formData.append('file', file);
         formData.append(
           'upload_preset',
-          process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || 'lords_salon'
+          import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'default_preset'
         );
 
         const response = await axios.post(

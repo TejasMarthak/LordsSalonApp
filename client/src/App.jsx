@@ -1,5 +1,6 @@
 import React from 'react';
 import SEO from './components/utils/SEO';
+import config from './config';
 import { useJsonLd, generateLocalBusinessSchema, generateOrganizationSchema } from './utils/jsonLdSchema';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -15,9 +16,9 @@ export default function App() {
   return (
     <>
       <SEO
-        title="Lords Professional Makeup Studio & Salon | Luxury Beauty Services"
+        title={`Professional Beauty Studio | ${config.salon.name}`}
         description="Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare. Book your appointment now!"
-        canonicalUrl="https://lords-salon.com"
+        canonicalUrl={config.salon.website}
         keywords="makeup salon, bridal makeup, hair styling, skincare, beauty, makeup artist"
       />
 

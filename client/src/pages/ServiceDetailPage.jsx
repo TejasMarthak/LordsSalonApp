@@ -1,6 +1,5 @@
 import React from 'react';
-import SEO from '../utils/SEO';
-import { useJsonLd, generateServiceSchema } from '../../utils/jsonLdSchema';
+import SEO from '../utils/SEO';import config from '../config';import { useJsonLd, generateServiceSchema } from '../../utils/jsonLdSchema';
 import axios from 'axios';
 
 /**
@@ -43,8 +42,8 @@ const ServiceDetailPage = ({ slug }) => {
     return <div className="p-8 text-center">Service not found</div>;
   }
 
-  const canonicalUrl = `https://lords-salon.com/services/${slug}`;
-  const pageTitle = `${service.name} | Professional Makeup Services | Lords Salon`;
+  const canonicalUrl = `${config.salon.website}/services/${slug}`;
+  const pageTitle = `${service.name} | Professional Makeup Services | ${config.salon.name}`;
   const pageDescription = service.description;
 
   return (
@@ -54,8 +53,8 @@ const ServiceDetailPage = ({ slug }) => {
         title={pageTitle}
         description={pageDescription}
         canonicalUrl={canonicalUrl}
-        ogImage={service.imageUrl || 'https://lords-salon.com/og-image.jpg'}
-        keywords={`${service.name}, ${service.category}, makeup, salon, Vadodara`}
+        ogImage={service.imageUrl || `${config.salon.website}/og-image.jpg`}
+        keywords={`${service.name}, ${service.category}, makeup, salon`}
       />
 
       {/* Page Content */}

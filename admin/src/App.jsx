@@ -5,7 +5,10 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import ServicesManager from './components/modules/ServicesManager';
 import PortfolioManager from './components/modules/PortfolioManager';
-import AdminManager from './components/modules/AdminManager';
+import HeroManager from './components/modules/HeroManager';
+import ContentManager from './components/modules/ContentManager';
+import SettingsManager from './components/modules/SettingsManager';
+import adminConfig from './adminConfig';
 
 export default function App() {
   const [admin, setAdmin] = useState(null);
@@ -33,8 +36,13 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <p className="font-inter text-white">Loading...</p>
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: adminConfig.colors.background }}
+      >
+        <p className="font-inter text-lg" style={{ color: adminConfig.colors.primary }}>
+          Loading...
+        </p>
       </div>
     );
   }
@@ -45,12 +53,16 @@ export default function App() {
 
   const renderPage = () => {
     switch (currentPage) {
+      case 'hero':
+        return <HeroManager />;
       case 'services':
         return <ServicesManager />;
       case 'portfolio':
         return <PortfolioManager />;
-      case 'admins':
-        return <AdminManager admin={admin} />;
+      case 'content':
+        return <ContentManager />;
+      case 'settings':
+        return <SettingsManager />;
       case 'dashboard':
       default:
         return <Dashboard admin={admin} />;
@@ -60,7 +72,7 @@ export default function App() {
   return (
     <div className="flex">
       <Sidebar currentPage={currentPage} onPageChange={setCurrentPage} />
-      <div className="flex-1 bg-slate-950 min-h-screen">
+      <div className="flex-1 min-h-screen" style={{ backgroundColor: adminConfig.colors.background }}>
         <AdminHeader admin={admin} onLogout={handleLogout} />
         <main className="p-8">
           {renderPage()}

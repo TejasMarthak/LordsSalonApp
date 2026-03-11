@@ -10,9 +10,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <h3 className="font-playfair text-2xl mb-4">Lords</h3>
+            <h3 className="font-playfair text-2xl mb-4">{config.salon.name.split(' ')[0] || 'Studio'}</h3>
             <p className="font-inter text-sm" style={{ color: config.colors.white, opacity: 0.8 }}>
-              Professional Makeup Studio & Salon
+              Professional Beauty Services
             </p>
             <p className="font-inter text-xs mt-4" style={{ color: config.colors.white, opacity: 0.6 }}>
               Elevating beauty through expert artistry
@@ -98,11 +98,11 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="font-inter text-sm" style={{ color: config.colors.white, opacity: 0.6 }}>
-            © {currentYear} Lords Professional Makeup Studio & Salon. All rights reserved.
+            © {currentYear} {config.salon.name}. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a 
-              href="https://instagram.com/lordssalon" 
+              href={config.social.instagram} 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 font-inter text-xs"
@@ -112,7 +112,7 @@ export default function Footer() {
               IG
             </a>
             <a 
-              href="https://facebook.com/lordssalon" 
+              href={config.social.facebook} 
               target="_blank" 
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 font-inter text-xs"

@@ -170,8 +170,8 @@ ADDED:
 <!-- Before -->
 <script src="https://maps.googleapis.com/maps/api/js?key=%VITE_GOOGLE_MAPS_API_KEY%&libraries=marker"></script>
 
-<!-- After -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBLSrAZWW6NQWR6Ck5YBbYn1HvmwQSo72E&libraries=marker"></script>
+<!-- After (Google Maps now loaded dynamically from loadGoogleMaps.js) -->
+<!-- Maps are loaded securely via environment variables in src/utils/loadGoogleMaps.js -->
 ```
 
 ---
