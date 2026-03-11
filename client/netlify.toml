@@ -1,0 +1,17 @@
+[build]
+command = "npm run build"
+functions = "netlify/functions"
+publish = "dist"
+
+[dev]
+command = "npm run dev"
+port = 3000
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
+
+[context.production.environment]
+VITE_API_URL = "https://lords-salon-api.herokuapp.com"
+VITE_GOOGLE_MAPS_API_KEY = ""

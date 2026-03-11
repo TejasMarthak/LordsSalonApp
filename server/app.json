@@ -1,0 +1,32 @@
+{
+  "name": "lords-salon-api",
+  "description": "Lords Professional Makeup Studio & Salon - Backend API",
+  "repository": "https://github.com/yourusername/lords-salon",
+  "keywords": ["node", "express", "mongodb", "salon", "api"],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "MONGODB_URI": {
+      "description": "MongoDB Atlas connection string",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "JWT secret key for authentication",
+      "generator": "secret"
+    },
+    "CLIENT_PROD_URL": {
+      "value": "https://lords-salon.vercel.app",
+      "description": "Production client URL for CORS"
+    },
+    "ADMIN_PROD_URL": {
+      "value": "https://admin-lords.vercel.app",
+      "description": "Production admin URL for CORS"
+    }
+  }
+}

@@ -1,0 +1,66 @@
+# Robots.txt for Lords Professional Makeup Studio & Salon
+# Defines crawling permissions for search engine bots
+
+# Default rules for all bots
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Disallow: /dashboard
+Disallow: /*.json
+Disallow: /node_modules
+Disallow: /.env
+Disallow: /uploads/temp
+Disallow: /__pycache__/
+Disallow: /.git
+
+# Allow important static assets
+Allow: *.js
+Allow: *.css
+Allow: *.jpg
+Allow: *.jpeg
+Allow: *.png
+Allow: *.gif
+Allow: *.webp
+Allow: *.svg
+Allow: *.woff
+Allow: *.woff2
+
+# Crawl delay (optional: add for heavy sites)
+# Crawl-delay: 1
+
+# Google-specific rules
+User-agent: Googlebot
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Crawl-delay: 0
+
+# Bing-specific rules
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Crawl-delay: 0
+
+# Block low-quality crawlers
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+# Point to sitemap for faster indexing
+Sitemap: https://api.lords-salon.com/sitemap.xml
+Sitemap: https://api.lords-salon.com/sitemap-index.xml
+
+# Additional directives
+# Cleaning parameters (tells Google which URL parameters are non-essential)
+# ?utm_source = tracking parameter (can be removed)
+# ?referrer = tracking parameter (can be removed)

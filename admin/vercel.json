@@ -1,0 +1,19 @@
+{
+  "name": "lords-salon-admin",
+  "public": true,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "^/(?!.*\\.).*",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "@vite_api_url"
+  }
+}

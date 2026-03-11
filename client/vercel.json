@@ -1,0 +1,25 @@
+{
+  "name": "lords-salon-client",
+  "public": true,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "^/(?!.*\\.).*",
+      "destination": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "@vite_api_url",
+    "VITE_GOOGLE_MAPS_API_KEY": "@vite_google_maps_api_key",
+    "VITE_SALON_LAT": "@vite_salon_lat",
+    "VITE_SALON_LNG": "@vite_salon_lng",
+    "VITE_SALON_ADDRESS": "@vite_salon_address",
+    "VITE_SALON_PHONE": "@vite_salon_phone",
+    "VITE_SALON_EMAIL": "@vite_salon_email"
+  }
+}
