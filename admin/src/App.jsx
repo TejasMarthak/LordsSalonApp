@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminHeader from './components/layout/AdminHeader';
 import Sidebar from './components/layout/Sidebar';
 import LoginPage from './pages/LoginPage';
+import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
 import ServicesManager from './components/modules/ServicesManager';
 import PortfolioManager from './components/modules/PortfolioManager';
@@ -19,6 +20,14 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
+    // Check if we're on OAuth callback page
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('code')) {
+      // OAuth callback - don't check token yet
+      setLoading(false);
+      return;
+    }
+
     // Check if admin is logged in
     const token = localStorage.getItem('adminToken');
     if (token) {
@@ -53,6 +62,12 @@ export default function App() {
         </p>
       </div>
     );
+  }
+
+  // Check if we're on OAuth callback page
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.get('code')) {
+    return <OAuthCallback onLogin={handleLogin} />;
   }
 
   if (!admin) {

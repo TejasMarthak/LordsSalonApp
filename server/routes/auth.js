@@ -214,15 +214,115 @@ router.post("/oauth/google/callback", async (req, res) => {
       return res.status(400).json({ error: "Authorization code required" });
     }
 
-    // In production, exchange code for tokens with Google OAuth API
-    // This is a placeholder implementation
+    // Exchange authorization code for tokens with Google
+    const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+    const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI;
 
-    res.status(501).json({
-      error: "OAuth callback processing requires backend configuration",
-      note: "Set up Google OAuth credentials and implement token exchange",
+    if (!clientId || !clientSecret || !redirectUri) {
+      return res.status(500).json({
+        error: "OAuth not properly configured",
+        details:
+          "Missing GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, or GOOGLE_OAUTH_REDIRECT_URI",
+      });
+    }
+
+    // Exchange code for tokens with Google's token endpoint
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }).toString(),
+    });
+
+    if (!tokenResponse.ok) {
+      const error = await tokenResponse.json();
+      return res.status(401).json({
+        error: "Failed to exchange authorization code",
+        details: error.error_description || error.error,
+      });
+    }
+
+    const tokenData = await tokenResponse.json();
+    const { id_token } = tokenData;
+
+    if (!id_token) {
+      return res
+        .status(401)
+        .json({ error: "No ID token received from Google" });
+    }
+
+    // Decode the ID token (without verification for now, but you should verify in production)
+    // The token format is: header.payload.signature
+    const parts = id_token.split(".");
+    if (parts.length !== 3) {
+      return res.status(401).json({ error: "Invalid ID token format" });
+    }
+
+    // Decode the payload (second part)
+    const payload = JSON.parse(
+      Buffer.from(parts[1], "base64").toString("utf-8"),
+    );
+
+    // Extract user information from the ID token
+    const { email, name, picture, sub: googleId } = payload;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email not provided by Google" });
+    }
+
+    // Find or create admin user
+    let admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      // Create new admin account (with a default role - owner or manager based on your logic)
+      admin = new Admin({
+        email,
+        name: name || email.split("@")[0],
+        googleId,
+        googleProfile: picture ? { picture } : undefined,
+        // Don't set password for Google OAuth users initially
+        isActive: true,
+        role: "manager", // Default role - adjust as needed
+      });
+
+      await admin.save();
+    } else {
+      // Update existing admin with Google info if they don't have it yet
+      if (!admin.googleId) {
+        admin.googleId = googleId;
+        if (picture) {
+          admin.googleProfile = { picture };
+        }
+        await admin.save();
+      }
+    }
+
+    // Generate JWT token for the app
+    const token = generateToken(admin._id);
+
+    res.json({
+      message: "OAuth authentication successful",
+      token,
+      admin: {
+        id: admin._id,
+        email: admin.email,
+        name: admin.name,
+        role: admin.role,
+        picture: admin.googleProfile?.picture,
+      },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("OAuth callback error:", error);
+    res.status(500).json({
+      error: "OAuth authentication failed",
+      details: error.message,
+    });
   }
 });
 

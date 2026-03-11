@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import adminConfig from '../../adminConfig';
 
 export default function AdminManager({ admin }) {
   const [admins, setAdmins] = useState([]);
@@ -64,7 +65,7 @@ export default function AdminManager({ admin }) {
       if (editingId) {
         // Update existing admin
         await axios.patch(
-          `${import.meta.env.VITE_API_URL}/api/auth/admins/${editingId}`,
+          `${adminConfig.api.baseUrl}/api/auth/admins/${editingId}`,
           formData,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -86,7 +87,7 @@ export default function AdminManager({ admin }) {
     try {
       const token = localStorage.getItem('adminToken');
       await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/auth/admins/${adminId}`,
+        `${adminConfig.api.baseUrl}/api/auth/admins/${adminId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

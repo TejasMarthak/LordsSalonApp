@@ -13,8 +13,8 @@ const adminSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
       minlength: 8,
+      // Optional: users can sign up with Google OAuth without a password
     },
     name: {
       type: String,
@@ -29,13 +29,23 @@ const adminSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Google OAuth fields
+    googleId: {
+      type: String,
+      index: true,
+      sparse: true, // Allow null values for non-OAuth users
+    },
+    googleProfile: {
+      picture: String,
+    },
   },
   { timestamps: true },
 );
 
 // Hash password before saving
 adminSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  // Only hash if password exists and is modified
+  if (!this.password || !this.isModified("password")) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);

@@ -50,13 +50,13 @@ export default function ServicesManager() {
 
       if (editingId) {
         await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/services/${editingId}`,
+          `${adminConfig.api.baseUrl}/api/services/${editingId}`,
           formData,
           { headers }
         );
       } else {
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/services`,
+          `${adminConfig.api.baseUrl}/api/services`,
           formData,
           { headers }
         );

@@ -52,7 +52,7 @@ export default function LoginPage({ onLogin }) {
       if (err.response?.data?.error) {
         errorMessage = err.response.data.error;
       } else if (err.message === 'Network Error') {
-        errorMessage = 'Cannot connect to server. Make sure server is running on ' + import.meta.env.VITE_API_URL;
+        errorMessage = 'Cannot connect to server. Make sure server is running on ' + adminConfig.api.baseUrl;
       } else if (err.code === 'ERR_NETWORK') {
         errorMessage = 'Network connection failed. Check server is running.';
       }
@@ -90,7 +90,8 @@ export default function LoginPage({ onLogin }) {
       }
 
       // Security: Use secure OAuth flow
-      const redirectUri = `${window.location.origin}/auth/callback`;
+      // Redirect to root with query params - App.jsx will detect 'code' param
+      const redirectUri = window.location.origin;
       const scope = 'openid profile email';
       const responseType = 'code';
       
