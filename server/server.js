@@ -28,6 +28,31 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 // CORS Configuration
 app.use(cors(corsConfig(app)));
 
+// Root endpoint with API documentation
+app.get("/", (req, res) => {
+  res.json({
+    message: "👑 Lords Professional Makeup Studio & Salon API",
+    status: "running",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+    availableEndpoints: {
+      health: "/api/health",
+      authentication: "/api/auth",
+      services: "/api/services",
+      portfolio: "/api/portfolio",
+      staff: "/api/staff",
+      bookings: "/api/bookings",
+      ratings: "/api/ratings",
+      content: "/api/content",
+      siteSettings: "/api/site-settings",
+      uploads: "/api/upload",
+      sitemap: "/sitemap.xml",
+      robots: "/robots.txt"
+    },
+    documentation: "API documentation available at /api/docs (coming soon)"
+  });
+});
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "API is running", timestamp: new Date().toISOString() });

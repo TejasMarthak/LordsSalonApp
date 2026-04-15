@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
+import { AddIcon, EditIcon, DeleteIcon, SaveIcon, CloseIcon, LoadingIcon } from '../../utils/Icons';
 
 export default function ServicesManager() {
   const [services, setServices] = useState([]);
@@ -121,109 +122,115 @@ export default function ServicesManager() {
 
   return (
     <div className="space-y-8">
-      {/* Form */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-8">
-        <h2 className="font-playfair text-2xl text-white mb-6">
-          {editingId ? 'Edit Service' : 'Add New Service'}
-        </h2>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
+        <h1 className="text-4xl font-bold mb-2">Services Management</h1>
+        <p className="text-gray-300">
+          Add, edit, and manage all your beauty services with pricing and duration
+        </p>
+      </div>
+
+      {/* Form Card */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+        <div className="flex items-center gap-3 mb-8">
+          {editingId ? (
+            <>
+              <EditIcon size={28} color="#000000" />
+              <h2 className="text-3xl font-bold text-black">Edit Service</h2>
+            </>
+          ) : (
+            <>
+              <AddIcon size={28} color="#000000" />
+              <h2 className="text-3xl font-bold text-black">Add New Service</h2>
+            </>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-inter text-sm text-slate-300 mb-2 uppercase">
-                Service Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded text-white font-inter focus:outline-none focus:border-amber-600"
-                placeholder="e.g., Bridal Makeup Package"
-              />
-            </div>
-
-            <div>
-              <label className="block font-inter text-sm text-slate-300 mb-2 uppercase">
-                Category
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded text-white font-inter focus:outline-none focus:border-amber-600"
-              >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-inter text-sm text-slate-300 mb-2 uppercase">
-                Price (₹)
-              </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                min="0"
-                className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded text-white font-inter focus:outline-none focus:border-amber-600"
-                placeholder="2999"
-              />
-            </div>
-
-            <div>
-              <label className="block font-inter text-sm text-slate-300 mb-2 uppercase">
-                Duration (minutes)
-              </label>
-              <input
-                type="number"
-                name="duration"
-                value={formData.duration}
-                onChange={handleChange}
-                required
-                min="15"
-                className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded text-white font-inter focus:outline-none focus:border-amber-600"
-                placeholder="60"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-inter text-sm text-slate-300 mb-2 uppercase">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
+            <FormField
+              label="Service Name"
+              name="name"
+              type="text"
+              value={formData.name}
               onChange={handleChange}
+              placeholder="e.g., Bridal Makeup Package"
               required
-              rows="4"
-              className="w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded text-white font-inter focus:outline-none focus:border-amber-600"
-              placeholder="Describe the service..."
+            />
+
+            <FormField
+              label="Category"
+              name="category"
+              type="select"
+              value={formData.category}
+              onChange={handleChange}
+              options={categories}
+            />
+
+            <FormField
+              label="Price (₹)"
+              name="price"
+              type="number"
+              value={formData.price}
+              onChange={handleChange}
+              placeholder="2999"
+              required
+              min="0"
+            />
+
+            <FormField
+              label="Duration (minutes)"
+              name="duration"
+              type="number"
+              value={formData.duration}
+              onChange={handleChange}
+              placeholder="60"
+              required
+              min="15"
             />
           </div>
 
-          <div className="flex gap-4">
+          <FormField
+            label="Description"
+            name="description"
+            type="textarea"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Describe the service..."
+            required
+            rows="4"
+          />
+
+          <div className="flex gap-4 pt-4">
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-amber-600 hover:bg-amber-700 disabled:bg-slate-700 text-white font-inter uppercase tracking-wider rounded transition-colors"
+              className="flex-1 py-3 rounded-xl font-bold uppercase tracking-wider transition-all duration-300 hover:shadow-lg disabled:opacity-50 bg-black text-white hover:bg-gray-900 flex items-center justify-center gap-2"
             >
-              {loading ? 'Saving...' : editingId ? 'Update' : 'Add Service'}
+              {loading ? (
+                <>
+                  <LoadingIcon size={20} color="#FFFFFF" />
+                  Saving...
+                </>
+              ) : editingId ? (
+                <>
+                  <SaveIcon size={20} color="#FFFFFF" />
+                  Update Service
+                </>
+              ) : (
+                <>
+                  <AddIcon size={20} color="#FFFFFF" />
+                  Add Service
+                </>
+              )}
             </button>
             {editingId && (
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white font-inter uppercase tracking-wider rounded transition-colors"
+                className="flex-1 py-3 border-2 border-gray-300 rounded-xl font-bold uppercase tracking-wider transition-all hover:border-red-500 hover:text-red-600 flex items-center justify-center gap-2"
               >
+                <CloseIcon size={20} color="#000000" />
                 Cancel
               </button>
             )}
@@ -232,49 +239,148 @@ export default function ServicesManager() {
       </div>
 
       {/* Services List */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-        <div className="px-8 py-6 border-b border-slate-800">
-          <h3 className="font-playfair text-xl text-white">Services ({services.length})</h3>
+      <div>
+        <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-t-2xl p-8 mb-0">
+          <h2 className="text-3xl font-bold">Your Services ({services.length})</h2>
+          <p className="text-gray-300 text-sm mt-2">
+            {services.length === 0 ? 'No services yet. Create your first one!' : `You have ${services.length} service${services.length !== 1 ? 's' : ''}`}
+          </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-800 border-b border-slate-700">
-              <tr>
-                <th className="px-6 py-3 text-left font-inter text-sm text-slate-300 uppercase">Name</th>
-                <th className="px-6 py-3 text-left font-inter text-sm text-slate-300 uppercase">Category</th>
-                <th className="px-6 py-3 text-left font-inter text-sm text-slate-300 uppercase">Price</th>
-                <th className="px-6 py-3 text-left font-inter text-sm text-slate-300 uppercase">Duration</th>
-                <th className="px-6 py-3 text-left font-inter text-sm text-slate-300 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {services.map((service) => (
-                <tr key={service._id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                  <td className="px-6 py-4 text-white font-inter">{service.name}</td>
-                  <td className="px-6 py-4 text-slate-400 font-inter text-sm">{service.category}</td>
-                  <td className="px-6 py-4 text-white font-inter">₹{service.price}</td>
-                  <td className="px-6 py-4 text-slate-400 font-inter text-sm">{service.duration} min</td>
-                  <td className="px-6 py-4 flex gap-2">
-                    <button
-                      onClick={() => handleEdit(service)}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
+        {services.length > 0 ? (
+          <div className="bg-white border border-t-0 border-gray-200 rounded-b-2xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Name</th>
+                    <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Category</th>
+                    <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Price</th>
+                    <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Duration</th>
+                    <th className="px-6 py-4 text-center font-bold uppercase text-xs text-black">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {services.map((service, index) => (
+                    <tr
+                      key={service._id}
+                      className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                      }`}
                     >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(service._id)}
-                      className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      <td className="px-6 py-4 font-semibold text-black">
+                        {service.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {service.category}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-black">
+                        ₹{service.price}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {service.duration} min
+                      </td>
+                      <td className="px-6 py-4 flex justify-center gap-2">
+                        <button
+                          onClick={() => handleEdit(service)}
+                          className="p-2 rounded-lg transition-all hover:bg-gray-200 hover:shadow-md flex items-center gap-1 px-3 py-2 text-sm font-bold"
+                          title="Edit service"
+                        >
+                          <EditIcon size={16} color="#1A1A1A" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(service._id)}
+                          className="p-2 rounded-lg transition-all hover:bg-red-100 hover:shadow-md flex items-center gap-1 px-3 py-2 text-sm font-bold text-red-600"
+                          title="Delete service"
+                        >
+                          <DeleteIcon size={16} color="#CB2431" />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-50 border border-t-0 border-gray-200 rounded-b-2xl p-16 text-center">
+            <BriefcaseIcon size={48} color="#CCCCCC" className="mx-auto mb-4" />
+            <p className="text-gray-800 text-lg font-medium">
+              No services added yet
+            </p>
+            <p className="text-gray-600 text-sm mt-2">
+              Create your first service to get started
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
+// Form Field Component for consistency
+function FormField({ label, name, type, value, onChange, placeholder, required, options, rows, min }) {
+  if (type === 'textarea') {
+    return (
+      <div>
+        <label className="block text-sm font-bold mb-3 uppercase text-black">
+          {label}
+        </label>
+        <textarea
+          name={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          rows={rows}
+          placeholder={placeholder}
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition resize-none bg-white text-black"
+        />
+      </div>
+    );
+  }
+
+  if (type === 'select') {
+    return (
+      <div>
+        <label className="block text-sm font-bold mb-3 uppercase text-black">
+          {label}
+        </label>
+        <select
+          name={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
+        >
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <label className="block text-sm font-bold mb-3 uppercase text-black">
+        {label}
+      </label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        placeholder={placeholder}
+        min={min}
+        className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
+      />
+    </div>
+  );
+}
+
+import { BriefcaseIcon } from '../../utils/Icons';

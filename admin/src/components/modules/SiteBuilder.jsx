@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
-import { AddIcon, EditIcon, DeleteIcon, EyeIcon } from '../../utils/Icons';
+import { AddIcon, EditIcon, DeleteIcon, EyeIcon, AlertIcon, SuccessIcon } from '../../utils/Icons';
 
 export default function SiteBuilder({ admin }) {
   const [pages, setPages] = useState([]);
@@ -138,31 +138,31 @@ export default function SiteBuilder({ admin }) {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h2 className="font-playfair text-3xl font-bold mb-2" style={{ color: adminConfig.colors.primary }}>
-          Website Builder
-        </h2>
-        <p className="font-inter text-sm" style={{ color: adminConfig.colors.textLight }}>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
+        <h1 className="text-4xl font-bold mb-2">Website Builder</h1>
+        <p className="text-gray-300">
           Design and manage your website by adding, editing, and organizing sections
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div className="p-4 rounded-lg border-l-4" style={{ backgroundColor: '#FFEBEE', borderLeftColor: adminConfig.colors.warning }}>
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.warning }}>{error}</p>
+        <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 flex items-start gap-3">
+          <AlertIcon size={20} color="#CB2431" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
       {success && (
-        <div className="p-4 rounded-lg border-l-4" style={{ backgroundColor: '#E8F5E9', borderLeftColor: adminConfig.colors.success }}>
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.success }}>{success}</p>
+        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-3">
+          <SuccessIcon size={20} color="#22863A" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-green-700">{success}</p>
         </div>
       )}
 
       {/* Page Selector */}
-      <div>
-        <label className="font-inter font-semibold mb-3 block text-sm" style={{ color: adminConfig.colors.primary }}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <label className="font-bold mb-4 block text-sm uppercase text-black">
           Select Page
         </label>
         <div className="flex gap-2 flex-wrap">
@@ -170,10 +170,10 @@ export default function SiteBuilder({ admin }) {
             <button
               key={page.id}
               onClick={() => setCurrentPage(page.id)}
-              className="px-4 py-2 rounded-lg font-inter text-sm font-semibold transition-all"
+              className="px-4 py-2 rounded-lg font-semibold transition-all text-sm"
               style={{
-                backgroundColor: currentPage === page.id ? adminConfig.colors.primary : adminConfig.colors.lightBg,
-                color: currentPage === page.id ? 'white' : adminConfig.colors.primary,
+                backgroundColor: currentPage === page.id ? '#000000' : '#F3F4F6',
+                color: currentPage === page.id ? 'white' : '#000000',
               }}
             >
               {page.name}
@@ -184,101 +184,93 @@ export default function SiteBuilder({ admin }) {
 
       {/* Sections List */}
       <div>
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-playfair text-xl font-bold" style={{ color: adminConfig.colors.primary }}>
-            Page Sections ({sections.length})
-          </h3>
+        <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-t-2xl p-8 mb-0 flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold">Page Sections ({sections.length})</h2>
+          </div>
           <button
             onClick={() => setShowAddSection(!showAddSection)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg font-inter text-sm font-semibold text-white transition-all"
-            style={{ backgroundColor: adminConfig.colors.success }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm bg-white text-black hover:bg-gray-100 transition-all"
           >
-            <AddIcon size={18} color="white" />
+            <AddIcon size={18} color="#000000" />
             Add Section
           </button>
         </div>
 
-        {/* Add Section Modal */}
-        {showAddSection && (
-          <div className="mb-6 p-4 rounded-lg border" style={{ backgroundColor: adminConfig.colors.lightBg, borderColor: adminConfig.colors.border }}>
-            <h4 className="font-inter font-semibold mb-3" style={{ color: adminConfig.colors.primary }}>
-              Select Section Type
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {sectionTypes.map((sectionType) => (
-                <button
-                  key={sectionType.type}
-                  onClick={() => addSection(sectionType.type)}
-                  className="p-3 rounded-lg border transition-all hover:shadow-md text-left"
+        <div className="bg-white border border-t-0 border-gray-200 rounded-b-2xl p-6">
+          {/* Add Section Modal */}
+          {showAddSection && (
+            <div className="mb-6 p-4 rounded-xl border border-gray-200 bg-gray-50">
+              <h4 className="font-bold mb-3 text-black">Select Section Type</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {sectionTypes.map((sectionType) => (
+                  <button
+                    key={sectionType.type}
+                    onClick={() => addSection(sectionType.type)}
+                    className="p-3 rounded-lg border border-gray-200 transition-all hover:shadow-md text-left bg-white hover:border-black"
+                  >
+                    <p className="font-semibold text-sm text-black">
+                      {sectionType.name}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sections List */}
+          {sections.length > 0 ? (
+            <div className="space-y-3">
+              {sections.map((section) => (
+                <div
+                  key={section.sectionId}
+                  className="p-4 rounded-lg border flex justify-between items-center transition-all border-gray-200"
                   style={{
-                    backgroundColor: adminConfig.colors.white,
-                    borderColor: adminConfig.colors.border,
+                    backgroundColor: section.isVisible ? '#FFFFFF' : '#F9F9F9',
+                    opacity: section.isVisible ? 1 : 0.7,
                   }}
                 >
-                  <p className="font-inter font-semibold text-sm" style={{ color: adminConfig.colors.primary }}>
-                    {sectionType.name}
-                  </p>
-                </button>
+                  <div className="flex-1">
+                    <h4 className="font-semibold mb-1 text-black">
+                      {section.title}
+                    </h4>
+                    <p className="text-xs text-gray-600">
+                      Type: {section.type} • Order: {section.order}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => toggleSectionVisibility(section.sectionId, section.isVisible)}
+                      className="p-2 rounded-lg transition-all"
+                      style={{ backgroundColor: section.isVisible ? '#22863A' : '#CCCCCC', color: 'white' }}
+                      title={section.isVisible ? 'Hide section' : 'Show section'}
+                    >
+                      <EyeIcon size={18} color="white" />
+                    </button>
+                    <button
+                      onClick={() => setEditingSection(section)}
+                      className="p-2 rounded-lg transition-all bg-black text-white hover:bg-gray-900"
+                    >
+                      <EditIcon size={18} color="white" />
+                    </button>
+                    <button
+                      onClick={() => deleteSection(section.sectionId)}
+                      className="p-2 rounded-lg transition-all bg-red-500 text-white hover:bg-red-600"
+                    >
+                      <DeleteIcon size={18} color="white" />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Sections List */}
-        {sections.length > 0 ? (
-          <div className="space-y-3">
-            {sections.map((section) => (
-              <div
-                key={section.sectionId}
-                className="p-4 rounded-lg border flex justify-between items-center transition-all"
-                style={{
-                  backgroundColor: section.isVisible ? adminConfig.colors.lightBg : '#F5F5F5',
-                  borderColor: adminConfig.colors.border,
-                  opacity: section.isVisible ? 1 : 0.6,
-                }}
-              >
-                <div className="flex-1">
-                  <h4 className="font-inter font-semibold mb-1" style={{ color: adminConfig.colors.primary }}>
-                    {section.title}
-                  </h4>
-                  <p className="font-inter text-xs" style={{ color: adminConfig.colors.textLight }}>
-                    Type: {section.type} • Order: {section.order}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => toggleSectionVisibility(section.sectionId, section.isVisible)}
-                    className="p-2 rounded-lg transition-all"
-                    style={{ backgroundColor: section.isVisible ? adminConfig.colors.success : adminConfig.colors.warning, color: 'white' }}
-                    title={section.isVisible ? 'Hide section' : 'Show section'}
-                  >
-                    <EyeIcon size={18} color="white" />
-                  </button>
-                  <button
-                    onClick={() => setEditingSection(section)}
-                    className="p-2 rounded-lg transition-all"
-                    style={{ backgroundColor: adminConfig.colors.info, color: 'white' }}
-                  >
-                    <EditIcon size={18} color="white" />
-                  </button>
-                  <button
-                    onClick={() => deleteSection(section.sectionId)}
-                    className="p-2 rounded-lg transition-all"
-                    style={{ backgroundColor: adminConfig.colors.warning, color: 'white' }}
-                  >
-                    <DeleteIcon size={18} color="white" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center rounded-lg" style={{ backgroundColor: adminConfig.colors.lightBg }}>
-            <p style={{ color: adminConfig.colors.textLight }}>
-              No sections yet. Click "Add Section" to get started.
-            </p>
-          </div>
-        )}
+          ) : (
+            <div className="p-8 text-center rounded-lg bg-gray-50">
+              <p className="text-gray-600">
+                No sections yet. Click "Add Section" to get started.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Section Editor Modal */}
@@ -331,17 +323,15 @@ function SectionEditor({ section, onClose, onSave, pageId }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
-        <div className="p-6 border-b sticky top-0" style={{ borderBottomColor: adminConfig.colors.border }}>
-          <h3 className="font-playfair text-2xl font-bold" style={{ color: adminConfig.colors.primary }}>
-            Edit Section
-          </h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-screen overflow-y-auto shadow-2xl">
+        <div className="p-8 border-b border-gray-200 sticky top-0 bg-gradient-to-r from-black to-gray-900 text-white">
+          <h3 className="text-2xl font-bold">Edit Section</h3>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-8 space-y-6">
           <div>
-            <label className="block font-inter font-semibold mb-2 text-sm" style={{ color: adminConfig.colors.primary }}>
+            <label className="block font-bold mb-3 text-sm uppercase text-black">
               Section Title
             </label>
             <input
@@ -349,13 +339,12 @@ function SectionEditor({ section, onClose, onSave, pageId }) {
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2 text-sm" style={{ color: adminConfig.colors.primary }}>
+            <label className="block font-bold mb-3 text-sm uppercase text-black">
               Subtitle
             </label>
             <input
@@ -363,13 +352,12 @@ function SectionEditor({ section, onClose, onSave, pageId }) {
               name="subtitle"
               value={formData.subtitle || ''}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2 text-sm" style={{ color: adminConfig.colors.primary }}>
+            <label className="block font-bold mb-3 text-sm uppercase text-black">
               Description
             </label>
             <textarea
@@ -377,13 +365,12 @@ function SectionEditor({ section, onClose, onSave, pageId }) {
               value={formData.description || ''}
               onChange={handleInputChange}
               rows={4}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 resize-none"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition resize-none bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2 text-sm" style={{ color: adminConfig.colors.primary }}>
+            <label className="block font-bold mb-3 text-sm uppercase text-black">
               Background Color
             </label>
             <input
@@ -391,27 +378,22 @@ function SectionEditor({ section, onClose, onSave, pageId }) {
               name="backgroundColor"
               value={formData.backgroundColor || '#FFFFFF'}
               onChange={handleInputChange}
-              className="w-full h-10 rounded-lg cursor-pointer"
+              className="w-full h-12 rounded-xl cursor-pointer border border-gray-300"
             />
           </div>
         </div>
 
-        <div className="p-6 border-t flex gap-3 sticky bottom-0 bg-white" style={{ borderTopColor: adminConfig.colors.border }}>
+        <div className="p-8 border-t border-gray-200 flex gap-3 sticky bottom-0 bg-white">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-lg font-inter font-semibold"
-            style={{
-              backgroundColor: adminConfig.colors.lightBg,
-              color: adminConfig.colors.primary,
-            }}
+            className="flex-1 px-4 py-3 rounded-xl font-bold text-sm upper case text-black bg-gray-200 hover:bg-gray-300 transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={loading}
-            className="flex-1 px-4 py-2 rounded-lg font-inter font-semibold text-white transition-all"
-            style={{ backgroundColor: adminConfig.colors.accent, opacity: loading ? 0.6 : 1 }}
+            className="flex-1 px-4 py-3 rounded-xl font-bold text-sm uppercase text-white bg-black hover:bg-gray-900 transition-all disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Save Changes'}
           </button>

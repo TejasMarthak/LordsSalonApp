@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
 import { AdminInput, AdminButton } from '../common/FormComponents';
+import { SaveIcon, AlertIcon, SuccessIcon, DeleteIcon } from '../../utils/Icons';
 
 export default function SettingsManager() {
   const [settings, setSettings] = useState({
@@ -123,65 +124,43 @@ export default function SettingsManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: adminConfig.colors.primary }}></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h2 className="font-playfair text-3xl font-bold" style={{ color: adminConfig.colors.primary }}>
-          Business Settings
-        </h2>
-        <p className="font-inter text-sm mt-2" style={{ color: adminConfig.colors.textLight }}>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
+        <h1 className="text-4xl font-bold mb-2">Business Settings</h1>
+        <p className="text-gray-300">
           Manage your salon information, contact details, business hours, and social media
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div 
-          className="p-4 rounded-lg border-l-4"
-          style={{
-            backgroundColor: '#FFF5F5',
-            borderLeftColor: adminConfig.colors.warning,
-          }}
-        >
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.warning }}>
-            ❌ {error}
-          </p>
+        <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 flex items-start gap-3">
+          <AlertIcon size={20} color="#CB2431" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {success && (
-        <div 
-          className="p-4 rounded-lg border-l-4"
-          style={{
-            backgroundColor: '#F0FDF4',
-            borderLeftColor: adminConfig.colors.success,
-          }}
-        >
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.success }}>
-            ✅ {success}
-          </p>
+        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-3">
+          <SuccessIcon size={20} color="#22863A" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-green-700">{success}</p>
         </div>
       )}
 
       {/* Contact Information */}
-      <div 
-        className="rounded-lg border p-6"
-        style={{
-          backgroundColor: adminConfig.colors.background,
-          borderColor: adminConfig.colors.border,
-        }}
-      >
-        <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
-          📞 Contact Information
+      <div className="rounded-2xl border border-gray-200 bg-white p-8">
+        <h3 className="font-bold text-2xl mb-8 text-black uppercase tracking-wider">
+          Contact Information
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AdminInput
             label="Phone"
             type="tel"
@@ -229,18 +208,12 @@ export default function SettingsManager() {
       </div>
 
       {/* Social Media */}
-      <div 
-        className="rounded-lg border p-6"
-        style={{
-          backgroundColor: adminConfig.colors.background,
-          borderColor: adminConfig.colors.border,
-        }}
-      >
-        <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
-          🌐 Social Media Links
+      <div className="rounded-2xl border border-gray-200 bg-white p-8">
+        <h3 className="font-bold text-2xl mb-8 text-black uppercase tracking-wider">
+          Social Media Links
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AdminInput
             label="Instagram"
             type="url"
@@ -276,22 +249,16 @@ export default function SettingsManager() {
       </div>
 
       {/* Business Hours */}
-      <div 
-        className="rounded-lg border p-6"
-        style={{
-          backgroundColor: adminConfig.colors.background,
-          borderColor: adminConfig.colors.border,
-        }}
-      >
-        <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
-          ⏰ Business Hours
+      <div className="rounded-2xl border border-gray-200 bg-white p-8">
+        <h3 className="font-bold text-2xl mb-8 text-black uppercase tracking-wider">
+          Business Hours
         </h3>
 
         <div className="space-y-4">
           {settings.businessHours.map((hour, index) => (
-            <div key={index} className="border rounded-lg p-4" style={{ borderColor: adminConfig.colors.border }}>
+            <div key={index} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
               <div className="flex items-center gap-4 flex-wrap">
-                <label className="font-inter font-semibold min-w-24" style={{ color: adminConfig.colors.primary }}>
+                <label className="font-bold text-sm min-w-24 text-black uppercase tracking-wider">
                   {hour.day}
                 </label>
 
@@ -301,21 +268,19 @@ export default function SettingsManager() {
                       type="time"
                       value={hour.open}
                       onChange={(e) => handleBusinessHourChange(index, 'open', e.target.value)}
-                      className="px-3 py-2 border rounded-lg font-inter text-sm"
-                      style={{ borderColor: adminConfig.colors.border }}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black"
                     />
-                    <span className="font-inter">to</span>
+                    <span className="font-bold text-black">to</span>
                     <input
                       type="time"
                       value={hour.close}
                       onChange={(e) => handleBusinessHourChange(index, 'close', e.target.value)}
-                      className="px-3 py-2 border rounded-lg font-inter text-sm"
-                      style={{ borderColor: adminConfig.colors.border }}
+                      className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black"
                     />
                   </>
                 ) : (
-                  <span className="font-inter font-semibold" style={{ color: adminConfig.colors.warning }}>
-                    CLOSED
+                  <span className="font-bold text-red-600 uppercase tracking-wider">
+                    Closed
                   </span>
                 )}
 
@@ -324,9 +289,9 @@ export default function SettingsManager() {
                     type="checkbox"
                     checked={hour.isClosed}
                     onChange={(e) => handleBusinessHourChange(index, 'isClosed', e.target.checked)}
-                    className="w-5 h-5 cursor-pointer"
+                    className="w-5 h-5 cursor-pointer accent-black border border-gray-300 rounded"
                   />
-                  <span className="font-inter text-sm">Closed</span>
+                  <span className="font-bold text-sm text-black uppercase tracking-wider">Closed</span>
                 </label>
               </div>
             </div>
@@ -335,26 +300,16 @@ export default function SettingsManager() {
       </div>
 
       {/* Danger Zone */}
-      <div 
-        className="rounded-lg border p-6"
-        style={{
-          backgroundColor: '#FFF5F5',
-          borderColor: adminConfig.colors.warning,
-        }}
-      >
-        <h3 className="font-playfair text-lg font-bold mb-4" style={{ color: adminConfig.colors.warning }}>
+      <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-8">
+        <h3 className="font-bold text-lg mb-4 text-red-700 uppercase tracking-wider">
           Danger Zone
         </h3>
-        <p className="font-inter text-sm mb-4" style={{ color: adminConfig.colors.textLight }}>
+        <p className="font-bold text-sm mb-6 text-red-600">
           Permanently delete your account and all associated data.
         </p>
         <button
           onClick={() => setShowDeleteConfirm(true)}
-          className="w-full px-4 py-3 font-inter text-sm font-semibold uppercase tracking-wider rounded-lg transition-all"
-          style={{
-            backgroundColor: adminConfig.colors.warning,
-            color: adminConfig.colors.white,
-          }}
+          className="w-full px-6 py-4 font-bold text-sm uppercase tracking-wider rounded-lg transition-all text-white bg-red-600 hover:bg-red-700"
         >
           Delete Account
         </button>

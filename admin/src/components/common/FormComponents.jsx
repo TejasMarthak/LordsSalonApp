@@ -20,13 +20,12 @@ export const AdminInput = ({
   const Component = isTextarea ? 'textarea' : 'input';
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {label && (
         <label 
-          className="block font-inter text-sm font-semibold"
-          style={{ color: adminConfig.colors.primary }}
+          className="block font-bold text-sm text-black uppercase tracking-wider"
         >
-          {label} {required && <span style={{ color: adminConfig.colors.warning }}>*</span>}
+          {label} {required && <span className="text-red-600">*</span>}
         </label>
       )}
       <Component
@@ -35,25 +34,22 @@ export const AdminInput = ({
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
-        className={`w-full px-4 py-3 border-2 rounded-lg font-inter text-sm transition-all focus:outline-none ${className} ${isTextarea ? 'resize-none' : ''}`}
-        style={{
-          borderColor: error ? adminConfig.colors.warning : adminConfig.colors.border,
-          backgroundColor: adminConfig.colors.white,
-          color: adminConfig.colors.text,
-        }}
+        className={`w-full px-4 py-3 border-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${className} ${isTextarea ? 'resize-none' : ''} bg-white text-black border-gray-300 placeholder-gray-400`}
         onFocus={(e) => {
           if (!error) {
-            e.target.style.borderColor = adminConfig.colors.accent;
+            e.target.style.borderColor = '#000000';
+            e.target.style.boxShadow = '0 0 0 2px rgba(0, 0, 0, 0.1)';
           }
         }}
         onBlur={(e) => {
           if (!error) {
-            e.target.style.borderColor = adminConfig.colors.border;
+            e.target.style.borderColor = '#D1D5DB';
+            e.target.style.boxShadow = 'none';
           }
         }}
       />
       {error && (
-        <p className="font-inter text-xs" style={{ color: adminConfig.colors.warning }}>
+        <p className="text-xs text-red-600 font-bold uppercase tracking-wider">
           ⚠️ {error}
         </p>
       )}
@@ -75,31 +71,31 @@ export const AdminButton = ({
 }) => {
   const variants = {
     primary: {
-      bg: adminConfig.colors.accent,
-      text: adminConfig.colors.white,
-      hover: '#0d2535',
+      bg: '#000000',
+      text: '#FFFFFF',
+      hover: '#1F2937',
     },
     secondary: {
-      bg: adminConfig.colors.lightBg,
-      text: adminConfig.colors.primary,
-      hover: '#E8E8E8',
+      bg: '#F3F4F6',
+      text: '#000000',
+      hover: '#E5E7EB',
     },
     danger: {
-      bg: adminConfig.colors.warning,
-      text: adminConfig.colors.white,
-      hover: '#B02026',
+      bg: '#DC2626',
+      text: '#FFFFFF',
+      hover: '#B91C1C',
     },
     success: {
-      bg: adminConfig.colors.success,
-      text: adminConfig.colors.white,
+      bg: '#22863A',
+      text: '#FFFFFF',
       hover: '#1a6830',
     },
   };
 
   const sizes = {
-    sm: 'px-3 py-1 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'px-3 py-2 text-xs',
+    md: 'px-4 py-3 text-sm',
+    lg: 'px-6 py-4 text-base',
   };
 
   const style = variants[variant] || variants.primary;
@@ -108,9 +104,9 @@ export const AdminButton = ({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`font-inter font-semibold rounded-lg transition-all uppercase tracking-wider ${sizes[size]} hover:scale-105 ${className}`}
+      className={`font-bold rounded-lg transition-all uppercase tracking-wider ${sizes[size]} ${className}`}
       style={{
-        backgroundColor: disabled || loading ? '#CCCCCC' : style.bg,
+        backgroundColor: disabled || loading ? '#D1D5DB' : style.bg,
         color: style.text,
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
       }}
@@ -123,7 +119,7 @@ export const AdminButton = ({
         e.target.style.backgroundColor = style.bg;
       }}
     >
-      {loading ? '⏳ Loading...' : children}
+      {loading ? 'Loading...' : children}
     </button>
   );
 };

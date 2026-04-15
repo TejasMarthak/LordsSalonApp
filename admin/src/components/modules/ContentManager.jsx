@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
+import { AlertIcon, SuccessIcon, SaveIcon } from '../../utils/Icons';
 
 export default function ContentManager() {
   const [sections, setSections] = useState([
@@ -50,42 +51,26 @@ export default function ContentManager() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h2 className="font-playfair text-3xl font-bold" style={{ color: adminConfig.colors.primary }}>
-          Content Management
-        </h2>
-        <p className="font-inter text-sm mt-2" style={{ color: adminConfig.colors.textLight }}>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
+        <h1 className="text-4xl font-bold mb-2">Content Management</h1>
+        <p className="text-gray-300">
           Edit all text content and manage sections across your website
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div 
-          className="p-4 rounded-lg border-l-4"
-          style={{
-            backgroundColor: '#FFF5F5',
-            borderLeftColor: adminConfig.colors.warning,
-          }}
-        >
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.warning }}>
-            ❌ {error}
-          </p>
+        <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 flex items-start gap-3">
+          <AlertIcon size={20} color="#CB2431" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {success && (
-        <div 
-          className="p-4 rounded-lg border-l-4"
-          style={{
-            backgroundColor: '#F0FDF4',
-            borderLeftColor: adminConfig.colors.success,
-          }}
-        >
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.success }}>
-            ✅ {success}
-          </p>
+        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-3">
+          <SuccessIcon size={20} color="#22863A" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-green-700">{success}</p>
         </div>
       )}
 
@@ -93,25 +78,21 @@ export default function ContentManager() {
         {/* Section Navigation */}
         <div className="lg:col-span-1">
           <div 
-            className="rounded-lg border p-4 space-y-2"
-            style={{
-              backgroundColor: adminConfig.colors.lightBg,
-              borderColor: adminConfig.colors.border,
-            }}
+            className="rounded-2xl border border-gray-200 p-6 space-y-2 bg-white"
           >
-            <h3 className="font-playfair text-lg font-bold mb-4" style={{ color: adminConfig.colors.primary }}>
+            <h3 className="font-bold text-lg mb-6 text-black uppercase tracking-wider">
               Sections
             </h3>
             {sections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => handleSectionChange(section.id)}
-                className="w-full text-left px-4 py-3 rounded-lg transition-all font-inter text-sm"
+                className="w-full text-left px-6 py-3 rounded-lg transition-all font-bold text-sm uppercase tracking-wider"
                 style={{
-                  backgroundColor: selectedSection === section.id ? adminConfig.colors.accent : 'transparent',
-                  color: selectedSection === section.id ? adminConfig.colors.white : adminConfig.colors.primary,
-                  borderColor: adminConfig.colors.border,
-                  borderWidth: selectedSection === section.id ? 0 : '1px',
+                  backgroundColor: selectedSection === section.id ? '#000000' : 'transparent',
+                  color: selectedSection === section.id ? '#FFFFFF' : '#000000',
+                  borderWidth: selectedSection === section.id ? '0' : '1px',
+                  borderColor: selectedSection === section.id ? 'transparent' : '#E5E5E5',
                 }}
               >
                 {section.title}
@@ -123,22 +104,18 @@ export default function ContentManager() {
         {/* Content Editor */}
         <div className="lg:col-span-3">
           <div 
-            className="rounded-lg border p-6"
-            style={{
-              backgroundColor: adminConfig.colors.background,
-              borderColor: adminConfig.colors.border,
-            }}
+            className="rounded-2xl border border-gray-200 p-8 bg-white"
           >
-            <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
+            <h3 className="font-bold text-2xl mb-8 text-black">
               {sections.find((s) => s.id === selectedSection)?.title}
             </h3>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Hero Section Content */}
               {selectedSection === 'hero' && (
                 <>
                   <div>
-                    <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                    <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">
                       Headline
                     </label>
                     <input
@@ -146,17 +123,12 @@ export default function ContentManager() {
                       value={editingContent.headline || ''}
                       onChange={(e) => handleContentChange('headline', e.target.value)}
                       placeholder="e.g., Elevate Your Beauty"
-                      className="w-full px-4 py-2 border rounded-lg font-inter text-sm"
-                      style={{
-                        borderColor: adminConfig.colors.border,
-                        color: adminConfig.colors.text,
-                        backgroundColor: adminConfig.colors.background,
-                      }}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black placeholder-gray-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                    <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">
                       Subheadline
                     </label>
                     <textarea
@@ -164,17 +136,12 @@ export default function ContentManager() {
                       onChange={(e) => handleContentChange('subheadline', e.target.value)}
                       placeholder="e.g., Professional makeup and styling..."
                       rows="3"
-                      className="w-full px-4 py-2 border rounded-lg font-inter text-sm resize-none"
-                      style={{
-                        borderColor: adminConfig.colors.border,
-                        color: adminConfig.colors.text,
-                        backgroundColor: adminConfig.colors.background,
-                      }}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black placeholder-gray-400 resize-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                    <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">
                       Button Text
                     </label>
                     <input
@@ -182,12 +149,7 @@ export default function ContentManager() {
                       value={editingContent.ctaText || ''}
                       onChange={(e) => handleContentChange('ctaText', e.target.value)}
                       placeholder="e.g., Book Appointment"
-                      className="w-full px-4 py-2 border rounded-lg font-inter text-sm"
-                      style={{
-                        borderColor: adminConfig.colors.border,
-                        color: adminConfig.colors.text,
-                        backgroundColor: adminConfig.colors.background,
-                      }}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black placeholder-gray-400"
                     />
                   </div>
                 </>
@@ -196,7 +158,7 @@ export default function ContentManager() {
               {/* Services Section Content */}
               {selectedSection === 'services' && (
                 <div>
-                  <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                  <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">
                     Services Description
                   </label>
                   <textarea
@@ -204,12 +166,7 @@ export default function ContentManager() {
                     onChange={(e) => handleContentChange('description', e.target.value)}
                     placeholder="Edit services section content..."
                     rows="5"
-                    className="w-full px-4 py-2 border rounded-lg font-inter text-sm resize-none"
-                    style={{
-                      borderColor: adminConfig.colors.border,
-                      color: adminConfig.colors.text,
-                      backgroundColor: adminConfig.colors.background,
-                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black placeholder-gray-400 resize-none"
                   />
                 </div>
               )}
@@ -217,7 +174,7 @@ export default function ContentManager() {
               {/* Generic Content */}
               {selectedSection !== 'hero' && selectedSection !== 'services' && (
                 <div>
-                  <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                  <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">
                     Section Content
                   </label>
                   <textarea
@@ -225,12 +182,7 @@ export default function ContentManager() {
                     onChange={(e) => handleContentChange('content', e.target.value)}
                     placeholder="Edit section content..."
                     rows="8"
-                    className="w-full px-4 py-2 border rounded-lg font-inter text-sm resize-none"
-                    style={{
-                      borderColor: adminConfig.colors.border,
-                      color: adminConfig.colors.text,
-                      backgroundColor: adminConfig.colors.background,
-                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white text-black placeholder-gray-400 resize-none"
                   />
                 </div>
               )}
@@ -240,12 +192,7 @@ export default function ContentManager() {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="mt-6 w-full px-4 py-3 font-inter text-sm font-semibold uppercase tracking-wider rounded-lg transition-all"
-              style={{
-                backgroundColor: adminConfig.colors.accent,
-                color: adminConfig.colors.white,
-                opacity: loading ? 0.6 : 1,
-              }}
+              className="mt-8 w-full px-8 py-4 font-bold text-sm uppercase tracking-wider rounded-lg transition-all text-white bg-black hover:bg-gray-900 disabled:opacity-60"
             >
               {loading ? 'Saving...' : 'Save Changes'}
             </button>

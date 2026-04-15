@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
-import { UploadIcon, EyeIcon, DeleteIcon } from '../../utils/Icons';
+import { UploadIcon, EyeIcon, DeleteIcon, SaveIcon, AlertIcon, SuccessIcon } from '../../utils/Icons';
 
 export default function HeroManager() {
   const [heroContent, setHeroContent] = useState(adminConfig.defaultHeroContent);
@@ -119,41 +119,29 @@ export default function HeroManager() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h2 className="font-playfair text-3xl font-bold" style={{ color: adminConfig.colors.primary }}>
-          Hero Section Management
-        </h2>
-        <p className="font-inter text-sm mt-2" style={{ color: adminConfig.colors.textLight }}>
+      {/* Header with Gradient */}
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
+        <h1 className="text-4xl font-bold mb-2">Hero Section Management</h1>
+        <p className="text-gray-300">
           Customize the main banner and headline on your homepage
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div 
-          className="p-4 rounded-lg border-l-4"
-          style={{
-            backgroundColor: '#FFF5F5',
-            borderLeftColor: adminConfig.colors.warning,
-          }}
-        >
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.warning }}>
-            ❌ {error}
+        <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 flex items-start gap-3">
+          <AlertIcon size={20} color="#CB2431" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">
+            {error}
           </p>
         </div>
       )}
 
       {success && (
-        <div 
-          className="p-4 rounded-lg border-l-4"
-          style={{
-            backgroundColor: '#F0FDF4',
-            borderLeftColor: adminConfig.colors.success,
-          }}
-        >
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.success }}>
-            ✅ {success}
+        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-3">
+          <SuccessIcon size={20} color="#22863A" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-green-700">
+            {success}
           </p>
         </div>
       )}
@@ -161,18 +149,12 @@ export default function HeroManager() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Section */}
         <div className="lg:col-span-2">
-          <div 
-            className="p-8 rounded-lg border"
-            style={{
-              backgroundColor: adminConfig.colors.lightBg,
-              borderColor: adminConfig.colors.border,
-            }}
-          >
+          <div className="p-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
             <form onSubmit={handleSave} className="space-y-6">
               {/* Headline */}
               <div>
-                <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                  Main Headline *
+                <label className="block text-sm font-bold mb-3 uppercase text-black">
+                  Main Headline
                 </label>
                 <input
                   type="text"
@@ -181,19 +163,16 @@ export default function HeroManager() {
                   onChange={handleInputChange}
                   required
                   placeholder="e.g., Elevate Your Beauty"
-                  className="w-full px-4 py-3 border rounded-lg font-inter text-sm focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: adminConfig.colors.border,
-                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
                 />
-                <p className="text-xs mt-1" style={{ color: adminConfig.colors.textLight }}>
+                <p className="text-xs mt-2 text-gray-600">
                   This is the main title displayed in the hero section
                 </p>
               </div>
 
               {/* Subheadline */}
               <div>
-                <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                <label className="block text-sm font-bold mb-3 uppercase text-black">
                   Subheadline
                 </label>
                 <input
@@ -202,19 +181,16 @@ export default function HeroManager() {
                   value={heroContent.subheadline}
                   onChange={handleInputChange}
                   placeholder="e.g., Professional makeup and styling at Lords Salon"
-                  className="w-full px-4 py-3 border rounded-lg font-inter text-sm focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: adminConfig.colors.border,
-                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
                 />
-                <p className="text-xs mt-1" style={{ color: adminConfig.colors.textLight }}>
+                <p className="text-xs mt-2 text-gray-600">
                   Secondary text shown below the main headline
                 </p>
               </div>
 
               {/* CTA Button Text */}
               <div>
-                <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                <label className="block text-sm font-bold mb-3 uppercase text-black">
                   Call-to-Action Button Text
                 </label>
                 <input
@@ -223,26 +199,20 @@ export default function HeroManager() {
                   value={heroContent.ctaText}
                   onChange={handleInputChange}
                   placeholder="e.g., Book Appointment"
-                  className="w-full px-4 py-3 border rounded-lg font-inter text-sm focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: adminConfig.colors.border,
-                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
                 />
               </div>
 
               {/* Featured Service */}
               <div>
-                <label className="block font-inter text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                <label className="block text-sm font-bold mb-3 uppercase text-black">
                   Featured Service
                 </label>
                 <select
                   name="featuredService"
                   value={heroContent.featuredService}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border rounded-lg font-inter text-sm focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: adminConfig.colors.border,
-                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
                 >
                   <option value="">Select a service to feature</option>
                   {services.map((service) => (
@@ -251,7 +221,7 @@ export default function HeroManager() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs mt-1" style={{ color: adminConfig.colors.textLight }}>
+                <p className="text-xs mt-2 text-gray-600">
                   This service will be highlighted in the hero section
                 </p>
               </div>
@@ -260,13 +230,9 @@ export default function HeroManager() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 font-inter text-sm font-semibold uppercase tracking-wider rounded-lg transition-all"
-                style={{
-                  backgroundColor: adminConfig.colors.accent,
-                  color: adminConfig.colors.white,
-                  opacity: loading ? 0.6 : 1,
-                }}
+                className="w-full py-3 font-bold uppercase tracking-wider rounded-xl transition-all bg-black text-white hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
               >
+                <SaveIcon size={20} color="#FFFFFF" />
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>
             </form>
@@ -275,43 +241,26 @@ export default function HeroManager() {
 
         {/* Preview Section */}
         <div>
-          <div 
-            className="p-8 rounded-lg border sticky top-24"
-            style={{
-              backgroundColor: adminConfig.colors.lightBg,
-              borderColor: adminConfig.colors.border,
-            }}
-          >
-            <h3 className="font-playfair text-xl font-bold mb-4" style={{ color: adminConfig.colors.primary }}>
+          <div className="p-8 rounded-2xl border border-gray-200 bg-white shadow-sm sticky top-24">
+            <h3 className="text-xl font-bold mb-4 text-black">
               Preview
             </h3>
 
-            <div 
-              className="p-6 rounded-lg space-y-3"
-              style={{
-                backgroundColor: adminConfig.colors.background,
-                borderWidth: '1px',
-                borderColor: adminConfig.colors.border,
-              }}
-            >
-              <h4 className="font-playfair text-2xl font-bold" style={{ color: adminConfig.colors.primary }}>
+            <div className="p-6 rounded-xl space-y-3 border border-gray-200 bg-gray-50">
+              <h4 className="text-2xl font-bold text-black">
                 {heroContent.headline}
               </h4>
-              <p className="font-inter text-sm" style={{ color: adminConfig.colors.secondary }}>
+              <p className="text-sm text-gray-700">
                 {heroContent.subheadline}
               </p>
               <button
-                className="mt-4 w-full py-2 font-inter text-xs font-semibold uppercase tracking-wider rounded"
-                style={{
-                  backgroundColor: adminConfig.colors.accent,
-                  color: adminConfig.colors.white,
-                }}
+                className="mt-4 w-full py-2 font-bold uppercase tracking-wider rounded-lg bg-black text-white hover:bg-gray-900 transition-all text-xs"
               >
                 {heroContent.ctaText}
               </button>
             </div>
 
-            <p className="text-xs mt-4 font-inter" style={{ color: adminConfig.colors.textLight }}>
+            <p className="text-xs mt-4 text-gray-600">
               This is a preview of how your hero section will look on the homepage.
             </p>
           </div>

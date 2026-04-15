@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import adminConfig from '../../adminConfig';
 
 export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSidebar }) {
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     if (onLogout) {
       onLogout();
-    } else {
-      window.location.reload();
     }
+    navigate('/login');
   };
 
   return (

@@ -1,8 +1,57 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import adminConfig from '../../adminConfig';
+import {
+  DashboardIcon,
+  LayoutIcon,
+  PaletteIcon,
+  ImageIcon,
+  BriefcaseIcon,
+  GalleryIcon,
+  FileTextIcon,
+  SettingsIcon,
+} from '../../utils/Icons';
 
 export default function Sidebar({ currentPage, onPageChange }) {
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  // Map item IDs to routes
+  const getPathFromId = (id) => {
+    const pathMap = {
+      'dashboard': '/dashboard',
+      'site-builder': '/site-builder',
+      'site-appearance': '/appearance',
+      'hero': '/hero-section',
+      'services': '/services',
+      'portfolio': '/portfolio',
+      'content': '/content',
+      'settings': '/settings',
+    };
+    return pathMap[id] || '/dashboard';
+  };
+
+  // Map item IDs to icon components
+  const getIconFromId = (id) => {
+    const iconMap = {
+      'dashboard': DashboardIcon,
+      'site-builder': LayoutIcon,
+      'site-appearance': PaletteIcon,
+      'hero': ImageIcon,
+      'services': BriefcaseIcon,
+      'portfolio': GalleryIcon,
+      'content': FileTextIcon,
+      'settings': SettingsIcon,
+    };
+    return iconMap[id] || DashboardIcon;
+  };
+
+  const handleNavigation = (itemId) => {
+    navigate(getPathFromId(itemId));
+    if (onPageChange) {
+      onPageChange(itemId);
+    }
+  };
 
   return (
     <aside 
@@ -42,10 +91,12 @@ export default function Sidebar({ currentPage, onPageChange }) {
 
       {/* Navigation */}
       <nav className="flex-1 p-3 sm:p-4 space-y-2 overflow-y-auto">
-        {adminConfig.navigation.map((item) => (
+        {adminConfig.navigation.map((item) => {
+          const IconComponent = getIconFromId(item.id);
+          return (
           <button
             key={item.id}
-            onClick={() => onPageChange(item.id)}
+            onClick={() => handleNavigation(item.id)}
             className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 rounded-lg font-inter text-xs sm:text-sm uppercase tracking-wider transition-all"
             style={{
               backgroundColor: currentPage === item.id 
@@ -60,7 +111,7 @@ export default function Sidebar({ currentPage, onPageChange }) {
             }}
             title={item.label}
           >
-            <span className="text-base sm:text-lg flex-shrink-0">{item.icon}</span>
+            <IconComponent size={20} color={currentPage === item.id ? '#FFFFFF' : '#1A1A1A'} className="flex-shrink-0" />
             {!isCollapsed && (
               <div className="text-left">
                 <div className="font-semibold text-sm">{item.label}</div>
@@ -68,7 +119,8 @@ export default function Sidebar({ currentPage, onPageChange }) {
               </div>
             )}
           </button>
-        ))}
+        );
+        })}
       </nav>
 
       {/* Footer Info */}

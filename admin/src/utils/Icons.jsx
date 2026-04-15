@@ -1,55 +1,138 @@
-/**
- * Admin Panel Minimalist Icons
- * Used throughout the admin dashboard
+﻿/**
+ * Icon Components using HugeIcons | React
+ * https://hugeicons.com/
+ * Professional and modern icon library (Official package)
  */
 
-export const UploadIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  DashboardSquare01Icon,
+  Edit02Icon,
+  Delete01Icon,
+  Upload01Icon,
+  File01Icon,
+  Settings01Icon,
+  CheckmarkCircle02Icon,
+  Alert01Icon,
+  EyeIcon as EyeHugeIcon,
+  Copy01Icon,
+  Search01Icon,
+  Refresh01Icon,
+} from "@hugeicons/core-free-icons";
+
+// Dashboard & Navigation Icons
+export const DashboardIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={DashboardSquare01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const LayoutIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={DashboardSquare01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const PaletteIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={Settings01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const ImageIcon = ({ size = 24, color = "#000000", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-    <polyline points="17 8 12 3 7 8"></polyline>
-    <line x1="12" y1="3" x2="12" y2="15"></line>
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+    <polyline points="21 15 16 10 5 21"></polyline>
   </svg>
+);
+
+export const BriefcaseIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"></path>
+  </svg>
+);
+
+export const GalleryIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+    <polyline points="21 15 16 10 5 21"></polyline>
+  </svg>
+);
+
+// Action Icons
+export const EditIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={Edit02Icon} size={size} color={color} className={className} strokeWidth={1.5} />
 );
 
 export const DeleteIcon = ({ size = 24, color = "#CB2431", className = "" }) => (
+  <HugeiconsIcon icon={Delete01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const SaveIcon = ({ size = 24, color = "#000000", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="3 6 5 6 21 6"></polyline>
-    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-    <line x1="10" y1="11" x2="10" y2="17"></line>
-    <line x1="14" y1="11" x2="14" y2="17"></line>
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+    <polyline points="7 3 7 8 15 8"></polyline>
   </svg>
 );
 
-export const EyeIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-    <circle cx="12" cy="12" r="3"></circle>
-  </svg>
+export const UploadIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={Upload01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
 );
 
-export const EditIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-  </svg>
+// Status & Feedback Icons
+export const EyeIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={EyeHugeIcon} size={size} color={color} className={className} strokeWidth={1.5} />
 );
 
 export const CheckIcon = ({ size = 24, color = "#22863A", className = "" }) => (
+  <HugeiconsIcon icon={CheckmarkCircle02Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const AlertIcon = ({ size = 24, color = "#CB2431", className = "" }) => (
+  <HugeiconsIcon icon={Alert01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const SuccessIcon = ({ size = 24, color = "#22863A", className = "" }) => (
+  <HugeiconsIcon icon={CheckmarkCircle02Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const LoadingIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={Refresh01Icon} size={size} color={color} className={className + " animate-spin"} strokeWidth={1.5} />
+);
+
+// File & Content Icons
+export const FileIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={File01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const FileTextIcon = ({ size = 24, color = "#000000", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="20 6 9 17 4 12"></polyline>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+    <polyline points="14 2 14 8 20 8"></polyline>
+    <line x1="12" y1="13" x2="12" y2="17"></line>
+    <line x1="10" y1="15" x2="14" y2="15"></line>
   </svg>
 );
 
-export const CloseIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
+export const SettingsIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <HugeiconsIcon icon={Settings01Icon} size={size} color={color} className={className} strokeWidth={1.5} />
+);
+
+export const StarIcon = ({ size = 24, color = "#000000", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
+    <polygon points="12 2 15.09 10.26 24 10.35 17.27 16.61 19.16 25.88 12 20.77 4.84 25.88 6.73 16.61 0 10.35 8.91 10.26 12 2"></polygon>
   </svg>
 );
 
-export const AddIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
+// Utility Icons (Simple SVG for close/add)
+export const CloseIcon = ({ size = 24, color = "#000000", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+export const AddIcon = ({ size = 24, color = "#000000", className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );

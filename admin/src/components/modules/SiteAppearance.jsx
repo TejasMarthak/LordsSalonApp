@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
 import ImageUploadManager from './ImageUploadManager';
+import { SuccessIcon, AlertIcon } from '../../utils/Icons';
 
 export default function SiteAppearance({ admin }) {
   const [settings, setSettings] = useState(null);
@@ -17,9 +18,7 @@ export default function SiteAppearance({ admin }) {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `${adminConfig.api.baseUrl}/api/site-settings`
-      );
+      const response = await axios.get(`${adminConfig.api.baseUrl}/api/site-settings`);
       setSettings(response.data);
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -42,11 +41,9 @@ export default function SiteAppearance({ admin }) {
     try {
       setSaving(true);
       const token = localStorage.getItem('adminToken');
-      await axios.put(
-        `${adminConfig.api.baseUrl}/api/site-settings`,
-        settings,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.put(`${adminConfig.api.baseUrl}/api/site-settings`, settings, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setSuccess('Settings saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
@@ -57,42 +54,36 @@ export default function SiteAppearance({ admin }) {
   };
 
   if (loading) {
-    return <div className="text-center py-12">Loading...</div>;
+    return <div className="text-center py-12"><p className="text-gray-600">Loading...</p></div>;
   }
 
   if (!settings) {
-    return <div>Error loading settings</div>;
+    return <div className="text-center py-12 text-red-600">Error loading settings</div>;
   }
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h2 className="font-playfair text-3xl font-bold mb-2" style={{ color: adminConfig.colors.primary }}>
-          Site Appearance
-        </h2>
-        <p className="font-inter text-sm" style={{ color: adminConfig.colors.textLight }}>
-          Customize colors, branding, backgrounds, and appearance
-        </p>
+      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
+        <h1 className="text-4xl font-bold mb-2">Site Appearance</h1>
+        <p className="text-gray-300">Customize colors, branding, backgrounds, and appearance</p>
       </div>
 
-      {/* Success Message */}
       {success && (
-        <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8F5E9' }}>
-          <p className="font-inter text-sm text-green-700">{success}</p>
+        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-3">
+          <SuccessIcon size={20} color="#22863A" />
+          <p className="text-sm text-green-700">{success}</p>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b overflow-x-auto" style={{ borderBottomColor: adminConfig.colors.border }}>
+      <div className="flex gap-0 border-b border-gray-200 overflow-x-auto">
         {['branding', 'colors', 'backgrounds', 'contact'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className="px-4 py-3 border-b-2 font-inter font-semibold text-sm capitalize transition-colors whitespace-nowrap"
+            className="px-6 py-4 border-b-2 font-bold text-sm capitalize transition-colors whitespace-nowrap"
             style={{
-              borderBottomColor: activeTab === tab ? adminConfig.colors.accent : 'transparent',
-              color: activeTab === tab ? adminConfig.colors.primary : adminConfig.colors.textLight,
+              borderBottomColor: activeTab === tab ? '#000000' : 'transparent',
+              color: activeTab === tab ? '#000000' : '#666666',
             }}
           >
             {tab}
@@ -100,39 +91,30 @@ export default function SiteAppearance({ admin }) {
         ))}
       </div>
 
-      {/* Branding Tab */}
       {activeTab === 'branding' && (
-        <div className="space-y-4">
+        <div className="space-y-6 bg-white rounded-2xl p-8 border border-gray-200">
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Site Name
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Site Name</label>
             <input
               type="text"
               value={settings.branding?.siteName || ''}
               onChange={(e) => handleInputChange('branding', 'siteName', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Tagline
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Tagline</label>
             <input
               type="text"
               value={settings.branding?.tagline || ''}
               onChange={(e) => handleInputChange('branding', 'tagline', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Logo Image
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Logo Image</label>
             <ImageUploadManager
               onImageSelect={(imageData) => handleInputChange('branding', 'logo', imageData.imageId)}
               location="branding"
@@ -141,33 +123,23 @@ export default function SiteAppearance({ admin }) {
         </div>
       )}
 
-      {/* Colors Tab */}
       {activeTab === 'colors' && (
-        <div className="space-y-4">
-          {[
-            { key: 'primaryColor', label: 'Primary Color' },
-            { key: 'secondaryColor', label: 'Secondary Color' },
-            { key: 'accentColor', label: 'Accent Color' },
-            { key: 'backgroundColor', label: 'Background Color' },
-          ].map(({ key, label }) => (
+        <div className="space-y-6 bg-white rounded-2xl p-8 border border-gray-200">
+          {['primaryColor', 'secondaryColor', 'accentColor', 'backgroundColor'].map((key) => (
             <div key={key}>
-              <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                {label}
-              </label>
+              <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider capitalize">{key.replace('Color', ' Color')}</label>
               <div className="flex gap-4 items-center">
                 <input
                   type="color"
                   value={settings.appearance?.[key] || '#FFFFFF'}
                   onChange={(e) => handleInputChange('appearance', key, e.target.value)}
-                  className="w-16 h-10 rounded-lg cursor-pointer border"
-                  style={{ borderColor: adminConfig.colors.border }}
+                  className="w-16 h-12 rounded-lg cursor-pointer border border-gray-300"
                 />
                 <input
                   type="text"
                   value={settings.appearance?.[key] || '#FFFFFF'}
                   onChange={(e) => handleInputChange('appearance', key, e.target.value)}
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-                  style={{ borderColor: adminConfig.colors.border }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
                 />
               </div>
             </div>
@@ -175,28 +147,21 @@ export default function SiteAppearance({ admin }) {
         </div>
       )}
 
-      {/* Backgrounds Tab */}
       {activeTab === 'backgrounds' && (
-        <div className="space-y-4">
-          <div>
-            <label className="flex items-center gap-2 mb-4">
-              <input
-                type="checkbox"
-                checked={settings.appearance?.useGlobalBackground || false}
-                onChange={(e) => handleInputChange('appearance', 'useGlobalBackground', e.target.checked)}
-                className="w-4 h-4"
-              />
-              <span className="font-inter font-semibold" style={{ color: adminConfig.colors.primary }}>
-                Use Global Background Image
-              </span>
-            </label>
-          </div>
+        <div className="space-y-6 bg-white rounded-2xl p-8 border border-gray-200">
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={settings.appearance?.useGlobalBackground || false}
+              onChange={(e) => handleInputChange('appearance', 'useGlobalBackground', e.target.checked)}
+              className="w-5 h-5 accent-black"
+            />
+            <span className="font-bold text-sm text-black uppercase tracking-wider">Use Global Background</span>
+          </label>
 
           {settings.appearance?.useGlobalBackground && (
             <div>
-              <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                Global Background Image
-              </label>
+              <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Global Background</label>
               <ImageUploadManager
                 onImageSelect={(imageData) => handleInputChange('appearance', 'globalBackground', imageData.imageId)}
                 location="background"
@@ -205,9 +170,7 @@ export default function SiteAppearance({ admin }) {
           )}
 
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Header Background Image (Optional)
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Header Background</label>
             <ImageUploadManager
               onImageSelect={(imageData) => handleInputChange('appearance', 'headerBackground', imageData.imageId)}
               location="header"
@@ -215,9 +178,7 @@ export default function SiteAppearance({ admin }) {
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Footer Background Image (Optional)
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Footer Background</label>
             <ImageUploadManager
               onImageSelect={(imageData) => handleInputChange('appearance', 'footerBackground', imageData.imageId)}
               location="footer"
@@ -226,105 +187,80 @@ export default function SiteAppearance({ admin }) {
         </div>
       )}
 
-      {/* Contact Tab */}
       {activeTab === 'contact' && (
-        <div className="space-y-4">
+        <div className="space-y-6 bg-white rounded-2xl p-8 border border-gray-200">
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Phone
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Phone</label>
             <input
               type="tel"
               value={settings.contact?.phone || ''}
               onChange={(e) => handleInputChange('contact', 'phone', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Email
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Email</label>
             <input
               type="email"
               value={settings.contact?.email || ''}
               onChange={(e) => handleInputChange('contact', 'email', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
             />
           </div>
 
           <div>
-            <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-              Address
-            </label>
+            <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Address</label>
             <input
               type="text"
               value={settings.contact?.address || ''}
               onChange={(e) => handleInputChange('contact', 'address', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-              style={{ borderColor: adminConfig.colors.border }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                Latitude
-              </label>
+              <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Latitude</label>
               <input
                 type="number"
                 step="0.0001"
                 value={settings.contact?.latitude || ''}
                 onChange={(e) => handleInputChange('contact', 'latitude', parseFloat(e.target.value))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-                style={{ borderColor: adminConfig.colors.border }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
               />
             </div>
             <div>
-              <label className="block font-inter font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                Longitude
-              </label>
+              <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Longitude</label>
               <input
                 type="number"
                 step="0.0001"
                 value={settings.contact?.longitude || ''}
                 onChange={(e) => handleInputChange('contact', 'longitude', parseFloat(e.target.value))}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
-                style={{ borderColor: adminConfig.colors.border }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
               />
             </div>
           </div>
 
-          {/* Social Media */}
-          <div className="border-t pt-4" style={{ borderTopColor: adminConfig.colors.border }}>
-            <h4 className="font-inter font-semibold mb-3" style={{ color: adminConfig.colors.primary }}>
-              Social Media Links
-            </h4>
-            <div className="space-y-3">
+          <div className="border-t border-gray-200 pt-6">
+            <h4 className="font-bold text-sm mb-6 text-black uppercase tracking-wider">Social Media</h4>
+            <div className="space-y-6">
               <div>
-                <label className="block font-inter text-sm mb-2" style={{ color: adminConfig.colors.primary }}>
-                  Instagram URL
-                </label>
+                <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Instagram</label>
                 <input
                   type="url"
                   value={settings.social?.instagram || ''}
                   onChange={(e) => handleInputChange('social', 'instagram', e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2"
-                  style={{ borderColor: adminConfig.colors.border }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
                 />
               </div>
               <div>
-                <label className="block font-inter text-sm mb-2" style={{ color: adminConfig.colors.primary }}>
-                  Facebook URL
-                </label>
+                <label className="block font-bold text-sm mb-3 text-black uppercase tracking-wider">Facebook</label>
                 <input
                   type="url"
                   value={settings.social?.facebook || ''}
                   onChange={(e) => handleInputChange('social', 'facebook', e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2"
-                  style={{ borderColor: adminConfig.colors.border }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white text-black"
                 />
               </div>
             </div>
@@ -332,13 +268,11 @@ export default function SiteAppearance({ admin }) {
         </div>
       )}
 
-      {/* Save Button */}
-      <div className="flex gap-3 sticky bottom-0 bg-white pt-4 border-t" style={{ borderTopColor: adminConfig.colors.border }}>
+      <div className="flex gap-3">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 px-6 py-3 rounded-lg font-inter font-semibold text-white transition-all"
-          style={{ backgroundColor: adminConfig.colors.accent, opacity: saving ? 0.6 : 1 }}
+          className="flex-1 px-8 py-4 rounded-lg font-bold text-white text-sm uppercase tracking-wider bg-black hover:bg-gray-900 disabled:opacity-60"
         >
           {saving ? 'Saving...' : 'Save All Changes'}
         </button>
