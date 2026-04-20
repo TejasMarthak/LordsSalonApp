@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import adminConfig from '../../adminConfig';
 
 export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSidebar }) {
-  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    if (onLogout) {
-      onLogout();
-    }
-    navigate('/login');
+  // Get user initials
+  const getInitials = (name) => {
+    if (!name) return 'A';
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
+
+  const adminName = admin?.name || 'Admin';
+  const adminEmail = admin?.email || 'admin@lords-salon.com';
+  const initials = getInitials(adminName);
 
   return (
     <header 
@@ -21,15 +26,16 @@ export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSide
         borderBottomWidth: '1px',
         borderBottomColor: adminConfig.colors.border,
       }}
-      className="sticky top-0 z-40 py-4 px-4 sm:px-6 md:px-8"
+      className="sticky top-0 z-40 py-3 px-4 sm:px-6 md:px-8"
     >
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+      <div className="flex justify-between items-center gap-4">
+        {/* Left Section - Title and Live Data */}
+        <div className="flex items-center gap-6 min-w-0">
           {/* Mobile Menu Toggle */}
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
               title="Toggle Menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: adminConfig.colors.primary }}>
@@ -38,38 +44,52 @@ export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSide
             </button>
           )}
 
-          <div>
-            <h1 className="font-playfair text-xl sm:text-2xl font-bold" style={{ color: adminConfig.colors.primary }}>
-              Lords Admin
+          <div className="flex-1 min-w-0">
+            <h1 className="font-playfair text-2xl sm:text-3xl font-bold" style={{ color: adminConfig.colors.primary }}>
+              Dashboard
             </h1>
-            <p className="font-inter text-xs mt-1 hidden sm:block" style={{ color: adminConfig.colors.textLight }}>
-              Management Dashboard
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <p className="font-inter text-xs sm:text-sm" style={{ color: adminConfig.colors.textLight }}>
+                Live Data <span className="font-semibold">(2 updates)</span>
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-6">
-          {/* Admin Info - Desktop */}
-          <div className="hidden md:flex flex-col items-end font-inter">
-            <p className="text-sm font-medium" style={{ color: adminConfig.colors.text }}>
-              Welcome, {admin?.name || 'Owner'}
-            </p>
-            <p className="text-xs mt-1" style={{ color: adminConfig.colors.textLight }}>
-              {admin?.email || 'owner@lords-salon.com'}
-            </p>
-          </div>
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="px-3 sm:px-4 py-2 font-inter text-xs sm:text-sm uppercase tracking-wider transition-all rounded font-semibold whitespace-nowrap"
-            style={{
-              backgroundColor: adminConfig.colors.warning,
-              color: adminConfig.colors.white,
-            }}
+        {/* Right Section - Notifications and User Profile */}
+        <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
+          {/* Notification Bell */}
+          <button 
+            className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            title="Notifications"
           >
-            Logout
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: adminConfig.colors.primary }}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
+
+          {/* User Profile */}
+          <div className="flex items-center gap-3 pl-4 border-l" style={{ borderLeftColor: adminConfig.colors.border }}>
+            {/* User Avatar */}
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-semibold text-sm"
+              style={{ backgroundColor: '#1a3a52' }}
+            >
+              {initials}
+            </div>
+
+            {/* User Info - Hidden on mobile */}
+            <div className="hidden sm:flex flex-col">
+              <p className="font-semibold text-sm" style={{ color: adminConfig.colors.primary }}>
+                {adminName}
+              </p>
+              <p className="font-inter text-xs" style={{ color: adminConfig.colors.textLight }}>
+                System Administrator
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </header>

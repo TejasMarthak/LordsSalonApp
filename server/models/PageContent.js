@@ -26,9 +26,17 @@ const pageContentSchema = new mongoose.Schema(
         },
         isVisible: { type: Boolean, default: true },
         order: Number,
+        // Hero Section Fields
+        headline: String,
+        subheadline: String,
+        description: String,
+        ctaText: String,
+        ctaLink: String,
+        heroImage: String, // Legacy single image
+        heroImages: [String], // New carousel images array
+        // Generic Fields
         title: String,
         subtitle: String,
-        description: String,
         backgroundImage: String,
         backgroundColor: String,
         content: mongoose.Schema.Types.Mixed,

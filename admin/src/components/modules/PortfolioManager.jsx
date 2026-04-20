@@ -3,6 +3,53 @@ import axios from 'axios';
 import adminConfig from '../../adminConfig';
 import { EditIcon, DeleteIcon, UploadIcon, AlertIcon, SuccessIcon, CheckIcon, SaveIcon } from '../../utils/Icons';
 
+// Image Carousel Component - Same as client-side Lookbook
+function ImageCarousel({ beforeImage, afterImage, title }) {
+  const [currentImage, setCurrentImage] = useState('after');
+
+  useEffect(() => {
+    if (!beforeImage) {
+      setCurrentImage('after');
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentImage(prev => prev === 'after' ? 'before' : 'after');
+    }, 5000); // Switch every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [beforeImage]);
+
+  const displayImage = currentImage === 'after' ? afterImage : beforeImage;
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      <img
+        src={displayImage}
+        alt={`${title} - ${currentImage}`}
+        className="w-full h-full object-cover transition-opacity duration-500"
+      />
+      
+      {/* Image indicator badge */}
+      {beforeImage && (
+        <div className="absolute top-3 right-3 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-xs font-semibold">
+          {currentImage === 'after' ? 'After' : 'Before'}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Category icons mapping
+const categoryIcons = {
+  'Bridal Makeup': '💄',
+  'Editorial': '📸',
+  'Party Makeup': '🎉',
+  'Skincare': '✨',
+  'Hair': '💇',
+  'Special Effects': '🎭',
+};
+
 export default function PortfolioManager() {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({
@@ -382,59 +429,88 @@ export default function PortfolioManager() {
 
           <div className="bg-white border border-t-0 border-gray-200 rounded-b-2xl p-6">
             {items.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 {items.map((item) => (
                   <div
                     key={item._id}
-                    className="p-4 rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all bg-white"
+                    className="group rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white"
                   >
-                    {/* Thumbnail */}
-                    {item.imageUrl && (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-full h-40 object-cover rounded-lg mb-3"
+                    {/* Image Container with Carousel */}
+                    <div 
+                      className="relative w-full overflow-hidden" 
+                      style={{ aspectRatio: '4/5', backgroundColor: adminConfig.colors.lightBg }}
+                    >
+                      <ImageCarousel 
+                        beforeImage={item.beforeImageUrl}
+                        afterImage={item.imageUrl}
+                        title={item.title}
                       />
-                    )}
+                      
+                      {/* Hover Overlay with Action Buttons */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3" 
+                        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="px-6 py-2 rounded-lg font-semibold text-white transition-all hover:scale-105 flex items-center gap-2"
+                          style={{ backgroundColor: adminConfig.colors.primary }}
+                        >
+                          <EditIcon size={16} color="#FFFFFF" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item._id)}
+                          className="px-6 py-2 rounded-lg font-semibold text-white transition-all hover:scale-105 flex items-center gap-2"
+                          style={{ backgroundColor: adminConfig.colors.warning }}
+                        >
+                          <DeleteIcon size={16} color="#FFFFFF" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
 
-                    {/* Item Info */}
-                    <h4 className="font-bold text-sm mb-1 text-black">
-                      {item.title}
-                    </h4>
-                    <p className="text-xs mb-2 text-gray-700">
-                      {item.category}
-                    </p>
+                    {/* Card Content */}
+                    <div className="p-4 md:p-6">
+                      {/* Category Badge */}
+                      <p className="font-inter text-xs uppercase tracking-widest mb-2" style={{ color: adminConfig.colors.accent }}>
+                        {categoryIcons[item.category]} {item.category}
+                      </p>
+                      
+                      {/* Title */}
+                      <h3 className="font-playfair text-lg md:text-xl font-light mb-2" style={{ color: adminConfig.colors.primary }}>
+                        {item.title}
+                      </h3>
 
-                    {item.featured && (
-                      <span className="inline-block px-2 py-1 rounded-lg text-xs font-semibold mb-3 bg-black text-white flex items-center gap-1 w-fit">
-                        <CheckIcon size={12} color="#FFFFFF" />
-                        Featured
-                      </span>
-                    )}
+                      {/* Description */}
+                      <p className="text-sm line-clamp-2 mb-3" style={{ color: adminConfig.colors.secondary }}>
+                        {item.description || 'No description provided'}
+                      </p>
 
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="flex-1 py-2 font-bold text-xs rounded-lg transition-all bg-black text-white hover:bg-gray-900 flex items-center justify-center gap-1"
-                      >
-                        <EditIcon size={14} color="#FFFFFF" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item._id)}
-                        className="flex-1 py-2 font-bold text-xs rounded-lg transition-all bg-red-100 text-red-700 hover:bg-red-200 flex items-center justify-center gap-1"
-                      >
-                        <DeleteIcon size={14} color="#CB2431" />
-                        Delete
-                      </button>
+                      {/* Featured Badge & Before/After Indicator */}
+                      <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: adminConfig.colors.border }}>
+                        {item.featured && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: adminConfig.colors.primary, color: 'white' }}>
+                            <CheckIcon size={12} color="#FFFFFF" />
+                            Featured
+                          </span>
+                        )}
+                        {item.beforeImageUrl && (
+                          <p className="text-xs" style={{ color: adminConfig.colors.textLight }}>
+                            ✓ Before & After
+                          </p>
+                        )}
+                        {!item.featured && !item.beforeImageUrl && (
+                          <p className="text-xs" style={{ color: adminConfig.colors.textLight }}>
+                            Single image
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-600">No portfolio items yet. Create your first one!</p>
+                <p style={{ color: adminConfig.colors.secondary }}>No portfolio items yet. Create your first one!</p>
               </div>
             )}
           </div>

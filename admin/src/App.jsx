@@ -9,9 +9,9 @@ import ServicesManager from './components/modules/ServicesManager';
 import PortfolioManager from './components/modules/PortfolioManager';
 import HeroManager from './components/modules/HeroManager';
 import ContentManager from './components/modules/ContentManager';
+import ContactManager from './components/modules/ContactManager';
 import SettingsManager from './components/modules/SettingsManager';
-import SiteBuilder from './components/modules/SiteBuilder';
-import SiteAppearance from './components/modules/SiteAppearance';
+import DiscountManager from './components/modules/DiscountManager';
 import adminConfig from './adminConfig';
 
 // Protected Route Component
@@ -31,12 +31,12 @@ function AdminLayout({ admin, onLogout, children }) {
   const getPageNameFromPath = (path) => {
     const pathMap = {
       '/dashboard': 'dashboard',
-      '/site-builder': 'site-builder',
-      '/appearance': 'site-appearance',
       '/hero-section': 'hero',
       '/services': 'services',
       '/portfolio': 'portfolio',
       '/content': 'content',
+      '/contact': 'contact',
+      '/discounts': 'discounts',
       '/settings': 'settings',
     };
     return pathMap[path] || 'dashboard';
@@ -53,7 +53,7 @@ function AdminLayout({ admin, onLogout, children }) {
 
       {/* Sidebar - Desktop Fixed, Mobile Overlay */}
       <div className={`fixed lg:static inset-y-0 left-0 z-30 lg:z-auto transform lg:transform-none transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <Sidebar currentPage={currentPage} onPageChange={() => setSidebarOpen(false)} />
+        <Sidebar currentPage={currentPage} onPageChange={() => setSidebarOpen(false)} sidebarOpen={sidebarOpen} onLogout={onLogout} />
       </div>
 
       {/* Mobile Sidebar Overlay */}
@@ -146,28 +146,6 @@ export default function App() {
         />
 
         <Route 
-          path="/site-builder" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <SiteBuilder admin={admin} />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/appearance" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <SiteAppearance admin={admin} />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
           path="/hero-section" 
           element={
             <ProtectedRoute admin={admin}>
@@ -201,11 +179,33 @@ export default function App() {
         />
 
         <Route 
+          path="/discounts" 
+          element={
+            <ProtectedRoute admin={admin}>
+              <AdminLayout admin={admin} onLogout={handleLogout}>
+                <DiscountManager />
+              </AdminLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
           path="/content" 
           element={
             <ProtectedRoute admin={admin}>
               <AdminLayout admin={admin} onLogout={handleLogout}>
                 <ContentManager />
+              </AdminLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/contact" 
+          element={
+            <ProtectedRoute admin={admin}>
+              <AdminLayout admin={admin} onLogout={handleLogout}>
+                <ContactManager />
               </AdminLayout>
             </ProtectedRoute>
           } 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import SEO from './components/utils/SEO';
 import config from './config';
 import { useJsonLd, generateLocalBusinessSchema, generateOrganizationSchema } from './utils/jsonLdSchema';
@@ -8,7 +9,39 @@ import HeroSectionNew from './components/sections/HeroSectionNew';
 import ServiceMenu from './components/sections/ServiceMenu';
 import Lookbook from './components/sections/Lookbook';
 import LocationContact from './components/sections/LocationContact';
+import PortfolioDetailPage from './pages/PortfolioDetailPage';
 import axios from 'axios';
+
+// Home Page Component
+function HomePage({ siteSettings }) {
+  return (
+    <>
+      <SEO
+        title={`Professional Beauty Studio | ${siteSettings?.branding?.siteName || config.salon.name}`}
+        description={siteSettings?.branding?.tagline || "Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare. Book your appointment now!"}
+        canonicalUrl={config.salon.website}
+        keywords="makeup salon, bridal makeup, hair styling, skincare, beauty, makeup artist"
+      />
+
+      <div className="min-h-screen bg-white overflow-x-hidden">
+        <Header />
+        <main className="pt-0">
+          <HeroSectionNew />
+          <section id="services">
+            <ServiceMenu />
+          </section>
+          <section id="portfolio">
+            <Lookbook />
+          </section>
+          <section id="location">
+            <LocationContact siteSettings={siteSettings} />
+          </section>
+        </main>
+        <Footer siteSettings={siteSettings} />
+      </div>
+    </>
+  );
+}
 
 export default function App() {
   const [siteSettings, setSiteSettings] = useState(null);
@@ -52,30 +85,21 @@ export default function App() {
   }
 
   return (
-    <>
-      <SEO
-        title={`Professional Beauty Studio | ${siteSettings?.branding?.siteName || config.salon.name}`}
-        description={siteSettings?.branding?.tagline || "Premium makeup and salon services. Expert bridal makeup, hair styling, and skincare. Book your appointment now!"}
-        canonicalUrl={config.salon.website}
-        keywords="makeup salon, bridal makeup, hair styling, skincare, beauty, makeup artist"
-      />
-
-      <div className="min-h-screen bg-white overflow-x-hidden">
-        <Header />
-        <main className="pt-0">
-          <HeroSectionNew />
-          <section id="services">
-            <ServiceMenu />
-          </section>
-          <section id="portfolio">
-            <Lookbook />
-          </section>
-          <section id="location">
-            <LocationContact siteSettings={siteSettings} />
-          </section>
-        </main>
-        <Footer siteSettings={siteSettings} />
-      </div>
-    </>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      <Header />
+      <main className="pt-0">
+        <Routes>
+          <Route path="/" element={<HomePage siteSettings={siteSettings} />} />
+          <Route path="/lookbook" element={<Lookbook />} />
+          <Route path="/lookbook/:id" element={
+            <>
+              <PortfolioDetailPage />
+              <Footer siteSettings={siteSettings} />
+            </>
+          } />
+        </Routes>
+      </main>
+    </div>
   );
 }
+

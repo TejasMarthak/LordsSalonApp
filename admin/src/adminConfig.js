@@ -32,18 +32,6 @@ const adminConfig = {
       description: "Overview & Analytics",
     },
     {
-      id: "site-builder",
-      label: "Site Builder",
-      icon: "🔨",
-      description: "Manage Page Sections",
-    },
-    {
-      id: "site-appearance",
-      label: "Appearance",
-      icon: "🎨",
-      description: "Colors & Branding",
-    },
-    {
       id: "hero",
       label: "Hero Section",
       icon: "🎯",
@@ -65,13 +53,25 @@ const adminConfig = {
       id: "content",
       label: "Content",
       icon: "📝",
-      description: "Manage All Text Content",
+      description: "Page Content",
+    },
+    {
+      id: "contact",
+      label: "Contact",
+      icon: "📞",
+      description: "Contact & Social",
+    },
+    {
+      id: "discounts",
+      label: "Discounts",
+      icon: "🏷️",
+      description: "Manage Special Offers",
     },
     {
       id: "settings",
       label: "Settings",
       icon: "⚙️",
-      description: "Business Settings",
+      description: "Account & Hours",
     },
   ],
 
@@ -105,9 +105,11 @@ const adminConfig = {
   defaultHeroContent: {
     headline: "Elevate Your Beauty",
     subheadline: "Professional makeup and styling at Lords Salon",
+    description: "Experience sophisticated beauty artistry. Elevate your appearance with expert craftsmanship and premium services tailored to perfection.",
     ctaText: "Book Appointment",
+    ctaLink: "/booking",
     backgroundImage: "",
-    featuredService: "",
+    heroImage: "",
   },
 
   // Content Management Schema

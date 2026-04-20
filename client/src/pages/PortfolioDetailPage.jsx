@@ -1,224 +1,321 @@
-import React from 'react';
-import SEO from '../components/utils/SEO';
-import config from '../config';
-import { useJsonLd, generateServiceSchema } from '../utils/jsonLdSchema';
-import OptimizedImage, { PortfolioImage } from '../components/utils/OptimizedImage';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
-/**
- * Portfolio Detail Page Component
- * Shows a single portfolio item with before/after images
- * Demonstrates responsive images with lazy loading
- */
-const PortfolioDetailPage = ({ itemId }) => {
-  const [item, setItem] = React.useState(null);
-  const [relatedItems, setRelatedItems] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+// Image Carousel Component for Before/After
+function DetailImageCarousel({ beforeImage, afterImage, title }) {
+  const [currentImage, setCurrentImage] = useState('after');
+  const [autoPlay, setAutoPlay] = useState(true);
 
-  React.useEffect(() => {
-    const fetchPortfolioItem = async () => {
-      try {
-        // Fetch the specific portfolio item
-        const itemResponse = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/portfolio/${itemId}`
-        );
-        setItem(itemResponse.data);
+  useEffect(() => {
+    if (!beforeImage || !autoPlay) return;
 
-        // Fetch related items from same category
-        const relatedResponse = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/portfolio?category=${itemResponse.data.category}&limit=6`
-        );
-        setRelatedItems(relatedResponse.data.filter((p) => p._id !== itemId));
-      } catch (error) {
-        console.error('Error fetching portfolio:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const interval = setInterval(() => {
+      setCurrentImage(prev => prev === 'after' ? 'before' : 'after');
+    }, 5000);
 
-    fetchPortfolioItem();
-  }, [itemId]);
+    return () => clearInterval(interval);
+  }, [beforeImage, autoPlay]);
 
-  // JSON-LD Schema for portfolio item
-  if (item) {
-    useJsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'CreativeWork',
-      name: item.title,
-      description: item.description,
-      image: [item.imageUrl, item.beforeImageUrl].filter(Boolean),
-      author: {
-        '@type': 'Organization',
-        name: config.salon.name,
-      },
-      datePublished: item.createdAt,
-      dateModified: item.updatedAt,
-    });
-  }
+  const displayImage = currentImage === 'after' ? afterImage : beforeImage;
 
-  if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
-  }
-
-  if (!item) {
-    return <div className="p-8 text-center">Portfolio item not found</div>;
-  }
-
-  const canonicalUrl = `${config.salon.website}/portfolio/${item._id}`;
+  const handleToggle = () => {
+    setCurrentImage(currentImage === 'after' ? 'before' : 'after');
+    setAutoPlay(false);
+  };
 
   return (
-    <>
-      {/* SEO Meta Tags */}
-      <SEO
-        title={`${item.title} | Portfolio | ${config.salon.name}`}
-        description={item.description}
-        canonicalUrl={canonicalUrl}
-        ogImage={item.imageUrl}
-        keywords={`${item.category}, makeup, portfolio`}
+    <div className="relative w-full overflow-hidden rounded-xl shadow-lg">
+      <img
+        src={displayImage}
+        alt={`${title} - ${currentImage}`}
+        className="w-full h-auto object-cover transition-opacity duration-500"
       />
+      
+      {/* Image indicator */}
+      <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-semibold">
+        {currentImage === 'after' ? 'After' : 'Before'}
+      </div>
 
-      {/* Main Content */}
-      <div className="min-h-screen bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          {/* Breadcrumb */}
-          <div className="mb-8 text-sm text-slate-600 font-inter">
-            <a href="/" className="hover:text-slate-950">
-              Home
-            </a>
-            {' / '}
-            <a href="/#portfolio" className="hover:text-slate-950">
+      {/* Manual toggle button */}
+      {beforeImage && (
+        <button
+          onClick={handleToggle}
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 text-black px-6 py-2 rounded-full font-semibold transition-all text-sm flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4.07 3.97a4 4 0 015.659.001m-.038 6.942A4 4 0 005.109 9.27m9.538.896a4 4 0 00-4.473-4.472m-2.868 13.036A4 4 0 015.109 13m14.882-4a4.001 4.001 0 00-4.268-3.277m0 0c1.930-.444 3.574-1.394 4.728-2.714m0 0A4 4 0 0017.464 9.5" clipRule="evenodd" />
+          </svg>
+          Switch Image
+        </button>
+      )}
+
+      {/* Auto-play indicator */}
+      {beforeImage && autoPlay && (
+        <div className="absolute bottom-4 right-4 text-white text-xs bg-black bg-opacity-60 px-3 py-1 rounded-full">
+          Auto-switching • {currentImage === 'after' ? 'Before in 5s' : 'After in 5s'}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PortfolioDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [relatedItems, setRelatedItems] = useState([]);
+
+  useEffect(() => {
+    fetchPortfolioItem();
+  }, [id]);
+
+  const fetchPortfolioItem = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${config.api.baseUrl}/api/portfolio/${id}`);
+      setItem(response.data);
+
+      // Fetch related items in same category
+      if (response.data.category) {
+        const relatedResponse = await axios.get(
+          `${config.api.baseUrl}/api/portfolio?category=${response.data.category}`
+        );
+        // Filter out the current item
+        const filtered = relatedResponse.data.filter(i => i._id !== id).slice(0, 3);
+        setRelatedItems(filtered);
+      }
+    } catch (err) {
+      console.error('Error fetching portfolio item:', err);
+      setError('Portfolio item not found');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: config.colors.white }}>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p style={{ color: config.colors.secondary }}>Loading portfolio details...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !item) {
+    return (
+      <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: config.colors.white }}>
+        <div className="text-center">
+          <h2 className="font-playfair text-3xl mb-4" style={{ color: config.colors.primary }}>
+            {error || 'Portfolio item not found'}
+          </h2>
+          <button
+            onClick={() => navigate('/lookbook')}
+            className="px-6 py-3 rounded-lg font-semibold text-white transition-all"
+            style={{ backgroundColor: config.colors.buttonColor }}
+          >
+            Back to Lookbook
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="min-h-screen" style={{ backgroundColor: config.colors.white }}>
+      {/* Back Button */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8">
+        <button
+          onClick={() => navigate('/lookbook')}
+          className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all"
+          style={{ backgroundColor: config.colors.lightBg, color: config.colors.primary }}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Lookbook
+        </button>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-1" style={{ backgroundColor: config.colors.accent }}></div>
+            <span className="font-inter text-xs uppercase tracking-widest" style={{ color: config.colors.accent }}>
               Portfolio
-            </a>
-            {' / '}
-            <span className="text-slate-950">{item.category}</span>
+            </span>
+          </div>
+          <h1 className="font-playfair text-5xl md:text-6xl mb-4" style={{ color: config.colors.primary }}>
+            {item.title}
+          </h1>
+          <p className="font-inter text-lg" style={{ color: config.colors.secondary }}>
+            {item.category}
+          </p>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
+          {/* Images Section */}
+          <div className="lg:col-span-2">
+            {item.beforeImageUrl ? (
+              <DetailImageCarousel
+                beforeImage={item.beforeImageUrl}
+                afterImage={item.imageUrl}
+                title={item.title}
+              />
+            ) : (
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="w-full rounded-xl shadow-lg"
+              />
+            )}
+
+            {/* Image Labels */}
+            {item.beforeImageUrl && (
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="text-center">
+                  <div className="w-full h-1 rounded-full mb-2" style={{ backgroundColor: config.colors.accent }}></div>
+                  <p className="font-inter text-sm font-semibold" style={{ color: config.colors.secondary }}>Before</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-full h-1 rounded-full mb-2" style={{ backgroundColor: config.colors.accent }}></div>
+                  <p className="font-inter text-sm font-semibold" style={{ color: config.colors.secondary }}>After</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Hero Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-            {/* Main Image */}
-            <div className="lg:col-span-2">
-              <div className="aspect-square rounded-lg overflow-hidden bg-gray-200">
-                <OptimizedImage
-                  src={item.imageUrl}
-                  alt={item.title}
-                  width={800}
-                  height={800}
-                  priority={true}
-                  className="w-full h-full object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
-                />
-              </div>
+          {/* Info Section */}
+          <div>
+            {/* Category Card */}
+            <div
+              className="rounded-xl p-6 mb-6"
+              style={{ backgroundColor: config.colors.lightBg }}
+            >
+              <p className="font-inter text-xs uppercase tracking-widest mb-2" style={{ color: config.colors.accent }}>
+                Service Category
+              </p>
+              <h3 className="font-playfair text-2xl" style={{ color: config.colors.primary }}>
+                {item.category}
+              </h3>
+            </div>
 
-              {/* Before/After Gallery */}
-              {item.beforeImageUrl && (
-                <div className="mt-8">
-                  <h3 className="font-playfair text-xl text-slate-950 mb-4">
-                    Before & After
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-200">
-                      <OptimizedImage
-                        src={item.beforeImageUrl}
-                        alt={`Before - ${item.title}`}
-                        width={400}
-                        height={400}
-                        className="w-full h-full object-cover"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
-                      <p className="text-xs text-slate-600 mt-2 text-center">Before</p>
-                    </div>
-                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-200">
-                      <OptimizedImage
-                        src={item.imageUrl}
-                        alt={`After - ${item.title}`}
-                        width={400}
-                        height={400}
-                        className="w-full h-full object-cover"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
-                      <p className="text-xs text-slate-600 mt-2 text-center">After</p>
+            {/* Description Card */}
+            {item.description && (
+              <div
+                className="rounded-xl p-6 mb-6"
+                style={{ backgroundColor: config.colors.lightBg }}
+              >
+                <p className="font-inter text-xs uppercase tracking-widest mb-3" style={{ color: config.colors.accent }}>
+                  About This Work
+                </p>
+                <p className="font-inter leading-relaxed" style={{ color: config.colors.secondary }}>
+                  {item.description}
+                </p>
+              </div>
+            )}
+
+            {/* Features */}
+            <div
+              className="rounded-xl p-6"
+              style={{ backgroundColor: config.colors.lightBg }}
+            >
+              <p className="font-inter text-xs uppercase tracking-widest mb-4" style={{ color: config.colors.accent }}>
+                Features
+              </p>
+              <ul className="space-y-3">
+                {item.beforeImageUrl && (
+                  <li className="flex items-center gap-3">
+                    <svg className="w-5 h-5" style={{ color: config.colors.accent }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-inter text-sm" style={{ color: config.colors.secondary }}>
+                      Before & After Comparison
+                    </span>
+                  </li>
+                )}
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5" style={{ color: config.colors.accent }} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-inter text-sm" style={{ color: config.colors.secondary }}>
+                    5-Second Auto-Switch
+                  </span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <svg className="w-5 h-5" style={{ color: config.colors.accent }} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-inter text-sm" style={{ color: config.colors.secondary }}>
+                    Professional Service
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Items */}
+        {relatedItems.length > 0 && (
+          <div className="border-t" style={{ borderColor: config.colors.border, paddingTop: '3rem' }}>
+            <h2 className="font-playfair text-3xl mb-8" style={{ color: config.colors.primary }}>
+              More from {item.category}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedItems.map(relatedItem => (
+                <div
+                  key={relatedItem._id}
+                  onClick={() => navigate(`/lookbook/${relatedItem._id}`)}
+                  className="cursor-pointer group rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all"
+                >
+                  <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
+                    <img
+                      src={relatedItem.imageUrl}
+                      alt={relatedItem.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                      <span className="text-white font-semibold">View</span>
                     </div>
                   </div>
+                  <div className="p-4">
+                    <h3 className="font-playfair text-lg" style={{ color: config.colors.primary }}>
+                      {relatedItem.title}
+                    </h3>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Sidebar Info */}
-            <div className="bg-slate-50 p-8 rounded-lg h-fit">
-              <div className="mb-6">
-                <span className="inline-block px-3 py-1 bg-slate-950 text-white text-xs uppercase tracking-widest rounded mb-4">
-                  {item.category}
-                </span>
-              </div>
-
-              <h1 className="font-playfair text-3xl text-slate-950 mb-4">
-                {item.title}
-              </h1>
-
-              <p className="font-inter text-gray-700 leading-relaxed mb-6">
-                {item.description}
-              </p>
-
-              {/* Metadata */}
-              <div className="space-y-4 border-t border-slate-200 pt-6">
-                <div>
-                  <p className="text-xs text-slate-600 uppercase tracking-widest mb-1">
-                    Makeup Artist
-                  </p>
-                  <p className="font-inter text-slate-950">
-                    {item.stylist || `${config.salon.name} Team`}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-slate-600 uppercase tracking-widest mb-1">
-                    Date
-                  </p>
-                  <p className="font-inter text-slate-950">
-                    {new Date(item.createdAt).toLocaleDateString('en-IN', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <a
-                href="#booking"
-                className="block w-full mt-8 px-6 py-3 bg-slate-950 text-white text-center font-inter uppercase tracking-wider hover:bg-slate-800 transition-colors rounded"
-              >
-                Book Similar Service
-              </a>
+              ))}
             </div>
           </div>
+        )}
 
-          {/* Related Portfolio Items */}
-          {relatedItems.length > 0 && (
-            <div className="mt-16 pt-16 border-t border-slate-200">
-              <h2 className="font-playfair text-3xl text-slate-950 mb-8">
-                More {item.category} Work
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {relatedItems.slice(0, 6).map((relatedItem) => (
-                  <PortfolioImage
-                    key={relatedItem._id}
-                    imageUrl={relatedItem.imageUrl}
-                    beforeImageUrl={relatedItem.beforeImageUrl}
-                    title={relatedItem.title}
-                    category={relatedItem.category}
-                    onClick={() => (window.location.href = `/portfolio/${relatedItem._id}`)}
-                    className="aspect-square"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        {/* CTA Section */}
+        <div
+          className="mt-16 rounded-2xl p-12 text-center"
+          style={{ backgroundColor: config.colors.lightBg }}
+        >
+          <h2 className="font-playfair text-3xl md:text-4xl mb-4" style={{ color: config.colors.primary }}>
+            Ready for Your Transformation?
+          </h2>
+          <p className="font-inter text-lg mb-8" style={{ color: config.colors.secondary }}>
+            Book your appointment with our expert beauty professionals today
+          </p>
+          <button
+            onClick={() => navigate('/booking')}
+            className="px-8 py-4 rounded-lg font-semibold text-white transition-all hover:scale-105"
+            style={{ backgroundColor: config.colors.buttonColor }}
+          >
+            Book an Appointment
+          </button>
         </div>
       </div>
-    </>
+    </section>
   );
-};
-
-export default PortfolioDetailPage;
+}

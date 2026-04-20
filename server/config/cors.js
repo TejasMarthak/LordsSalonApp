@@ -1,28 +1,48 @@
-const corsConfig = (app) => {
-  const clientUrl =
-    process.env.NODE_ENV === "production"
-      ? process.env.CLIENT_PROD_URL
-      : process.env.CLIENT_URL;
+const corsConfig = () => {
+  const isDev = process.env.NODE_ENV !== "production";
+  
+  // Always allow localhost in development
+  let allowedOrigins = [
+    "http://localhost:3000",    // Client dev
+    "http://localhost:3001",    // Admin dev
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+  ];
 
-  const adminUrl =
-    process.env.NODE_ENV === "production"
-      ? process.env.ADMIN_PROD_URL
-      : process.env.ADMIN_URL;
+  // Add production URLs if provided
+  if (!isDev) {
+    if (process.env.CLIENT_PROD_URL) allowedOrigins.push(process.env.CLIENT_PROD_URL);
+    if (process.env.ADMIN_PROD_URL) allowedOrigins.push(process.env.ADMIN_PROD_URL);
+  }
 
-  const allowedOrigins = [clientUrl, adminUrl];
+  // Also allow the URLs from env variables
+  if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) {
+    allowedOrigins.push(process.env.CLIENT_URL);
+  }
+  if (process.env.ADMIN_URL && !allowedOrigins.includes(process.env.ADMIN_URL)) {
+    allowedOrigins.push(process.env.ADMIN_URL);
+  }
 
   const corsOptions = {
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`CORS: Blocked request from origin: ${origin}`);
+        console.warn(`CORS: Allowed origins: ${allowedOrigins.join(", ")}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
     maxAge: 86400, // 24 hours
   };
 

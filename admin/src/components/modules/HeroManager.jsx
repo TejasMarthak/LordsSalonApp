@@ -1,40 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
-import { UploadIcon, EyeIcon, DeleteIcon, SaveIcon, AlertIcon, SuccessIcon } from '../../utils/Icons';
+import { AdminInput, AdminButton } from '../common/FormComponents';
 
 export default function HeroManager() {
-  const [heroContent, setHeroContent] = useState(adminConfig.defaultHeroContent);
+  const [heroContent, setHeroContent] = useState({
+    headline: '',
+    subheadline: '',
+    description: '',
+    ctaText: 'Book Appointment',
+    ctaLink: '/booking',
+    heroImages: [],
+  });
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [services, setServices] = useState([]);
-  const [backgroundImage, setBackgroundImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
   useEffect(() => {
-    fetchServices();
     fetchHeroContent();
   }, []);
 
-  const fetchServices = async () => {
-    try {
-      const response = await axios.get(`${adminConfig.api.baseUrl}/api/services`);
-      setServices(response.data || []);
-    } catch (err) {
-      console.error('Error fetching services:', err);
-    }
-  };
-
   const fetchHeroContent = async () => {
     try {
-      // This assumes you have an endpoint to fetch hero content
-      // For now, we'll use the default
+      setFetching(true);
+      const response = await axios.get(`${adminConfig.api.baseUrl}/api/content/hero`);
+      if (response.data) {
+        setHeroContent(prev => ({
+          ...prev,
+          ...response.data,
+          heroImages: response.data.heroImages || [],
+        }));
+      }
     } catch (err) {
       console.error('Error fetching hero content:', err);
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -43,37 +46,80 @@ export default function HeroManager() {
     setHeroContent((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
+  // Add image from URL
+  const handleAddImageUrl = () => {
+    if (!imageUrlInput.trim()) {
+      setError('Please enter an image URL');
+      return;
+    }
+
+    try {
+      new URL(imageUrlInput);
+    } catch {
+      setError('Please enter a valid image URL');
+      return;
+    }
+
+    setHeroContent(prev => ({
+      ...prev,
+      heroImages: [...prev.heroImages, imageUrlInput]
+    }));
+    setImageUrlInput('');
+    setError('');
+  };
+
+  // Add image from file upload
+  const handleImageFileChange = async (e) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    for (let file of files) {
       if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file');
-        return;
+        setError(`${file.name} is not a valid image file`);
+        continue;
       }
 
-      // Validate file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image size must be less than 5MB');
-        return;
+        setError(`${file.name} exceeds 5MB limit`);
+        continue;
       }
 
-      setImageFile(file);
-      setError('');
-
-      // Create preview URL
       const reader = new FileReader();
       reader.onload = (event) => {
-        setPreviewImage(event.target?.result);
+        const dataUrl = event.target?.result;
+        setHeroContent(prev => ({
+          ...prev,
+          heroImages: [...prev.heroImages, dataUrl]
+        }));
       };
       reader.readAsDataURL(file);
     }
+
+    setError('');
   };
 
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setPreviewImage(null);
-    setBackgroundImage(null);
+  // Remove image at index
+  const handleRemoveImage = (index) => {
+    setHeroContent(prev => ({
+      ...prev,
+      heroImages: prev.heroImages.filter((_, i) => i !== index)
+    }));
+    if (currentPreviewIndex >= heroContent.heroImages.length - 1 && currentPreviewIndex > 0) {
+      setCurrentPreviewIndex(currentPreviewIndex - 1);
+    }
+  };
+
+  // Navigate preview
+  const handlePrevImage = () => {
+    setCurrentPreviewIndex(prev =>
+      prev === 0 ? heroContent.heroImages.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentPreviewIndex(prev =>
+      prev === heroContent.heroImages.length - 1 ? 0 : prev + 1
+    );
   };
 
   const handleSave = async (e) => {
@@ -84,188 +130,316 @@ export default function HeroManager() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      
-      // Prepare data
-      let imageUrl = backgroundImage;
-      
-      // If there's a new image, upload it first (in real implementation with Cloudinary)
-      if (imageFile && previewImage) {
-        // In production, upload to Cloudinary here
-        // For now, use the preview as the URL
-        imageUrl = previewImage;
-        setBackgroundImage(previewImage);
+
+      if (!token) {
+        setError('Session expired. Please login again.');
+        setLoading(false);
+        return;
+      }
+
+      if (!heroContent.headline || !heroContent.subheadline) {
+        setError('Headline and subheadline are required');
+        setLoading(false);
+        return;
+      }
+
+      if (heroContent.heroImages.length === 0) {
+        setError('Please add at least one image');
+        setLoading(false);
+        return;
       }
 
       const dataToSave = {
-        ...heroContent,
-        backgroundImage: imageUrl,
+        headline: heroContent.headline,
+        subheadline: heroContent.subheadline,
+        description: heroContent.description || '',
+        ctaText: heroContent.ctaText || 'Book Appointment',
+        ctaLink: heroContent.ctaLink || '/booking',
+        heroImages: heroContent.heroImages,
+        type: 'hero',
       };
 
-      // Update hero content via API
       await axios.post(
-        `${adminConfig.api.baseUrl}/api/hero`,
+        `${adminConfig.api.baseUrl}/api/content/hero`,
         dataToSave,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
-      setSuccess('Hero section updated successfully!');
-      setImageFile(null);
+      setSuccess(`Hero section updated successfully with ${heroContent.heroImages.length} image(s)!`);
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Error saving hero content');
+      console.error('Error saving hero content:', err);
+
+      if (err.response?.status === 401) {
+        setError('Unauthorized. Please login again.');
+      } else if (err.response?.status === 400) {
+        setError(err.response?.data?.error || 'Invalid data provided');
+      } else if (err.response?.status === 500) {
+        setError('Server error. Please try again.');
+      } else if (err.message === 'Network Error') {
+        setError('Network error. Please check your connection.');
+      } else {
+        setError(err.response?.data?.error || 'Error saving hero content');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading hero section...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {/* Header with Gradient */}
-      <div className="bg-gradient-to-r from-black to-gray-900 text-white rounded-2xl p-8">
-        <h1 className="text-4xl font-bold mb-2">Hero Section Management</h1>
-        <p className="text-gray-300">
-          Customize the main banner and headline on your homepage
+      {/* Header */}
+      <div>
+        <h2 className="font-playfair text-3xl font-bold" style={{ color: adminConfig.colors.primary }}>
+          Hero Section Manager
+        </h2>
+        <p className="font-inter text-sm mt-2" style={{ color: adminConfig.colors.textLight }}>
+          Manage carousel with 2-3+ images that rotate every 5-10 seconds
         </p>
       </div>
 
       {/* Messages */}
       {error && (
-        <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 flex items-start gap-3">
-          <AlertIcon size={20} color="#CB2431" className="flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">
-            {error}
-          </p>
+        <div className="p-4 rounded-lg border-l-4" style={{ backgroundColor: '#FFF5F5', borderLeftColor: adminConfig.colors.warning }}>
+          <p className="font-inter text-sm" style={{ color: adminConfig.colors.warning }}>❌ {error}</p>
         </div>
       )}
 
       {success && (
-        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-3">
-          <SuccessIcon size={20} color="#22863A" className="flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-green-700">
-            {success}
-          </p>
+        <div className="p-4 rounded-lg border-l-4" style={{ backgroundColor: '#F0FDF4', borderLeftColor: adminConfig.colors.success }}>
+          <p className="font-inter text-sm" style={{ color: adminConfig.colors.success }}>✅ {success}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form Section */}
-        <div className="lg:col-span-2">
-          <div className="p-8 rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <form onSubmit={handleSave} className="space-y-6">
-              {/* Headline */}
-              <div>
-                <label className="block text-sm font-bold mb-3 uppercase text-black">
-                  Main Headline
-                </label>
-                <input
-                  type="text"
-                  name="headline"
-                  value={heroContent.headline}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="e.g., Elevate Your Beauty"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
-                />
-                <p className="text-xs mt-2 text-gray-600">
-                  This is the main title displayed in the hero section
-                </p>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Content Editor */}
+        <div className="lg:col-span-2 rounded-lg border p-6" style={{ backgroundColor: adminConfig.colors.background, borderColor: adminConfig.colors.border }}>
+          <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
+            Content
+          </h3>
 
-              {/* Subheadline */}
-              <div>
-                <label className="block text-sm font-bold mb-3 uppercase text-black">
-                  Subheadline
-                </label>
-                <input
-                  type="text"
-                  name="subheadline"
-                  value={heroContent.subheadline}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Professional makeup and styling at Lords Salon"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
-                />
-                <p className="text-xs mt-2 text-gray-600">
-                  Secondary text shown below the main headline
-                </p>
-              </div>
+          <form onSubmit={handleSave} className="space-y-6">
+            {/* Headline */}
+            <AdminInput
+              label="Main Headline"
+              type="text"
+              name="headline"
+              value={heroContent.headline}
+              onChange={handleInputChange}
+              placeholder="e.g., Elevate Your Beauty"
+              required
+            />
 
-              {/* CTA Button Text */}
-              <div>
-                <label className="block text-sm font-bold mb-3 uppercase text-black">
-                  Call-to-Action Button Text
-                </label>
-                <input
-                  type="text"
-                  name="ctaText"
-                  value={heroContent.ctaText}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Book Appointment"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
-                />
-              </div>
+            {/* Subheadline */}
+            <AdminInput
+              label="Subheadline"
+              type="text"
+              name="subheadline"
+              value={heroContent.subheadline}
+              onChange={handleInputChange}
+              placeholder="e.g., Professional makeup and styling"
+              required
+            />
 
-              {/* Featured Service */}
-              <div>
-                <label className="block text-sm font-bold mb-3 uppercase text-black">
-                  Featured Service
-                </label>
-                <select
-                  name="featuredService"
-                  value={heroContent.featuredService}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
-                >
-                  <option value="">Select a service to feature</option>
-                  {services.map((service) => (
-                    <option key={service._id} value={service._id}>
-                      {service.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs mt-2 text-gray-600">
-                  This service will be highlighted in the hero section
-                </p>
-              </div>
-
-              {/* Save Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 font-bold uppercase tracking-wider rounded-xl transition-all bg-black text-white hover:bg-gray-900 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                <SaveIcon size={20} color="#FFFFFF" />
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </form>
-          </div>
-        </div>
-
-        {/* Preview Section */}
-        <div>
-          <div className="p-8 rounded-2xl border border-gray-200 bg-white shadow-sm sticky top-24">
-            <h3 className="text-xl font-bold mb-4 text-black">
-              Preview
-            </h3>
-
-            <div className="p-6 rounded-xl space-y-3 border border-gray-200 bg-gray-50">
-              <h4 className="text-2xl font-bold text-black">
-                {heroContent.headline}
-              </h4>
-              <p className="text-sm text-gray-700">
-                {heroContent.subheadline}
-              </p>
-              <button
-                className="mt-4 w-full py-2 font-bold uppercase tracking-wider rounded-lg bg-black text-white hover:bg-gray-900 transition-all text-xs"
-              >
-                {heroContent.ctaText}
-              </button>
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                Description (Optional)
+              </label>
+              <textarea
+                name="description"
+                value={heroContent.description}
+                onChange={handleInputChange}
+                placeholder="Tell visitors more about your services..."
+                rows="4"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none"
+                style={{ borderColor: adminConfig.colors.border, color: adminConfig.colors.text }}
+              />
             </div>
 
-            <p className="text-xs mt-4 text-gray-600">
-              This is a preview of how your hero section will look on the homepage.
-            </p>
+            {/* CTA Button */}
+            <div className="grid grid-cols-2 gap-4">
+              <AdminInput
+                label="Button Text"
+                type="text"
+                name="ctaText"
+                value={heroContent.ctaText}
+                onChange={handleInputChange}
+                placeholder="Book Appointment"
+              />
+              <AdminInput
+                label="Button Link"
+                type="text"
+                name="ctaLink"
+                value={heroContent.ctaLink}
+                onChange={handleInputChange}
+                placeholder="/booking"
+              />
+            </div>
+
+            {/* Images Count */}
+            <div className="p-4 rounded-lg" style={{ backgroundColor: adminConfig.colors.lightBg }}>
+              <p className="font-inter text-sm" style={{ color: adminConfig.colors.text }}>
+                📸 Images Added: <span className="font-bold text-lg">{heroContent.heroImages.length}</span>
+                {heroContent.heroImages.length > 0 && (
+                  <span style={{ color: adminConfig.colors.success }}> ✓ Ready for carousel</span>
+                )}
+              </p>
+            </div>
+
+            {/* Save Button */}
+            <button
+              type="submit"
+              disabled={loading || heroContent.heroImages.length === 0}
+              className="w-full py-3 px-6 rounded-lg font-semibold text-white transition-all"
+              style={{
+                backgroundColor: loading || heroContent.heroImages.length === 0 ? '#ccc' : adminConfig.colors.primary,
+                cursor: loading || heroContent.heroImages.length === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {loading ? 'Saving...' : '💾 Save Hero Section'}
+            </button>
+          </form>
+        </div>
+
+        {/* Image Manager */}
+        <div className="rounded-lg border p-6" style={{ backgroundColor: adminConfig.colors.background, borderColor: adminConfig.colors.border }}>
+          <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
+            Images ({heroContent.heroImages.length})
+          </h3>
+
+          {/* Add Images Section */}
+          <div className="space-y-4 mb-6 pb-6 border-b" style={{ borderColor: adminConfig.colors.border }}>
+            {/* File Upload */}
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                Upload Images (Multiple)
+              </label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="w-full px-4 py-3 border rounded-lg text-sm"
+                style={{ borderColor: adminConfig.colors.border, color: adminConfig.colors.text }}
+              />
+              <p className="text-xs mt-2" style={{ color: adminConfig.colors.textLight }}>
+                Select 2-3+ images. Max 5MB each.
+              </p>
+            </div>
+
+            {/* URL Input */}
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                Or Paste Image URL
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddImageUrl()}
+                  placeholder="https://example.com/image.jpg"
+                  className="flex-1 px-4 py-3 border rounded-lg text-sm"
+                  style={{ borderColor: adminConfig.colors.border, color: adminConfig.colors.text }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddImageUrl}
+                  className="px-4 py-3 rounded-lg font-semibold text-white"
+                  style={{ backgroundColor: adminConfig.colors.accent }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
           </div>
+
+          {/* Preview */}
+          {heroContent.heroImages.length > 0 && (
+            <div className="space-y-4">
+              <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <img
+                  src={heroContent.heroImages[currentPreviewIndex]}
+                  alt={`Preview ${currentPreviewIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {heroContent.heroImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full"
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full"
+                    >
+                      →
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {heroContent.heroImages.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="relative flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
+                    style={{
+                      width: 80,
+                      height: 80,
+                      border: currentPreviewIndex === idx ? `3px solid ${adminConfig.colors.accent}` : `2px solid ${adminConfig.colors.border}`
+                    }}
+                    onClick={() => setCurrentPreviewIndex(idx)}
+                  >
+                    <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage(idx);
+                      }}
+                      className="absolute top-0 right-0 bg-red-500 hover:bg-red-600 text-white text-xs p-1 rounded-full"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-center" style={{ color: adminConfig.colors.textLight }}>
+                Image {currentPreviewIndex + 1} of {heroContent.heroImages.length}
+              </p>
+            </div>
+          )}
+
+          {heroContent.heroImages.length === 0 && (
+            <div className="text-center py-8" style={{ color: adminConfig.colors.textLight }}>
+              <p>📸 No images added yet</p>
+              <p className="text-xs mt-2">Add at least 2 images for the carousel</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
+

@@ -153,10 +153,12 @@ router.get("/hero", async (req, res) => {
       return res.json({
         sectionId: "hero-1",
         type: "hero",
-        title: "Welcome",
-        subtitle: "Your subtitle here",
-        backgroundImage: null,
-        ctaButton: { text: "Get Started", link: "#services" },
+        headline: "Welcome to Luxury",
+        subheadline: "Premium Beauty Services",
+        description: "Experience sophisticated beauty artistry",
+        ctaText: "Book Appointment",
+        ctaLink: "/booking",
+        heroImages: [],
         order: 0,
       });
     }
@@ -166,9 +168,21 @@ router.get("/hero", async (req, res) => {
   }
 });
 
-// Update hero section
+// Update hero section with carousel images
 router.post("/hero", adminAuth, async (req, res) => {
   try {
+    const { headline, subheadline, description, ctaText, ctaLink, heroImage, heroImages } = req.body;
+
+    // Validate required fields
+    if (!headline || !subheadline) {
+      return res.status(400).json({ error: "Headline and subheadline are required" });
+    }
+
+    // Validate at least one image
+    if (!heroImages || (Array.isArray(heroImages) && heroImages.length === 0)) {
+      return res.status(400).json({ error: "At least one image is required" });
+    }
+
     let page = await PageContent.findOne({ pageId: "home" });
 
     if (!page) {
@@ -180,25 +194,32 @@ router.post("/hero", adminAuth, async (req, res) => {
     }
 
     const heroIndex = page.sections.findIndex((s) => s.type === "hero");
+    const heroData = {
+      sectionId: "hero-1",
+      type: "hero",
+      order: 0,
+      headline,
+      subheadline,
+      description: description || "",
+      ctaText: ctaText || "Book Appointment",
+      ctaLink: ctaLink || "/booking",
+      heroImage: heroImage || heroImages?.[0] || "", // Fallback for legacy support
+      heroImages: Array.isArray(heroImages) ? heroImages : [heroImages], // Store all images
+    };
 
     if (heroIndex >= 0) {
-      page.sections[heroIndex] = {
-        ...page.sections[heroIndex],
-        ...req.body,
-      };
+      page.sections[heroIndex] = heroData;
     } else {
-      page.sections.push({
-        sectionId: "hero-1",
-        type: "hero",
-        order: 0,
-        ...req.body,
-      });
+      page.sections.push(heroData);
     }
 
-    await page.save();
-    res.json(page.sections.find((s) => s.type === "hero"));
+    const savedPage = await page.save();
+    const savedHero = savedPage.sections.find((s) => s.type === "hero");
+    
+    res.status(200).json(savedHero);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error saving hero section:", error);
+    res.status(500).json({ error: error.message || "Failed to save hero section" });
   }
 });
 

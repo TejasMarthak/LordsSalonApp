@@ -15,26 +15,34 @@ export const AdminInput = ({
   error = '',
   className = '',
   rows = undefined,
+  name = '',
+  min = undefined,
+  max = undefined,
+  step = undefined,
 }) => {
   const isTextarea = type === 'textarea';
   const Component = isTextarea ? 'textarea' : 'input';
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {label && (
         <label 
-          className="block font-bold text-sm text-black uppercase tracking-wider"
+          className="block font-bold text-xs text-black uppercase tracking-wider"
         >
           {label} {required && <span className="text-red-600">*</span>}
         </label>
       )}
       <Component
         type={type}
+        name={name}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         rows={rows}
-        className={`w-full px-4 py-3 border-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${className} ${isTextarea ? 'resize-none' : ''} bg-white text-black border-gray-300 placeholder-gray-400`}
+        min={min}
+        max={max}
+        step={step}
+        className={`w-full px-3 py-1.5 border-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${className} ${isTextarea ? 'resize-none' : ''} bg-white text-black border-gray-300 placeholder-gray-400`}
         onFocus={(e) => {
           if (!error) {
             e.target.style.borderColor = '#000000';
@@ -93,9 +101,9 @@ export const AdminButton = ({
   };
 
   const sizes = {
-    sm: 'px-3 py-2 text-xs',
-    md: 'px-4 py-3 text-sm',
-    lg: 'px-6 py-4 text-base',
+    sm: 'px-2 py-1.5 text-xs',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base',
   };
 
   const style = variants[variant] || variants.primary;
