@@ -55,7 +55,7 @@ function ServiceCard({ number, title, price, duration, index }) {
           </h3>
 
           {/* Duration and Price Footer */}
-          <div className="flex flex-col gap-3 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <div className="flex items-center gap-4 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
             {/* Duration */}
             {duration && (
               <div className="flex items-center gap-2">
@@ -64,6 +64,11 @@ function ServiceCard({ number, title, price, duration, index }) {
                 </svg>
                 <span className="font-inter text-sm text-gray-300">{formatDuration(duration)}</span>
               </div>
+            )}
+            
+            {/* Divider */}
+            {duration && price !== undefined && (
+              <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255, 255, 255, 0.2)' }}></div>
             )}
             
             {/* Price */}
