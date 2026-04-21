@@ -24,7 +24,7 @@ function ServiceCard({ number, title, price, duration, index }) {
     >
       {/* Card Background */}
       <div
-        className="relative rounded-2xl p-6 sm:p-8 md:p-10 min-h-40 sm:min-h-48 md:min-h-56 flex flex-col justify-start overflow-hidden transition-all duration-300 ease-out"
+        className="relative rounded-2xl p-6 sm:p-8 md:p-10 min-h-40 sm:min-h-48 md:min-h-56 flex flex-col justify-start overflow-visible transition-all duration-300 ease-out"
         style={{
           backgroundColor: '#2A2A2A',
           boxShadow: isHovered
@@ -47,31 +47,31 @@ function ServiceCard({ number, title, price, duration, index }) {
           }}
         ></div>
 
+        {/* Number Badge - Mobile: inside card at top, Desktop: overlapping */}
+        <div
+          className="absolute top-6 left-6 sm:-top-3 sm:-left-3 z-20 transition-all duration-300"
+          style={{
+            transform: isHovered ? 'scale(1.15) rotate(5deg)' : 'scale(1)',
+          }}
+        >
+          <div
+            className="w-14 sm:w-16 h-14 sm:h-16 rounded-full flex items-center justify-center font-playfair font-bold text-lg sm:text-xl shadow-lg"
+            style={{
+              backgroundColor: '#FFFFFF',
+              color: '#1A1A1A',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+            }}
+          >
+            {String(number).padStart(2, '0')}
+          </div>
+        </div>
+
         {/* Content */}
-        <div className="relative z-10">
+        <div className="relative z-10 pt-16 sm:pt-0">
           {/* Title - Left-aligned at top */}
           <h3 className="font-playfair text-xl sm:text-2xl md:text-3xl font-semibold leading-snug text-white text-left">
             {title}
           </h3>
-        </div>
-      </div>
-
-      {/* Number Badge - Positioned overlapping top-left */}
-      <div
-        className="absolute -top-3 -left-3 z-20 transition-all duration-300"
-        style={{
-          transform: isHovered ? 'scale(1.15) rotate(5deg)' : 'scale(1)',
-        }}
-      >
-        <div
-          className="w-14 sm:w-16 h-14 sm:h-16 rounded-full flex items-center justify-center font-playfair font-bold text-lg sm:text-xl shadow-lg"
-          style={{
-            backgroundColor: '#FFFFFF',
-            color: '#1A1A1A',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-          }}
-        >
-          {String(number).padStart(2, '0')}
         </div>
       </div>
     </div>
