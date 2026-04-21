@@ -9,6 +9,7 @@ export default function HeroSectionNew() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [textColor, setTextColor] = useState('white');
+  const [accentColor, setAccentColor] = useState(config.colors.accent);
   const [buttonColors, setButtonColors] = useState({ primary: 'white', secondary: 'black' });
 
   useEffect(() => {
@@ -97,25 +98,29 @@ export default function HeroSectionNew() {
 
       const avgLuminance = totalLuminance / sampleCount;
 
-      // Determine text color based on luminance with better threshold
+      // Determine text color and accent based on luminance with better threshold
       // Add text stroke/shadow for all cases
-      let color, shadowColor;
+      let color, shadowColor, accent;
       
       if (avgLuminance > 0.6) {
         // Very bright image - use dark text
         color = '#0a0a0a';
         shadowColor = 'rgba(255, 255, 255, 0.8)';
+        accent = '#D4AF37'; // Gold accent for bright backgrounds
       } else if (avgLuminance > 0.4) {
         // Medium bright - use white with dark shadow
         color = '#ffffff';
         shadowColor = 'rgba(0, 0, 0, 0.8)';
+        accent = '#FFD700'; // Bright gold for medium backgrounds
       } else {
         // Dark image - use bright white
         color = '#ffffff';
         shadowColor = 'rgba(0, 0, 0, 0.9)';
+        accent = '#E6C542'; // Warm gold for dark backgrounds
       }
 
       setTextColor(color);
+      setAccentColor(accent);
       setButtonColors({ 
         primary: color, 
         secondary: color,
@@ -191,11 +196,11 @@ export default function HeroSectionNew() {
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 py-20">
           {/* Top Accent */}
           <div className="flex items-center justify-center gap-3">
-            <div className="w-8 sm:w-12 h-1" style={{ backgroundColor: config.colors.accent }}></div>
+            <div className="w-8 sm:w-12 h-1" style={{ backgroundColor: accentColor }}></div>
             <span 
               className="font-inter text-xs uppercase tracking-widest" 
               style={{ 
-                color: config.colors.accent,
+                color: accentColor,
                 textShadow: `
                   1px 1px 2px ${buttonColors.shadowColor},
                   -1px -1px 2px ${buttonColors.shadowColor}
@@ -204,7 +209,7 @@ export default function HeroSectionNew() {
             >
               Welcome to Luxury
             </span>
-            <div className="w-8 sm:w-12 h-1" style={{ backgroundColor: config.colors.accent }}></div>
+            <div className="w-8 sm:w-12 h-1" style={{ backgroundColor: accentColor }}></div>
           </div>
 
           {/* Main Headline */}
