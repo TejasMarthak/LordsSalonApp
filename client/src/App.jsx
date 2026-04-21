@@ -6,7 +6,7 @@ import { useJsonLd, generateLocalBusinessSchema, generateOrganizationSchema } fr
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import HeroSectionNew from './components/sections/HeroSectionNew';
-import ServiceMenu from './components/sections/ServiceMenu';
+import ServiceSection from './components/sections/ServiceSection';
 import Lookbook from './components/sections/Lookbook';
 import LocationContact from './components/sections/LocationContact';
 import PortfolioDetailPage from './pages/PortfolioDetailPage';
@@ -28,7 +28,7 @@ function HomePage({ siteSettings }) {
         <main className="pt-0">
           <HeroSectionNew />
           <section id="services">
-            <ServiceMenu />
+            <ServiceSection />
           </section>
           <section id="portfolio">
             <Lookbook />
