@@ -3,8 +3,18 @@ import axios from 'axios';
 import config from '../../config';
 
 // Service Card Component
-function ServiceCard({ number, title, index }) {
+function ServiceCard({ number, title, price, duration, index }) {
   const [isHovered, setIsHovered] = useState(false);
+
+  // Format duration to display in hours and minutes
+  const formatDuration = (minutes) => {
+    if (!minutes) return '';
+    if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (mins === 0) return `${hours} hr`;
+    return `${hours} hr ${mins} min`;
+  };
 
   return (
     <div
@@ -14,7 +24,7 @@ function ServiceCard({ number, title, index }) {
     >
       {/* Card Background */}
       <div
-        className="relative rounded-2xl p-8 sm:p-10 h-40 sm:h-48 flex flex-col justify-end overflow-hidden transition-all duration-300 ease-out"
+        className="relative rounded-2xl p-6 sm:p-8 md:p-10 min-h-48 sm:min-h-56 md:min-h-64 flex flex-col justify-between overflow-hidden transition-all duration-300 ease-out"
         style={{
           backgroundColor: '#2A2A2A',
           boxShadow: isHovered
@@ -38,10 +48,34 @@ function ServiceCard({ number, title, index }) {
         ></div>
 
         {/* Content */}
-        <div className="relative z-10">
-          <h3 className="font-playfair text-xl sm:text-2xl md:text-3xl font-light leading-tight text-white">
+        <div className="relative z-10 flex flex-col h-full justify-between">
+          {/* Title */}
+          <h3 className="font-playfair text-xl sm:text-2xl md:text-3xl font-light leading-tight text-white mb-4">
             {title}
           </h3>
+
+          {/* Duration and Price Footer */}
+          <div className="flex flex-col gap-3 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            {/* Duration */}
+            {duration && (
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-inter text-sm text-gray-300">{formatDuration(duration)}</span>
+              </div>
+            )}
+            
+            {/* Price */}
+            {price !== undefined && (
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-inter text-sm font-semibold text-white">₹{price}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -76,18 +110,18 @@ export default function ServiceSection() {
 
   // Default services data
   const defaultServices = [
-    { id: 1, name: 'Eyebrow Threading' },
-    { id: 2, name: 'Eyebrow Shaping' },
-    { id: 3, name: 'Eyebrow Beautification' },
-    { id: 4, name: 'Tanning' },
-    { id: 5, name: 'Bridal Services' },
-    { id: 6, name: 'Pedicure' },
-    { id: 7, name: 'Haircut' },
-    { id: 8, name: 'Hair Threading' },
-    { id: 9, name: 'Hair Coloring' },
-    { id: 10, name: 'Facial Treatment' },
-    { id: 11, name: 'Manicure' },
-    { id: 12, name: 'Waxing' },
+    { id: 1, name: 'Eyebrow Threading', duration: 30, price: 250 },
+    { id: 2, name: 'Eyebrow Shaping', duration: 45, price: 350 },
+    { id: 3, name: 'Eyebrow Beautification', duration: 60, price: 450 },
+    { id: 4, name: 'Tanning', duration: 45, price: 400 },
+    { id: 5, name: 'Bridal Services', duration: 180, price: 1500 },
+    { id: 6, name: 'Pedicure', duration: 75, price: 600 },
+    { id: 7, name: 'Haircut', duration: 45, price: 500 },
+    { id: 8, name: 'Hair Threading', duration: 30, price: 200 },
+    { id: 9, name: 'Hair Coloring', duration: 120, price: 1200 },
+    { id: 10, name: 'Facial Treatment', duration: 60, price: 800 },
+    { id: 11, name: 'Manicure', duration: 45, price: 350 },
+    { id: 12, name: 'Waxing', duration: 30, price: 250 },
   ];
 
   useEffect(() => {
@@ -189,6 +223,8 @@ export default function ServiceSection() {
                   <ServiceCard
                     number={index + 1}
                     title={service.name || service.title}
+                    price={service.price}
+                    duration={service.duration}
                     index={index}
                   />
                 </div>
