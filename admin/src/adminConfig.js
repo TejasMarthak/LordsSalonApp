@@ -50,12 +50,6 @@ const adminConfig = {
       description: "Manage Portfolio Items",
     },
     {
-      id: "content",
-      label: "Content",
-      icon: "📝",
-      description: "Page Content",
-    },
-    {
       id: "contact",
       label: "Contact",
       icon: "📞",

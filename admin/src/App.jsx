@@ -8,7 +8,6 @@ import Dashboard from './pages/Dashboard';
 import ServicesManager from './components/modules/ServicesManager';
 import PortfolioManager from './components/modules/PortfolioManager';
 import HeroManager from './components/modules/HeroManager';
-import ContentManager from './components/modules/ContentManager';
 import ContactManager from './components/modules/ContactManager';
 import SettingsManager from './components/modules/SettingsManager';
 import DiscountManager from './components/modules/DiscountManager';
@@ -34,7 +33,6 @@ function AdminLayout({ admin, onLogout, children }) {
       '/hero-section': 'hero',
       '/services': 'services',
       '/portfolio': 'portfolio',
-      '/content': 'content',
       '/contact': 'contact',
       '/discounts': 'discounts',
       '/settings': 'settings',
@@ -184,17 +182,6 @@ export default function App() {
             <ProtectedRoute admin={admin}>
               <AdminLayout admin={admin} onLogout={handleLogout}>
                 <DiscountManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/content" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <ContentManager />
               </AdminLayout>
             </ProtectedRoute>
           } 
