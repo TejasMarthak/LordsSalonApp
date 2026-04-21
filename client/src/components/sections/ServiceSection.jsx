@@ -24,7 +24,7 @@ function ServiceCard({ number, title, price, duration, index }) {
     >
       {/* Card Background */}
       <div
-        className="relative rounded-2xl p-6 sm:p-8 md:p-10 min-h-48 sm:min-h-56 md:min-h-64 flex flex-col justify-start overflow-hidden transition-all duration-300 ease-out"
+        className="relative rounded-2xl p-6 sm:p-8 md:p-10 min-h-40 sm:min-h-48 md:min-h-56 flex flex-col justify-start overflow-hidden transition-all duration-300 ease-out"
         style={{
           backgroundColor: '#2A2A2A',
           boxShadow: isHovered
