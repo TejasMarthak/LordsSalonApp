@@ -49,13 +49,13 @@ function ServiceCard({ number, title, price, duration, index }) {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col h-full justify-between">
-          {/* Title */}
-          <h3 className="font-playfair text-xl sm:text-2xl md:text-3xl font-light leading-tight text-white mb-4">
+          {/* Title - Expands to fill available space */}
+          <h3 className="font-playfair text-2xl sm:text-3xl md:text-4xl font-light leading-relaxed text-white flex items-center mb-auto">
             {title}
           </h3>
 
-          {/* Duration and Price Footer */}
-          <div className="flex items-center gap-4 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          {/* Duration and Price Footer - Pinned to bottom */}
+          <div className="flex items-center gap-4 pt-6 border-t mt-6" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
             {/* Duration */}
             {duration && (
               <div className="flex items-center gap-2">
