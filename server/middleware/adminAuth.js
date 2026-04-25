@@ -29,6 +29,10 @@ const adminAuth = async (req, res, next) => {
       });
     }
 
+    // Update lastActivityAt to track active sessions
+    admin.lastActivityAt = now;
+    await admin.save();
+
     next();
   } catch (error) {
     return res

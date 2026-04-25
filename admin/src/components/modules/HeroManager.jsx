@@ -53,6 +53,11 @@ export default function HeroManager() {
       return;
     }
 
+    if (heroContent.heroImages.length >= 2) {
+      setError('Maximum 2 images allowed. Remove an image to add another.');
+      return;
+    }
+
     try {
       new URL(imageUrlInput);
     } catch {
@@ -73,7 +78,20 @@ export default function HeroManager() {
     const files = e.target.files;
     if (!files) return;
 
+    let addedCount = 0;
+    const maxAllowed = 2 - heroContent.heroImages.length;
+
+    if (maxAllowed <= 0) {
+      setError('Maximum 2 images allowed. Remove an image to add another.');
+      return;
+    }
+
     for (let file of files) {
+      if (addedCount >= maxAllowed) {
+        setError(`Maximum 2 images allowed. Only ${maxAllowed} image(s) can be added.`);
+        break;
+      }
+
       if (!file.type.startsWith('image/')) {
         setError(`${file.name} is not a valid image file`);
         continue;
@@ -93,6 +111,7 @@ export default function HeroManager() {
         }));
       };
       reader.readAsDataURL(file);
+      addedCount++;
     }
 
     setError('');
@@ -104,7 +123,7 @@ export default function HeroManager() {
       ...prev,
       heroImages: prev.heroImages.filter((_, i) => i !== index)
     }));
-    if (currentPreviewIndex >= heroContent.heroImages.length - 1 && currentPreviewIndex > 0) {
+    if (currentPreviewIndex >= index && currentPreviewIndex > 0) {
       setCurrentPreviewIndex(currentPreviewIndex - 1);
     }
   };
@@ -137,14 +156,8 @@ export default function HeroManager() {
         return;
       }
 
-      if (!heroContent.headline || !heroContent.subheadline) {
+      if (!heroContent.headline?.trim() || !heroContent.subheadline?.trim()) {
         setError('Headline and subheadline are required');
-        setLoading(false);
-        return;
-      }
-
-      if (heroContent.heroImages.length === 0) {
-        setError('Please add at least one image');
         setLoading(false);
         return;
       }
@@ -210,7 +223,7 @@ export default function HeroManager() {
           Hero Section Manager
         </h2>
         <p className="font-inter text-sm mt-2" style={{ color: adminConfig.colors.textLight }}>
-          Manage carousel with 2-3+ images that rotate every 5-10 seconds
+          Manage up to 2 hero images in card layout
         </p>
       </div>
 
@@ -228,13 +241,13 @@ export default function HeroManager() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Content Editor */}
+        {/* Content Editor - Left Column on Desktop, Full Width on Mobile */}
         <div className="lg:col-span-2 rounded-lg border p-6" style={{ backgroundColor: adminConfig.colors.background, borderColor: adminConfig.colors.border }}>
           <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
             Content
           </h3>
 
-          <form onSubmit={handleSave} className="space-y-6">
+          <div className="space-y-6">
             {/* Headline */}
             <AdminInput
               label="Main Headline"
@@ -296,29 +309,16 @@ export default function HeroManager() {
             {/* Images Count */}
             <div className="p-4 rounded-lg" style={{ backgroundColor: adminConfig.colors.lightBg }}>
               <p className="font-inter text-sm" style={{ color: adminConfig.colors.text }}>
-                📸 Images Added: <span className="font-bold text-lg">{heroContent.heroImages.length}</span>
-                {heroContent.heroImages.length > 0 && (
-                  <span style={{ color: adminConfig.colors.success }}> ✓ Ready for carousel</span>
+                📸 Images: <span className="font-bold text-lg">{heroContent.heroImages.length}/2</span>
+                {heroContent.heroImages.length === 2 && (
+                  <span style={{ color: adminConfig.colors.success }}> ✓ Maximum reached</span>
                 )}
               </p>
             </div>
-
-            {/* Save Button */}
-            <button
-              type="submit"
-              disabled={loading || heroContent.heroImages.length === 0}
-              className="w-full py-3 px-6 rounded-lg font-semibold text-white transition-all"
-              style={{
-                backgroundColor: loading || heroContent.heroImages.length === 0 ? '#ccc' : adminConfig.colors.primary,
-                cursor: loading || heroContent.heroImages.length === 0 ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {loading ? 'Saving...' : '💾 Save Hero Section'}
-            </button>
-          </form>
+          </div>
         </div>
 
-        {/* Image Manager */}
+        {/* Image Manager - Right Column on Desktop */}
         <div className="rounded-lg border p-6" style={{ backgroundColor: adminConfig.colors.background, borderColor: adminConfig.colors.border }}>
           <h3 className="font-playfair text-2xl font-bold mb-6" style={{ color: adminConfig.colors.primary }}>
             Images ({heroContent.heroImages.length})
@@ -340,7 +340,7 @@ export default function HeroManager() {
                 style={{ borderColor: adminConfig.colors.border, color: adminConfig.colors.text }}
               />
               <p className="text-xs mt-2" style={{ color: adminConfig.colors.textLight }}>
-                Select 2-3+ images. Max 5MB each.
+                Select up to 2 images. Max 5MB each.
               </p>
             </div>
 
@@ -417,7 +417,7 @@ export default function HeroManager() {
                         e.stopPropagation();
                         handleRemoveImage(idx);
                       }}
-                      className="absolute top-0 right-0 bg-red-500 hover:bg-red-600 text-white text-xs p-1 rounded-full"
+                      className="absolute top-0 right-0 text-white text-xs p-1 rounded-full bg-red-500 hover:bg-red-600"
                     >
                       ✕
                     </button>
@@ -434,11 +434,27 @@ export default function HeroManager() {
           {heroContent.heroImages.length === 0 && (
             <div className="text-center py-8" style={{ color: adminConfig.colors.textLight }}>
               <p>📸 No images added yet</p>
-              <p className="text-xs mt-2">Add at least 2 images for the carousel</p>
+              <p className="text-xs mt-2">Add at least 1 image for the hero section</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* Save Button - Below All Content on Mobile, Full Width */}
+      <form onSubmit={handleSave} className="mt-8">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 px-6 rounded-lg font-semibold text-white transition-all text-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: adminConfig.colors.primary,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          {loading ? 'Saving...' : 'Save Hero Section'}
+        </button>
+      </form>
     </div>
   );
 }

@@ -178,11 +178,6 @@ router.post("/hero", adminAuth, async (req, res) => {
       return res.status(400).json({ error: "Headline and subheadline are required" });
     }
 
-    // Validate at least one image
-    if (!heroImages || (Array.isArray(heroImages) && heroImages.length === 0)) {
-      return res.status(400).json({ error: "At least one image is required" });
-    }
-
     let page = await PageContent.findOne({ pageId: "home" });
 
     if (!page) {
@@ -203,8 +198,8 @@ router.post("/hero", adminAuth, async (req, res) => {
       description: description || "",
       ctaText: ctaText || "Book Appointment",
       ctaLink: ctaLink || "/booking",
-      heroImage: heroImage || heroImages?.[0] || "", // Fallback for legacy support
-      heroImages: Array.isArray(heroImages) ? heroImages : [heroImages], // Store all images
+      heroImage: heroImage || (heroImages && heroImages[0]) || "", // Fallback for legacy support
+      heroImages: Array.isArray(heroImages) ? heroImages : (heroImages ? [heroImages] : []), // Store all images
     };
 
     if (heroIndex >= 0) {
@@ -233,11 +228,6 @@ router.post("/hero/update", async (req, res) => {
       return res.status(400).json({ error: "Headline and subheadline are required" });
     }
 
-    // Validate at least one image
-    if (!heroImages || (Array.isArray(heroImages) && heroImages.length === 0)) {
-      return res.status(400).json({ error: "At least one image is required" });
-    }
-
     let page = await PageContent.findOne({ pageId: "home" });
 
     if (!page) {
@@ -258,8 +248,8 @@ router.post("/hero/update", async (req, res) => {
       description: description || "",
       ctaText: ctaText || "Book Appointment",
       ctaLink: ctaLink || "/booking",
-      heroImage: heroImages?.[0] || "",
-      heroImages: Array.isArray(heroImages) ? heroImages : [heroImages],
+      heroImage: (heroImages && heroImages[0]) || "",
+      heroImages: Array.isArray(heroImages) ? heroImages : (heroImages ? [heroImages] : []),
     };
 
     if (heroIndex >= 0) {
