@@ -15,8 +15,18 @@ export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSide
       .slice(0, 2);
   };
 
-  const adminName = admin?.name || 'Admin';
-  const adminEmail = admin?.email || 'admin@lords-salon.com';
+  const getStoredAdminUser = () => {
+    try {
+      const stored = localStorage.getItem('adminUser');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const storedAdmin = getStoredAdminUser();
+  const adminName = admin?.name || storedAdmin?.name || 'Loading...';
+  const adminEmail = admin?.email || storedAdmin?.email || 'Loading...';
   const initials = getInitials(adminName);
 
   return (

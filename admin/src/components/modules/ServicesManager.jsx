@@ -7,7 +7,6 @@ export default function ServicesManager() {
   const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
-    category: 'Professional Bridal Makeup',
     description: '',
     price: '',
     duration: '',
@@ -19,14 +18,6 @@ export default function ServicesManager() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [preview, setPreview] = useState('');
   const fileInputRef = useRef(null);
-
-  const categories = [
-    'Professional Bridal Makeup',
-    'Hair Styling',
-    'Advanced Skincare',
-    'Special Occasions',
-    'Consultation',
-  ];
 
   useEffect(() => {
     fetchServices();
@@ -66,7 +57,6 @@ export default function ServicesManager() {
       fetchServices();
       setFormData({
         name: '',
-        category: 'Professional Bridal Makeup',
         description: '',
         price: '',
         duration: '',
@@ -82,7 +72,6 @@ export default function ServicesManager() {
   const handleEdit = (service) => {
     setFormData({
       name: service.name,
-      category: service.category,
       description: service.description,
       price: service.price,
       duration: service.duration,
@@ -107,7 +96,6 @@ export default function ServicesManager() {
   const handleCancel = () => {
     setFormData({
       name: '',
-      category: 'Professional Bridal Makeup',
       description: '',
       price: '',
       duration: '',
@@ -159,15 +147,6 @@ export default function ServicesManager() {
             />
 
             <FormField
-              label="Category"
-              name="category"
-              type="select"
-              value={formData.category}
-              onChange={handleChange}
-              options={categories}
-            />
-
-            <FormField
               label="Price (₹)"
               name="price"
               type="number"
@@ -201,26 +180,29 @@ export default function ServicesManager() {
             rows="4"
           />
 
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-3 rounded-xl font-bold uppercase tracking-wider transition-all duration-300 hover:shadow-lg disabled:opacity-50 bg-black text-white hover:bg-gray-900 flex items-center justify-center gap-2"
+              className="w-full sm:flex-1 py-3 sm:py-3 px-4 rounded-xl font-bold uppercase tracking-wider transition-all duration-300 hover:shadow-lg disabled:opacity-50 bg-black text-white hover:bg-gray-900 flex items-center justify-center gap-2 text-sm sm:text-base min-h-12"
             >
               {loading ? (
                 <>
                   <LoadingIcon size={20} color="#FFFFFF" />
-                  Saving...
+                  <span className="hidden sm:inline">Saving...</span>
+                  <span className="sm:hidden">Saving</span>
                 </>
               ) : editingId ? (
                 <>
                   <SaveIcon size={20} color="#FFFFFF" />
-                  Update Service
+                  <span className="hidden sm:inline">Update Service</span>
+                  <span className="sm:hidden">Update</span>
                 </>
               ) : (
                 <>
                   <AddIcon size={20} color="#FFFFFF" />
-                  Add Service
+                  <span className="hidden sm:inline">Add Service</span>
+                  <span className="sm:hidden">Add</span>
                 </>
               )}
             </button>
@@ -228,10 +210,11 @@ export default function ServicesManager() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex-1 py-3 border-2 border-gray-300 rounded-xl font-bold uppercase tracking-wider transition-all hover:border-red-500 hover:text-red-600 flex items-center justify-center gap-2"
+                className="w-full sm:flex-1 py-3 sm:py-3 px-4 border-2 border-gray-300 rounded-xl font-bold uppercase tracking-wider transition-all hover:border-red-500 hover:text-red-600 hover:bg-red-50 flex items-center justify-center gap-2 text-sm sm:text-base min-h-12"
               >
                 <CloseIcon size={20} color="#000000" />
-                Cancel
+                <span className="hidden sm:inline">Cancel</span>
+                <span className="sm:hidden">Cancel</span>
               </button>
             )}
           </div>
@@ -254,7 +237,6 @@ export default function ServicesManager() {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Name</th>
-                    <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Category</th>
                     <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Price</th>
                     <th className="px-6 py-4 text-left font-bold uppercase text-xs text-black">Duration</th>
                     <th className="px-6 py-4 text-center font-bold uppercase text-xs text-black">Actions</th>
@@ -270,9 +252,6 @@ export default function ServicesManager() {
                     >
                       <td className="px-6 py-4 font-semibold text-black">
                         {service.name}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {service.category}
                       </td>
                       <td className="px-6 py-4 font-bold text-black">
                         ₹{service.price}

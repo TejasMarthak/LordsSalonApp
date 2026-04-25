@@ -15,5 +15,8 @@ export default defineConfig({
     "import.meta.env.VITE_API_URL": JSON.stringify(
       process.env.VITE_API_URL || "http://localhost:5000",
     ),
+    "import.meta.env.VITE_GOOGLE_CLIENT_ID": JSON.stringify(
+      process.env.VITE_GOOGLE_CLIENT_ID || "587820354720-f8g4kd4c0pma67k7s480nflsds80debb.apps.googleusercontent.com",
+    ),
   },
 });

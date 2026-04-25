@@ -116,11 +116,11 @@ export default function LoginPage({ onLogin, isSignupDefaultMode = false }) {
 
   const handleGoogleOAuth = async () => {
     try {
-      const clientId = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       
       if (!clientId || clientId.includes('undefined') || clientId.includes('your_')) {
         setError('Google OAuth is not configured. Please contact administrator.');
-        console.warn('Missing VITE_GOOGLE_OAUTH_CLIENT_ID in environment');
+        console.warn('Missing VITE_GOOGLE_CLIENT_ID in environment');
         return;
       }
 
@@ -313,6 +313,19 @@ export default function LoginPage({ onLogin, isSignupDefaultMode = false }) {
               </svg>
               Continue with Google
             </button>
+
+            {/* Forgot Password Link (Login Only) */}
+            {!isSignup && (
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-xs text-gray-600 hover:text-gray-900 font-medium transition"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Footer */}

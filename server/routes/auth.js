@@ -2,8 +2,11 @@ import express from "express";
 import Admin from "../models/Admin.js";
 import { generateToken } from "../config/jwt.js";
 import { adminAuth } from "../middleware/adminAuth.js";
+import { sendOTPEmail, sendPasswordResetConfirmation } from "../utils/emailService.js";
 
 const router = express.Router();
+
+// ==================== AUTHENTICATION ====================
 
 // Signup - Create new admin account
 router.post("/signup", async (req, res) => {
@@ -34,6 +37,7 @@ router.post("/signup", async (req, res) => {
       name: name || "Admin",
       role: role || "manager",
       isActive: true,
+      lastActivityAt: new Date(),
     });
 
     await admin.save();
@@ -68,10 +72,22 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // Check if admin has a password (password login not available for OAuth-only users)
+    if (!admin.password) {
+      return res.status(401).json({
+        error: "Please use Google OAuth to login",
+        useGoogleOAuth: true,
+      });
+    }
+
     const isPasswordValid = await admin.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    // Update last activity
+    admin.lastActivityAt = new Date();
+    await admin.save();
 
     const token = generateToken(admin._id);
     res.json({
@@ -88,15 +104,40 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// ==================== SESSION MANAGEMENT ====================
+
 // Get current admin
 router.get("/me", adminAuth, async (req, res) => {
   try {
-    const admin = await Admin.findById(req.adminId).select("-password");
+    const admin = await Admin.findById(req.adminId).select("-password -otp -resetToken");
+    
+    // Update last activity
+    if (admin) {
+      admin.lastActivityAt = new Date();
+      await admin.save();
+    }
+    
     res.json(admin);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Update activity timestamp (called periodically from frontend)
+router.post("/activity", adminAuth, async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.adminId);
+    if (admin) {
+      admin.lastActivityAt = new Date();
+      await admin.save();
+    }
+    res.json({ success: true, lastActivityAt: admin.lastActivityAt });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== ADMIN MANAGEMENT ====================
 
 // Get all admins (owner only)
 router.get("/admins", adminAuth, async (req, res) => {
@@ -106,7 +147,7 @@ router.get("/admins", adminAuth, async (req, res) => {
       return res.status(403).json({ error: "Only owners can view all admins" });
     }
 
-    const admins = await Admin.find().select("-password");
+    const admins = await Admin.find().select("-password -otp -resetToken");
     res.json(admins);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -126,7 +167,7 @@ router.patch("/admins/:id", adminAuth, async (req, res) => {
       req.params.id,
       { name, role, isActive },
       { new: true },
-    ).select("-password");
+    ).select("-password -otp -resetToken");
 
     res.json(admin);
   } catch (error) {
@@ -169,6 +210,12 @@ router.delete("/account", adminAuth, async (req, res) => {
       return res.status(404).json({ error: "Admin not found" });
     }
 
+    if (!admin.password) {
+      return res.status(400).json({
+        error: "Cannot delete OAuth-only account with password",
+      });
+    }
+
     const isPasswordValid = await admin.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid password" });
@@ -181,29 +228,146 @@ router.delete("/account", adminAuth, async (req, res) => {
   }
 });
 
-// Google OAuth Callback Handler
-router.post("/oauth/google", async (req, res) => {
-  try {
-    const { idToken } = req.body;
+// ==================== PASSWORD RESET - FORGOT PASSWORD ====================
 
-    if (!idToken) {
-      return res.status(400).json({ error: "ID token required" });
+// Step 1: Request password reset - Send OTP to email
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
     }
 
-    // In production, verify the ID token with Google
-    // For now, we'll create/update admin based on Google info
-    // You'll need to add google-auth-library to verify tokens properly
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      // For security, don't reveal if email exists
+      return res.json({
+        message: "If email exists, OTP has been sent",
+        success: true,
+      });
+    }
 
-    const token = generateToken(null); // Temporary token
+    // Generate OTP
+    const otp = admin.generateOTP();
+    await admin.save();
+
+    // Send OTP via email
+    try {
+      await sendOTPEmail(email, otp);
+    } catch (emailError) {
+      admin.clearOTP();
+      await admin.save();
+      return res.status(500).json({
+        error: "Failed to send OTP email",
+        details: emailError.message,
+      });
+    }
+
     res.json({
-      message: "OAuth endpoint ready",
-      token,
-      note: "Implement Google Auth Library for production",
+      message: "OTP sent to your email",
+      success: true,
+      masked_email: email.replace(/(.{2})(.*)(@.*)/, "$1***$3"),
+    });
+  } catch (error) {
+    console.error("❌ Forgot-password endpoint error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Step 2: Verify OTP
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP required" });
+    }
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!admin.verifyOTP(otp)) {
+      return res.status(401).json({ error: "Invalid or expired OTP" });
+    }
+
+    // OTP verified, generate a temporary token for password reset
+    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    admin.resetToken = resetToken;
+    admin.resetTokenExpiry = new Date(Date.now() + 30 * 60 * 1000); // Valid for 30 minutes
+    admin.clearOTP();
+    await admin.save();
+
+    res.json({
+      message: "OTP verified successfully",
+      success: true,
+      resetToken, // Send this to frontend to use in password reset
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Step 3: Reset password with OTP verification
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+
+    if (!email || !resetToken || !newPassword) {
+      return res.status(400).json({
+        error: "Email, reset token, and new password are required",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 8 characters" });
+    }
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Verify reset token
+    if (
+      admin.resetToken !== resetToken ||
+      !admin.resetTokenExpiry ||
+      Date.now() > admin.resetTokenExpiry
+    ) {
+      return res.status(401).json({
+        error: "Invalid or expired reset token",
+      });
+    }
+
+    // Update password
+    admin.password = newPassword;
+    admin.resetToken = null;
+    admin.resetTokenExpiry = null;
+    admin.lastActivityAt = new Date();
+    await admin.save();
+
+    // Send confirmation email
+    try {
+      await sendPasswordResetConfirmation(email, admin.name);
+    } catch (emailError) {
+      console.error("Confirmation email error:", emailError);
+      // Don't fail the reset, just log the error
+    }
+
+    res.json({
+      message: "Password reset successfully",
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== GOOGLE OAUTH ====================
 
 // Google OAuth Token Exchange (for authorization code flow)
 router.post("/oauth/google/callback", async (req, res) => {
@@ -214,16 +378,13 @@ router.post("/oauth/google/callback", async (req, res) => {
       return res.status(400).json({ error: "Authorization code required" });
     }
 
-    // Exchange authorization code for tokens with Google
-    const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL;
 
     if (!clientId || !clientSecret || !redirectUri) {
       return res.status(500).json({
         error: "OAuth not properly configured",
-        details:
-          "Missing GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, or GOOGLE_OAUTH_REDIRECT_URI",
       });
     }
 
@@ -257,19 +418,18 @@ router.post("/oauth/google/callback", async (req, res) => {
         .json({ error: "No ID token received from Google" });
     }
 
-    // Decode the ID token (without verification for now, but you should verify in production)
-    // The token format is: header.payload.signature
+    // Decode the ID token
     const parts = id_token.split(".");
     if (parts.length !== 3) {
       return res.status(401).json({ error: "Invalid ID token format" });
     }
 
-    // Decode the payload (second part)
+    // Decode the payload
     const payload = JSON.parse(
       Buffer.from(parts[1], "base64").toString("utf-8"),
     );
 
-    // Extract user information from the ID token
+    // Extract user information
     const { email, name, picture, sub: googleId } = payload;
 
     if (!email) {
@@ -280,34 +440,39 @@ router.post("/oauth/google/callback", async (req, res) => {
     let admin = await Admin.findOne({ email });
 
     if (!admin) {
-      // Create new admin account (with a default role - owner or manager based on your logic)
+      // Create new admin account
       admin = new Admin({
         email,
         name: name || email.split("@")[0],
         googleId,
-        googleProfile: picture ? { picture } : undefined,
-        // Don't set password for Google OAuth users initially
+        googleProfile: { 
+          name: name,
+          picture 
+        },
         isActive: true,
-        role: "manager", // Default role - adjust as needed
+        role: "manager",
+        lastActivityAt: new Date(),
       });
 
       await admin.save();
     } else {
-      // Update existing admin with Google info if they don't have it yet
+      // Update existing admin with Google info if they don't have it
       if (!admin.googleId) {
         admin.googleId = googleId;
-        if (picture) {
-          admin.googleProfile = { picture };
-        }
-        await admin.save();
+        admin.googleProfile = { 
+          name: name,
+          picture 
+        };
       }
+      admin.lastActivityAt = new Date();
+      await admin.save();
     }
 
     // Generate JWT token for the app
     const token = generateToken(admin._id);
 
     res.json({
-      message: "OAuth authentication successful",
+      message: "Google OAuth authentication successful",
       token,
       admin: {
         id: admin._id,
@@ -320,9 +485,70 @@ router.post("/oauth/google/callback", async (req, res) => {
   } catch (error) {
     console.error("OAuth callback error:", error);
     res.status(500).json({
-      error: "OAuth authentication failed",
+      error: "Google OAuth authentication failed",
       details: error.message,
     });
+  }
+});
+
+// ==================== PROFILE MANAGEMENT ====================
+
+// Update password
+router.put("/update-password", adminAuth, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ 
+        error: "Password must be at least 6 characters" 
+      });
+    }
+
+    const admin = await Admin.findById(req.adminId);
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    // Update password
+    admin.password = newPassword;
+    await admin.save();
+
+    res.json({
+      message: "Password updated successfully",
+      success: true
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update profile (name, phone)
+router.put("/update-profile", adminAuth, async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+
+    const admin = await Admin.findById(req.adminId);
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    if (name) admin.name = name;
+    if (phone) admin.phone = phone;
+    
+    await admin.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      admin: {
+        id: admin._id,
+        email: admin.email,
+        name: admin.name,
+        phone: admin.phone,
+        role: admin.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

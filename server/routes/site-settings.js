@@ -76,4 +76,53 @@ router.patch("/contact", adminAuth, async (req, res) => {
   }
 });
 
+// Update addresses (multiple locations)
+router.put("/addresses", adminAuth, async (req, res) => {
+  try {
+    const { addresses } = req.body;
+
+    if (!Array.isArray(addresses)) {
+      return res.status(400).json({ error: "Addresses must be an array" });
+    }
+
+    const settings = await SiteSettings.findOneAndUpdate(
+      { siteId: "default" },
+      { addresses },
+      { new: true, upsert: true },
+    );
+    res.json({
+      message: "Addresses updated successfully",
+      addresses: settings.addresses
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update social media links
+router.put("/social", adminAuth, async (req, res) => {
+  try {
+    const { instagram, facebook, whatsapp, twitter } = req.body;
+
+    const settings = await SiteSettings.findOneAndUpdate(
+      { siteId: "default" },
+      { 
+        social: {
+          instagram: instagram || "",
+          facebook: facebook || "",
+          whatsapp: whatsapp || "",
+          twitter: twitter || ""
+        }
+      },
+      { new: true, upsert: true },
+    );
+    res.json({
+      message: "Social media links updated successfully",
+      social: settings.social
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

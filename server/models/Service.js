@@ -8,18 +8,6 @@ const serviceSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
-    category: {
-      type: String,
-      enum: [
-        "Professional Bridal Makeup",
-        "Hair Styling",
-        "Advanced Skincare",
-        "Special Occasions",
-        "Consultation",
-      ],
-      required: true,
-      index: true,
-    },
     description: {
       type: String,
       required: true,

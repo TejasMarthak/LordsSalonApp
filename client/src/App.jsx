@@ -5,7 +5,7 @@ import config from './config';
 import { useJsonLd, generateLocalBusinessSchema, generateOrganizationSchema } from './utils/jsonLdSchema';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import HeroSectionNew from './components/sections/HeroSectionNew';
+import HeroSectionScrollable from './components/sections/HeroSectionScrollable';
 import ServiceSection from './components/sections/ServiceSection';
 import Lookbook from './components/sections/Lookbook';
 import LocationContact from './components/sections/LocationContact';
@@ -26,7 +26,7 @@ function HomePage({ siteSettings }) {
       <div className="min-h-screen bg-white overflow-x-hidden">
         <Header />
         <main className="pt-0">
-          <HeroSectionNew />
+          <HeroSectionScrollable />
           <section id="services">
             <ServiceSection />
           </section>

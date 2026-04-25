@@ -9,14 +9,8 @@ const portfolioItemSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: [
-        "Bridal Makeup",
-        "Editorial",
-        "Party Makeup",
-        "Skincare",
-        "Hair",
-        "Special Effects",
-      ],
+      // Changed from enum to String to support dynamic service names
+      // Examples: "Bridal Makeup", "Hair Styling", "Advanced Skincare", etc.
       required: true,
       index: true,
     },

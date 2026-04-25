@@ -223,4 +223,59 @@ router.post("/hero", adminAuth, async (req, res) => {
   }
 });
 
+// PUBLIC: Update hero section from client side (without authentication)
+router.post("/hero/update", async (req, res) => {
+  try {
+    const { headline, subheadline, description, ctaText, ctaLink, heroImages } = req.body;
+
+    // Validate required fields
+    if (!headline || !subheadline) {
+      return res.status(400).json({ error: "Headline and subheadline are required" });
+    }
+
+    // Validate at least one image
+    if (!heroImages || (Array.isArray(heroImages) && heroImages.length === 0)) {
+      return res.status(400).json({ error: "At least one image is required" });
+    }
+
+    let page = await PageContent.findOne({ pageId: "home" });
+
+    if (!page) {
+      page = new PageContent({
+        pageId: "home",
+        pageName: "Home",
+        sections: [],
+      });
+    }
+
+    const heroIndex = page.sections.findIndex((s) => s.type === "hero");
+    const heroData = {
+      sectionId: "hero-1",
+      type: "hero",
+      order: 0,
+      headline,
+      subheadline,
+      description: description || "",
+      ctaText: ctaText || "Book Appointment",
+      ctaLink: ctaLink || "/booking",
+      heroImage: heroImages?.[0] || "",
+      heroImages: Array.isArray(heroImages) ? heroImages : [heroImages],
+    };
+
+    if (heroIndex >= 0) {
+      page.sections[heroIndex] = heroData;
+    } else {
+      page.sections.push(heroData);
+    }
+
+    const savedPage = await page.save();
+    const savedHero = savedPage.sections.find((s) => s.type === "hero");
+    
+    res.status(200).json(savedHero);
+  } catch (error) {
+    console.error("Error updating hero section:", error);
+    res.status(500).json({ error: error.message || "Failed to update hero section" });
+  }
+});
+
 export default router;

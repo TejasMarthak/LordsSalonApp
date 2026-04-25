@@ -27,6 +27,15 @@ const siteSettingsSchema = new mongoose.Schema(
       latitude: Number,
       longitude: Number,
     },
+    addresses: [
+      {
+        id: { type: Number, required: true },
+        address: String,
+        latitude: Number,
+        longitude: Number,
+        googleMapsLink: String,
+      }
+    ],
     social: {
       instagram: String,
       facebook: String,

@@ -43,24 +43,35 @@ function ImageCarousel({ beforeImage, afterImage, title }) {
 export default function Lookbook() {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeItem, setActiveItem] = useState(null);
-
-  const categories = ['Bridal Makeup', 'Editorial', 'Party Makeup', 'Skincare', 'Hair', 'Special Effects'];
-  
-  const categoryIcons = {
-    'Bridal Makeup': '💄',
-    'Editorial': '📸',
-    'Party Makeup': '🎉',
-    'Skincare': '✨',
-    'Hair': '💇',
-    'Special Effects': '🎭',
-  };
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch categories (services) on mount
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    // Fetch portfolio items when category changes
     fetchPortfolio();
   }, [selectedCategory]);
+
+  const fetchCategories = async () => {
+    try {
+      setCategoriesLoading(true);
+      const response = await axios.get(`${config.api.baseUrl}/api/services`);
+      // Extract service names as categories
+      const serviceNames = response.data.map(service => service.name);
+      setCategories(serviceNames);
+    } catch (error) {
+      // Fall back to empty array if services can't be fetched
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   const fetchPortfolio = async () => {
     try {
@@ -72,7 +83,7 @@ export default function Lookbook() {
       const response = await axios.get(url);
       setItems(response.data);
     } catch (error) {
-      console.error('Error fetching portfolio:', error);
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -118,7 +129,7 @@ export default function Lookbook() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className="px-6 py-2 font-inter text-sm uppercase tracking-wider transition-all rounded-lg font-medium flex items-center gap-2"
+              className="px-6 py-2 font-inter text-sm uppercase tracking-wider transition-all rounded-lg font-medium"
               style={{
                 backgroundColor: selectedCategory === category ? config.colors.primary : 'transparent',
                 color: selectedCategory === category ? config.colors.white : config.colors.primary,
@@ -126,7 +137,6 @@ export default function Lookbook() {
                 borderColor: config.colors.primary,
               }}
             >
-              <span>{categoryIcons[category]}</span>
               {category}
             </button>
           ))}
@@ -176,7 +186,7 @@ export default function Lookbook() {
                 <div className="p-4 md:p-6">
                   {/* Category Badge */}
                   <p className="font-inter text-xs uppercase tracking-widest mb-2" style={{ color: config.colors.accent }}>
-                    {categoryIcons[item.category]} {item.category}
+                    {item.category}
                   </p>
                   
                   {/* Title */}

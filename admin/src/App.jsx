@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import AdminHeader from './components/layout/AdminHeader';
 import Sidebar from './components/layout/Sidebar';
 import LoginPage from './pages/LoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import OAuthCallback from './pages/OAuthCallback';
 import Dashboard from './pages/Dashboard';
 import ServicesManager from './components/modules/ServicesManager';
@@ -11,6 +13,7 @@ import HeroManager from './components/modules/HeroManager';
 import ContactManager from './components/modules/ContactManager';
 import SettingsManager from './components/modules/SettingsManager';
 import DiscountManager from './components/modules/DiscountManager';
+import { useSessionTimeout } from './hooks/useSessionTimeout';
 import adminConfig from './adminConfig';
 
 // Protected Route Component
@@ -78,28 +81,161 @@ function AdminLayout({ admin, onLogout, children }) {
   );
 }
 
+// Inner App Component - Contains routes and session timeout
+function AppContent({ admin, setAdmin, token, handleLogin, handleLogout }) {
+  // Initialize session timeout hook inside Router context
+  useSessionTimeout(token, () => {
+    setAdmin(null);
+    localStorage.removeItem('adminToken');
+  });
+
+  return (
+    <Routes>
+      {/* Auth Callback Route */}
+      <Route path="/auth/callback" element={<OAuthCallback onLogin={handleLogin} />} />
+
+      {/* Login and Signup Routes */}
+      <Route 
+        path="/login" 
+        element={admin ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} />} 
+      />
+      <Route 
+        path="/signup" 
+        element={admin ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} isSignupDefaultMode={true} onSignupSuccess={() => {}} />} 
+      />
+
+      {/* Forgot Password Route */}
+      <Route 
+        path="/forgot-password" 
+        element={admin ? <Navigate to="/dashboard" replace /> : <ForgotPasswordPage />} 
+      />
+
+      {/* Protected Dashboard Routes */}
+      <Route 
+        path="/dashboard" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <Dashboard admin={admin} />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/hero-section" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <HeroManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/services" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <ServicesManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/portfolio" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <PortfolioManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/discounts" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <DiscountManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/contact" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <ContactManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <SettingsManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to={admin ? '/dashboard' : '/login'} replace />} />
+    </Routes>
+  );
+}
+
 // App Component
 export default function App() {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('adminToken');
 
   useEffect(() => {
-    // Check if admin is logged in
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      // Verify token and fetch admin info
-      setAdmin({ name: 'Admin', email: 'admin@lords-salon.com', role: 'owner' });
-    }
-    setLoading(false);
+    // Check if admin is logged in and validate token
+    const validateSession = async () => {
+      if (token) {
+        try {
+          // Fetch current admin profile to validate token and get user data
+          const response = await axios.get(
+            `${adminConfig.api.baseUrl}/api/auth/me`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setAdmin(response.data);
+        } catch (error) {
+          // Token is invalid or expired
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminUser');
+          setAdmin(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    validateSession();
   }, []);
 
   const handleLogin = (adminData) => {
     setAdmin(adminData);
+    // Also store admin user data for reference
+    localStorage.setItem('adminUser', JSON.stringify(adminData));
   };
 
   const handleLogout = () => {
     setAdmin(null);
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
   };
 
   if (loading) {
@@ -117,102 +253,13 @@ export default function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Auth Callback Route */}
-        <Route path="/auth/callback" element={<OAuthCallback onLogin={handleLogin} />} />
-
-        {/* Login and Signup Routes */}
-        <Route 
-          path="/login" 
-          element={admin ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} />} 
-        />
-        <Route 
-          path="/signup" 
-          element={admin ? <Navigate to="/dashboard" replace /> : <LoginPage onLogin={handleLogin} isSignupDefaultMode={true} onSignupSuccess={() => {}} />} 
-        />
-
-        {/* Protected Dashboard Routes */}
-        <Route 
-          path="/dashboard" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <Dashboard admin={admin} />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/hero-section" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <HeroManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/services" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <ServicesManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/portfolio" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <PortfolioManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/discounts" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <DiscountManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/contact" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <ContactManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        <Route 
-          path="/settings" 
-          element={
-            <ProtectedRoute admin={admin}>
-              <AdminLayout admin={admin} onLogout={handleLogout}>
-                <SettingsManager />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to={admin ? "/dashboard" : "/login"} replace />} />
-        <Route path="*" element={<Navigate to={admin ? "/dashboard" : "/login"} replace />} />
-      </Routes>
+      <AppContent 
+        admin={admin} 
+        setAdmin={setAdmin} 
+        token={token} 
+        handleLogin={handleLogin} 
+        handleLogout={handleLogout} 
+      />
     </Router>
   );
 }

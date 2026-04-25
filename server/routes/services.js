@@ -7,14 +7,7 @@ const router = express.Router();
 // Get all services (public)
 router.get("/", async (req, res) => {
   try {
-    const { category } = req.query;
-    const filter = {};
-
-    if (category) {
-      filter.category = category;
-    }
-
-    const services = await Service.find(filter).sort({ category: 1, name: 1 });
+    const services = await Service.find({ isActive: true }).sort({ name: 1 });
     res.json(services);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -37,15 +30,14 @@ router.get("/:id", async (req, res) => {
 // Create service (admin only)
 router.post("/", adminAuth, async (req, res) => {
   try {
-    const { name, category, description, price, duration } = req.body;
+    const { name, description, price, duration } = req.body;
 
-    if (!name || !category || !description || !price || !duration) {
+    if (!name || !description || !price || !duration) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
     const service = new Service({
       name,
-      category,
       description,
       price,
       duration,

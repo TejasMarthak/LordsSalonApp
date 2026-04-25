@@ -52,9 +52,10 @@ const categoryIcons = {
 
 export default function PortfolioManager() {
   const [items, setItems] = useState([]);
+  const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Bridal Makeup',
+    category: '',
     description: '',
     imageFile: null,
     imageUrl: '',
@@ -70,8 +71,24 @@ export default function PortfolioManager() {
 
 
   useEffect(() => {
+    fetchServices();
     fetchPortfolio();
   }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await axios.get(
+        `${adminConfig.api.baseUrl}/api/services`
+      );
+      setServices(response.data);
+      // Set default category to first service
+      if (response.data.length > 0 && !formData.category) {
+        setFormData(prev => ({ ...prev, category: response.data[0].name }));
+      }
+    } catch (err) {
+      console.error('Error fetching services:', err);
+    }
+  };
 
   const fetchPortfolio = async () => {
     try {
@@ -234,7 +251,7 @@ export default function PortfolioManager() {
   const resetForm = () => {
     setFormData({
       title: '',
-      category: 'Bridal Makeup',
+      category: services.length > 0 ? services[0].name : '',
       description: '',
       imageFile: null,
       imageUrl: '',
@@ -302,7 +319,7 @@ export default function PortfolioManager() {
               {/* Category */}
               <div>
                 <label className="block text-sm font-bold mb-2 uppercase text-black">
-                  Category
+                  Service Category
                 </label>
                 <select
                   required
@@ -310,12 +327,18 @@ export default function PortfolioManager() {
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
                 >
-                  {adminConfig.portfolioCategories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                  <option value="">Select a service...</option>
+                  {services.map((service) => (
+                    <option key={service._id} value={service.name}>
+                      {service.name}
                     </option>
                   ))}
                 </select>
+                {services.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No services found. Create services first to add portfolio items.
+                  </p>
+                )}
               </div>
 
               {/* Main Image Upload */}
