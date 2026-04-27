@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import config from '../../config';
-import BookingModal from './BookingModal';
 import axios from 'axios';
 
 export default function HeroSectionScrollable() {
-  const [bookingOpen, setBookingOpen] = useState(false);
+  const navigate = useNavigate();
   const [heroData, setHeroData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -107,7 +107,7 @@ export default function HeroSectionScrollable() {
                 <button
                   onClick={() => {
                     if (heroContent.ctaLink === '/booking') {
-                      setBookingOpen(true);
+                      navigate('/booking');
                     } else if (heroContent.ctaLink?.startsWith('#')) {
                       const elementId = heroContent.ctaLink.substring(1);
                       const element = document.getElementById(elementId);
@@ -206,9 +206,6 @@ export default function HeroSectionScrollable() {
 
 
       </section>
-
-      {/* Booking Modal */}
-      <BookingModal isOpen={bookingOpen} onClose={() => setBookingOpen(false)} />
     </>
   );
 }

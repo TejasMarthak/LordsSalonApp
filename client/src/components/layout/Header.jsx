@@ -38,16 +38,7 @@ export default function Header() {
           </button>
         </nav>
 
-        {/* CTA Buttons */}
-        <div className="flex gap-3 items-center">
-          <button
-            onClick={() => scrollToSection('booking')}
-            className="hidden sm:flex px-6 py-2 text-white font-inter text-xs uppercase tracking-wider transition-all font-semibold"
-            style={{ backgroundColor: config.colors.buttonColor }}
-          >
-            Book Now
-          </button>
-        </div>
+
 
         {/* Mobile Menu Button */}
         <button
@@ -72,13 +63,6 @@ export default function Header() {
           </button>
           <button onClick={() => scrollToSection('location')} className="block w-full text-left font-inter text-sm uppercase tracking-wider font-semibold" style={{ color: config.colors.primary }}>
             Contact
-          </button>
-          <button
-            onClick={() => scrollToSection('booking')}
-            className="block w-full px-4 py-2 text-white font-inter text-xs uppercase tracking-wider font-semibold"
-            style={{ backgroundColor: config.colors.buttonColor }}
-          >
-            Book Now
           </button>
         </div>
       )}

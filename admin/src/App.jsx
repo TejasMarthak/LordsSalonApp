@@ -13,6 +13,7 @@ import HeroManager from './components/modules/HeroManager';
 import ContactManager from './components/modules/ContactManager';
 import SettingsManager from './components/modules/SettingsManager';
 import DiscountManager from './components/modules/DiscountManager';
+import BookingManager from './components/modules/BookingManager';
 import { useSessionTimeout } from './hooks/useSessionTimeout';
 import adminConfig from './adminConfig';
 
@@ -37,6 +38,7 @@ function AdminLayout({ admin, onLogout, children }) {
       '/services': 'services',
       '/portfolio': 'portfolio',
       '/contact': 'contact',
+      '/bookings': 'bookings',
       '/discounts': 'discounts',
       '/settings': 'settings',
     };
@@ -177,8 +179,17 @@ function AppContent({ admin, setAdmin, token, handleLogin, handleLogout }) {
         } 
       />
 
-      <Route 
-        path="/settings" 
+      <Route         path="/bookings" 
+        element={
+          <ProtectedRoute admin={admin}>
+            <AdminLayout admin={admin} onLogout={handleLogout}>
+              <BookingManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route         path="/settings" 
         element={
           <ProtectedRoute admin={admin}>
             <AdminLayout admin={admin} onLogout={handleLogout}>

@@ -19,6 +19,13 @@ export default function SettingsManager() {
     { day: 'Saturday', open: '11:00', close: '21:00', isClosed: false },
     { day: 'Sunday', open: '12:00', close: '19:00', isClosed: false },
   ]);
+
+  const [featureToggles, setFeatureToggles] = useState({
+    discountsEnabled: true,
+    ratingsEnabled: true,
+    bookingEnabled: true,
+  });
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
@@ -33,6 +40,10 @@ export default function SettingsManager() {
         // Only use API businessHours if they exist and are not empty
         if (response.data.businessHours && response.data.businessHours.length > 0) {
           setBusinessHours(response.data.businessHours);
+        }
+        // Load feature toggles
+        if (response.data.featureToggles) {
+          setFeatureToggles(response.data.featureToggles);
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
@@ -63,11 +74,42 @@ export default function SettingsManager() {
 
     try {
       const token = localStorage.getItem('adminToken');
+
+      if (!token) {
+        setError('Session expired. Please login again.');
+        setSaving(false);
+        return;
+      }
+
+      // Save user info (name and email)
+      if (userInfo.name || userInfo.email) {
+        try {
+          await axios.put(
+            `${adminConfig.api.baseUrl}/api/auth/update-profile`,
+            { 
+              name: userInfo.name,
+              email: userInfo.email 
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (profileErr) {
+          // If email update fails because email is not updatable, just log it
+          console.error('Profile update error:', profileErr);
+          if (profileErr.response?.status !== 400) {
+            setError(profileErr.response?.data?.error || 'Failed to save profile');
+            setSaving(false);
+            return;
+          }
+        }
+      }
+
+      // Save business hours
       await axios.put(
         `${adminConfig.api.baseUrl}/api/site-settings`,
-        { businessHours },
+        { businessHours, featureToggles },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       setSuccess('Settings saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -170,6 +212,72 @@ export default function SettingsManager() {
             onChange={(e) => handleUserInfoChange('email', e.target.value)}
             placeholder="admin@lordssalon.com"
           />
+        </div>
+      </div>
+
+      {/* Feature Toggles */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4 sm:p-5 md:p-6">
+        <h2 className="font-playfair font-bold text-lg sm:text-xl mb-4 sm:mb-5 uppercase tracking-wider" style={{ color: adminConfig.colors.primary }}>
+          Feature Management
+        </h2>
+
+        <div className="space-y-3 sm:space-y-4">
+          {/* Discounts Toggle */}
+          <div className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div>
+              <p className="font-bold text-xs sm:text-sm uppercase tracking-wider" style={{ color: adminConfig.colors.primary }}>
+                Enable Discounts
+              </p>
+              <p className="text-xs text-gray-600 mt-1">Show discount section on website</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={featureToggles.discountsEnabled}
+                onChange={(e) => setFeatureToggles({ ...featureToggles, discountsEnabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          {/* Ratings Toggle */}
+          <div className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div>
+              <p className="font-bold text-xs sm:text-sm uppercase tracking-wider" style={{ color: adminConfig.colors.primary }}>
+                Enable Ratings
+              </p>
+              <p className="text-xs text-gray-600 mt-1">Show client reviews on website</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={featureToggles.ratingsEnabled}
+                onChange={(e) => setFeatureToggles({ ...featureToggles, ratingsEnabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          {/* Booking Toggle */}
+          <div className="flex items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div>
+              <p className="font-bold text-xs sm:text-sm uppercase tracking-wider" style={{ color: adminConfig.colors.primary }}>
+                Enable Bookings
+              </p>
+              <p className="text-xs text-gray-600 mt-1">Allow customers to book appointments</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={featureToggles.bookingEnabled}
+                onChange={(e) => setFeatureToggles({ ...featureToggles, bookingEnabled: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
         </div>
       </div>
 

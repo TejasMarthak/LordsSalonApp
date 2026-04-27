@@ -5,11 +5,16 @@ import config from './config';
 import { useJsonLd, generateLocalBusinessSchema, generateOrganizationSchema } from './utils/jsonLdSchema';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import DiscountBanner from './components/sections/DiscountBanner';
 import HeroSectionScrollable from './components/sections/HeroSectionScrollable';
+import CustomerCounterSection from './components/sections/CustomerCounterSection';
 import ServiceSection from './components/sections/ServiceSection';
 import Lookbook from './components/sections/Lookbook';
 import LocationContact from './components/sections/LocationContact';
+import DiscountSection from './components/sections/DiscountSection';
+import RatingsSection from './components/sections/RatingsSection';
 import PortfolioDetailPage from './pages/PortfolioDetailPage';
+import BookingPage from './pages/BookingPage';
 import axios from 'axios';
 
 // Home Page Component
@@ -25,14 +30,18 @@ function HomePage({ siteSettings }) {
 
       <div className="min-h-screen bg-white overflow-x-hidden">
         <Header />
+        <DiscountBanner />
         <main className="pt-0">
           <HeroSectionScrollable />
+          <CustomerCounterSection />
           <section id="services">
             <ServiceSection />
           </section>
           <section id="portfolio">
             <Lookbook />
           </section>
+          <DiscountSection />
+          <RatingsSection />
           <section id="location">
             <LocationContact siteSettings={siteSettings} />
           </section>
@@ -90,6 +99,12 @@ export default function App() {
       <main className="pt-0">
         <Routes>
           <Route path="/" element={<HomePage siteSettings={siteSettings} />} />
+          <Route path="/booking" element={
+            <>
+              <BookingPage />
+              <Footer siteSettings={siteSettings} />
+            </>
+          } />
           <Route path="/lookbook" element={<Lookbook />} />
           <Route path="/lookbook/:id" element={
             <>

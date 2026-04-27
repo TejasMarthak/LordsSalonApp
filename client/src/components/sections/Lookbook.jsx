@@ -6,6 +6,7 @@ import config from '../../config';
 // Image Carousel Component for Before/After
 function ImageCarousel({ beforeImage, afterImage, title }) {
   const [currentImage, setCurrentImage] = useState('after');
+  const [touchStart, setTouchStart] = useState(null);
 
   useEffect(() => {
     if (!beforeImage) {
@@ -20,20 +21,54 @@ function ImageCarousel({ beforeImage, afterImage, title }) {
     return () => clearInterval(interval);
   }, [beforeImage]);
 
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStart) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+
+    // Swipe left to show before, swipe right to show after
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        // Swiped left
+        setCurrentImage('before');
+      } else {
+        // Swiped right
+        setCurrentImage('after');
+      }
+    }
+    setTouchStart(null);
+  };
+
   const displayImage = currentImage === 'after' ? afterImage : beforeImage;
 
   return (
-    <div className="relative w-full h-full overflow-hidden group">
+    <div 
+      className="relative w-full h-full overflow-hidden group cursor-pointer touch-none"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <img
         src={displayImage}
         alt={`${title} - ${currentImage}`}
         className="w-full h-full object-cover transition-opacity duration-500"
+        style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
       />
       
       {/* Image indicator badge */}
       {beforeImage && (
         <div className="absolute top-3 right-3 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-xs font-semibold">
           {currentImage === 'after' ? 'After' : 'Before'}
+        </div>
+      )}
+
+      {/* Mobile swipe hint */}
+      {beforeImage && (
+        <div className="absolute bottom-3 left-3 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-xs md:hidden">
+          Swipe to compare
         </div>
       )}
     </div>

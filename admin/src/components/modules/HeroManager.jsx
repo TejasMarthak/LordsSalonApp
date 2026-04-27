@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import adminConfig from '../../adminConfig';
 import { AdminInput, AdminButton } from '../common/FormComponents';
+import { ImageIcon, AlertIcon, SuccessIcon, LoadingIcon } from '../../utils/Icons';
 
 export default function HeroManager() {
   const [heroContent, setHeroContent] = useState({
@@ -204,17 +205,6 @@ export default function HeroManager() {
     }
   };
 
-  if (fetching) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading hero section...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -229,14 +219,23 @@ export default function HeroManager() {
 
       {/* Messages */}
       {error && (
-        <div className="p-4 rounded-lg border-l-4" style={{ backgroundColor: '#FFF5F5', borderLeftColor: adminConfig.colors.warning }}>
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.warning }}>❌ {error}</p>
+        <div className="p-4 rounded-lg border-l-4 border-red-500 bg-red-50 flex items-start gap-2">
+          <AlertIcon size={18} color="#CB2431" className="flex-shrink-0 mt-0.5" />
+          <p className="font-inter text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="p-4 rounded-lg border-l-4" style={{ backgroundColor: '#F0FDF4', borderLeftColor: adminConfig.colors.success }}>
-          <p className="font-inter text-sm" style={{ color: adminConfig.colors.success }}>✅ {success}</p>
+        <div className="p-4 rounded-lg border-l-4 border-green-500 bg-green-50 flex items-start gap-2">
+          <SuccessIcon size={18} color="#22863A" className="flex-shrink-0 mt-0.5" />
+          <p className="font-inter text-sm text-green-700">{success}</p>
+        </div>
+      )}
+
+      {fetching && !heroContent.headline && (
+        <div className="p-4 rounded-lg border-l-4 border-blue-500 bg-blue-50 flex items-start gap-2">
+          <LoadingIcon size={18} color="#0366D6" className="flex-shrink-0 mt-0.5" />
+          <p className="font-inter text-sm text-blue-700">Loading hero section...</p>
         </div>
       )}
 
@@ -286,8 +285,8 @@ export default function HeroManager() {
               />
             </div>
 
-            {/* CTA Button */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* CTA Button - Note: Hidden fields to keep internal link structure */}
+            <div className="grid grid-cols-1 gap-4 pb-4 border-b" style={{ borderColor: adminConfig.colors.border }}>
               <AdminInput
                 label="Button Text"
                 type="text"
@@ -296,24 +295,22 @@ export default function HeroManager() {
                 onChange={handleInputChange}
                 placeholder="Book Appointment"
               />
-              <AdminInput
-                label="Button Link"
-                type="text"
-                name="ctaLink"
-                value={heroContent.ctaLink}
-                onChange={handleInputChange}
-                placeholder="/booking"
-              />
+              <div className="text-xs text-gray-500 italic">
+                Note: Button link is fixed to booking flow for consistency
+              </div>
             </div>
 
             {/* Images Count */}
-            <div className="p-4 rounded-lg" style={{ backgroundColor: adminConfig.colors.lightBg }}>
-              <p className="font-inter text-sm" style={{ color: adminConfig.colors.text }}>
-                📸 Images: <span className="font-bold text-lg">{heroContent.heroImages.length}/2</span>
-                {heroContent.heroImages.length === 2 && (
-                  <span style={{ color: adminConfig.colors.success }}> ✓ Maximum reached</span>
-                )}
-              </p>
+            <div className="p-4 rounded-lg flex items-center gap-3" style={{ backgroundColor: adminConfig.colors.lightBg }}>
+              <ImageIcon size={20} color={adminConfig.colors.primary} />
+              <div>
+                <p className="font-inter text-sm font-bold">
+                  Images: <span style={{ color: adminConfig.colors.accent }}>{heroContent.heroImages.length}/2</span>
+                  {heroContent.heroImages.length === 2 && (
+                    <span style={{ color: adminConfig.colors.success }}> ✓ Maximum</span>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -433,7 +430,8 @@ export default function HeroManager() {
 
           {heroContent.heroImages.length === 0 && (
             <div className="text-center py-8" style={{ color: adminConfig.colors.textLight }}>
-              <p>📸 No images added yet</p>
+              <ImageIcon size={32} color={adminConfig.colors.textLight} className="mx-auto mb-2" />
+              <p className="text-sm font-semibold">No images added yet</p>
               <p className="text-xs mt-2">Add at least 1 image for the hero section</p>
             </div>
           )}
@@ -445,14 +443,21 @@ export default function HeroManager() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 px-6 rounded-lg font-semibold text-white transition-all text-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-4 px-6 rounded-lg font-semibold text-white transition-all text-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           style={{
             backgroundColor: adminConfig.colors.primary,
             cursor: loading ? 'not-allowed' : 'pointer',
             transition: 'all 0.3s ease'
           }}
         >
-          {loading ? 'Saving...' : 'Save Hero Section'}
+          {loading ? (
+            <>
+              <LoadingIcon size={18} color="white" />
+              Saving...
+            </>
+          ) : (
+            'Save Hero Section'
+          )}
         </button>
       </form>
     </div>

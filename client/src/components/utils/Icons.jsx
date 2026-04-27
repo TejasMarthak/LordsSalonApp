@@ -39,7 +39,10 @@ export const FacebookIcon = ({ size = 24, color = "#1A1A1A", className = "" }) =
 
 export const WhatsAppIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M21.5 2H2.5A.5.5 0 0 0 2 2.5v19a.5.5 0 0 0 .5.5h11V14h-3v-3h3V9c0-2.716 1.657-4.203 4.088-4.203 1.158 0 2.152.087 2.44.125v2.832h-1.675c-1.314 0-1.57.623-1.57 1.536V11h3.14l-.408 3h-2.732v8.5h5.357a.5.5 0 0 0 .5-.5v-19a.5.5 0 0 0-.5-.5z"></path>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    <circle cx="9" cy="10" r="0.5" fill={color}></circle>
+    <circle cx="12" cy="10" r="0.5" fill={color}></circle>
+    <circle cx="15" cy="10" r="0.5" fill={color}></circle>
   </svg>
 );
 
@@ -84,5 +87,12 @@ export const EyeIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
     <circle cx="12" cy="12" r="3"></circle>
+  </svg>
+);
+
+export const ClockIcon = ({ size = 24, color = "#1A1A1A", className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10"></circle>
+    <polyline points="12 6 12 12 16 14"></polyline>
   </svg>
 );

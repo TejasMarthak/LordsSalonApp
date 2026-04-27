@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import config from '../../config';
 
 // Service Card Component
-function ServiceCard({ number, title, price, duration, index }) {
+function ServiceCard({ number, title, price, duration, index, service }) {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
 
   // Format duration to display in hours and minutes
@@ -17,14 +19,15 @@ function ServiceCard({ number, title, price, duration, index }) {
   };
 
   return (
-    <div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative group"
-    >
+    <>
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="relative group h-full cursor-pointer"
+      >
       {/* Card Background */}
       <div
-        className="relative rounded-2xl p-6 sm:p-8 md:p-10 min-h-40 sm:min-h-48 md:min-h-56 flex flex-col justify-start overflow-visible transition-all duration-300 ease-out"
+        className="relative rounded-xl p-5 sm:p-6 md:p-7 min-h-56 sm:min-h-64 md:min-h-72 flex flex-col justify-between overflow-visible transition-all duration-300 ease-out h-full"
         style={{
           backgroundColor: '#2A2A2A',
           boxShadow: isHovered
@@ -41,21 +44,21 @@ function ServiceCard({ number, title, price, duration, index }) {
 
         {/* Animated gradient overlay on hover */}
         <div
-          className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300"
+          className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-xl"
           style={{
             background: `linear-gradient(135deg, ${config.colors.accent}, #D4AF37)`,
           }}
         ></div>
 
-        {/* Number Badge - Mobile: inside card at top, Desktop: overlapping */}
+        {/* Number Badge */}
         <div
-          className="absolute top-6 left-6 sm:-top-3 sm:-left-3 z-20 transition-all duration-300"
+          className="absolute top-4 left-4 sm:top-3 sm:left-3 z-20 transition-all duration-300"
           style={{
             transform: isHovered ? 'scale(1.15) rotate(5deg)' : 'scale(1)',
           }}
         >
           <div
-            className="w-14 sm:w-16 h-14 sm:h-16 rounded-full flex items-center justify-center font-playfair font-bold text-lg sm:text-xl shadow-lg"
+            className="w-12 sm:w-14 h-12 sm:h-14 rounded-full flex items-center justify-center font-playfair font-bold text-base sm:text-lg shadow-lg"
             style={{
               backgroundColor: '#FFFFFF',
               color: '#1A1A1A',
@@ -67,14 +70,54 @@ function ServiceCard({ number, title, price, duration, index }) {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 pt-16 sm:pt-0">
-          {/* Title - Left-aligned at top */}
-          <h3 className="font-playfair text-xl sm:text-2xl md:text-3xl font-semibold leading-snug text-white text-left">
-            {title}
-          </h3>
+        <div className="relative z-10 pt-14 flex flex-col justify-between h-full">
+          {/* Title */}
+          <div>
+            <h3 className="font-playfair text-lg sm:text-xl md:text-2xl font-semibold leading-tight text-white">
+              {title}
+            </h3>
+          </div>
+
+          {/* Details Footer */}
+          <div className="mt-4 space-y-3 border-t border-white border-opacity-20 pt-4">
+            {/* Price */}
+            <div className="flex justify-between items-center">
+              <span className="font-inter text-xs uppercase tracking-wider text-gray-400">Price</span>
+              <span className="font-playfair text-lg font-semibold text-white">₹{price}</span>
+            </div>
+            
+            {/* Duration */}
+            {duration && (
+              <div className="flex justify-between items-center">
+                <span className="font-inter text-xs uppercase tracking-wider text-gray-400">Duration</span>
+                <span className="font-inter text-sm text-gray-300">{formatDuration(duration)}</span>
+              </div>
+            )}
+
+            {/* Book Now Button */}
+            <button
+              onClick={() => navigate('/booking')}
+              className="w-full mt-3 py-2.5 px-4 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300 hover:shadow-lg active:scale-95"
+              style={{
+                backgroundColor: config.colors.accent,
+                color: '#FFFFFF',
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = `0 8px 16px rgba(212, 175, 55, 0.3)`;
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              Book Now
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -186,7 +229,7 @@ export default function ServiceSection() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
               {displayedServices.map((service, index) => (
                 <div
                   key={service.id || index}
@@ -203,6 +246,7 @@ export default function ServiceSection() {
                     price={service.price}
                     duration={service.duration}
                     index={index}
+                    service={service}
                   />
                 </div>
               ))}

@@ -56,6 +56,12 @@ const adminConfig = {
       description: "Contact & Social",
     },
     {
+      id: "bookings",
+      label: "Bookings",
+      icon: "📅",
+      description: "Manage Appointments",
+    },
+    {
       id: "discounts",
       label: "Discounts",
       icon: "🏷️",

@@ -35,6 +35,7 @@ export default function Sidebar({ currentPage, onPageChange, sidebarOpen, onLogo
       'services': '/services',
       'portfolio': '/portfolio',
       'contact': '/contact',
+      'bookings': '/bookings',
       'discounts': '/discounts',
       'settings': '/settings',
     };
@@ -49,6 +50,7 @@ export default function Sidebar({ currentPage, onPageChange, sidebarOpen, onLogo
       'services': BriefcaseIcon,
       'portfolio': GalleryIcon,
       'contact': PhoneIcon,
+      'bookings': BriefcaseIcon, // Using briefcase as placeholder for calendar
       'discounts': TagIcon,
       'settings': SettingsIcon,
     };

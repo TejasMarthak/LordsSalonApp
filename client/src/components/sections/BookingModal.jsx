@@ -27,29 +27,79 @@ export default function BookingModal({ isOpen, onClose, service }) {
     setSuccess('');
 
     try {
+      // Validate all required fields
+      if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || !formData.bookingDate || !formData.bookingTime) {
+        setError('Please fill in all required fields');
+        setLoading(false);
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.clientEmail)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
+
+      // Validate phone format
+      const phoneRegex = /^[\d+\-\s()]+$/;
+      if (!phoneRegex.test(formData.clientPhone) || formData.clientPhone.replace(/\D/g, '').length < 10) {
+        setError('Please enter a valid phone number');
+        setLoading(false);
+        return;
+      }
+
+      // Create booking date in ISO format
       const bookingDateTime = new Date(`${formData.bookingDate}T${formData.bookingTime}`);
+      
+      // Validate that booking date is in the future
+      if (bookingDateTime < new Date()) {
+        setError('Please select a future date and time');
+        setLoading(false);
+        return;
+      }
+
+      // Prepare booking data with all required fields
+      const bookingData = {
+        clientName: formData.clientName,
+        clientEmail: formData.clientEmail,
+        clientPhone: formData.clientPhone,
+        serviceId: service._id || service.id,
+        serviceName: service.name,
+        bookingDate: bookingDateTime.toISOString(),
+        duration: service.duration || 60,
+        notes: formData.notes,
+        status: 'pending',
+        paymentStatus: 'pending',
+        createdFrom: 'website'
+      };
 
       const response = await axios.post(
         `${config.api.baseUrl}/api/bookings`,
+        bookingData,
         {
-          clientName: formData.clientName,
-          clientEmail: formData.clientEmail,
-          clientPhone: formData.clientPhone,
-          serviceId: service._id,
-          bookingDate: bookingDateTime,
-          notes: formData.notes,
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
       );
 
-      setSuccess('✅ Booking successful! Opening WhatsApp to confirm...');
+      setSuccess('✅ Booking successful! We will confirm via WhatsApp soon.');
       
       setTimeout(() => {
-        window.open(response.data.whatsappLink, '_blank');
+        // Try to open WhatsApp if available
+        if (formData.clientPhone) {
+          const whatsappNumber = formData.clientPhone.replace(/\D/g, '');
+          const message = `Hi! I'd like to book ${service.name} for ${formData.bookingDate} at ${formData.bookingTime}`;
+          window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        }
         onClose();
         resetForm();
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Booking failed. Please try again.');
+      console.error('Booking error:', err);
+      setError(err.response?.data?.error || err.response?.data?.message || 'Booking failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -232,7 +282,7 @@ export default function BookingModal({ isOpen, onClose, service }) {
 
           {/* Info */}
           <p className="text-xs text-center mt-4 font-inter" style={{ color: config.colors.secondary }}>
-            💬 You'll be connected to WhatsApp for confirmation
+            You'll be connected to WhatsApp for confirmation. Our team will reach out shortly.
           </p>
         </form>
       </div>

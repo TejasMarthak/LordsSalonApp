@@ -128,7 +128,7 @@ export default function Dashboard({ admin }) {
             icon={StarIcon}
           />
           <StatCard
-            label="Services"
+            label={`Live Services (${servicesCount})`}
             value={servicesCount}
             icon={BriefcaseIcon}
           />

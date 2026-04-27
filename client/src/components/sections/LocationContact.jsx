@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import config from '../../config';
 import loadGoogleMaps from '../../utils/loadGoogleMaps';
-import { PhoneIcon, EmailIcon, LocationIcon, InstagramIcon, FacebookIcon, WhatsAppIcon } from '../utils/Icons';
+import { PhoneIcon, EmailIcon, LocationIcon, InstagramIcon, FacebookIcon, WhatsAppIcon, ClockIcon } from '../utils/Icons';
 
 export default function LocationContact({ siteSettings }) {
   const mapRef = useRef(null);
@@ -18,6 +18,13 @@ export default function LocationContact({ siteSettings }) {
     longitude: parseFloat(import.meta.env.VITE_SALON_LNG) || 72.4644,
   };
   
+  // Get primary address from addresses array or contact
+  const primaryAddress = siteSettings?.addresses?.[0] || {
+    address: contact.address,
+    latitude: contact.latitude,
+    longitude: contact.longitude,
+  };
+  
   const social = siteSettings?.social || config.social || {};
   const businessHours = siteSettings?.businessHours || [
     { day: 'Monday', open: '10:00', close: '20:00', isClosed: false },
@@ -30,8 +37,8 @@ export default function LocationContact({ siteSettings }) {
   ];
 
   const salonCoordinates = {
-    lat: parseFloat(contact.latitude) || 23.0152,
-    lng: parseFloat(contact.longitude) || 72.4644,
+    lat: parseFloat(primaryAddress.latitude) || 23.0152,
+    lng: parseFloat(primaryAddress.longitude) || 72.4644,
   };
 
   const salonInfo = {
@@ -175,7 +182,7 @@ export default function LocationContact({ siteSettings }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Map - Full width on mobile, responsive height */}
           <div className="rounded-lg overflow-hidden shadow-xl" style={{ borderColor: config.colors.border, borderWidth: '1px' }}>
-            <div ref={mapRef} className="w-full md:h-96" style={{ height: '300px', backgroundColor: config.colors.light }}>
+            <div ref={mapRef} className="w-full h-72 sm:h-96 lg:h-full" style={{ minHeight: '400px', backgroundColor: config.colors.light }}>
               {mapLoading && (
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: config.colors.accent }}></div>
@@ -184,8 +191,9 @@ export default function LocationContact({ siteSettings }) {
               {mapError && (
                 <div className="w-full h-full flex items-center justify-center p-4">
                   <div className="text-center">
+                    <LocationIcon size={32} color={config.colors.secondary} className="mx-auto mb-2" />
                     <p style={{ color: config.colors.secondary }} className="font-inter text-sm">
-                      📍 Map unavailable
+                      Map unavailable
                     </p>
                     <p style={{ color: config.colors.textLight }} className="font-inter text-xs mt-2">
                       {salonInfo.address}
@@ -198,23 +206,51 @@ export default function LocationContact({ siteSettings }) {
 
           {/* Contact Information */}
           <div className="flex flex-col justify-center space-y-6 md:space-y-8">
-            {/* Address */}
+            {/* Addresses - Display all locations */}
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <LocationIcon size={28} color={config.colors.accent} />
                 <h3 className="font-playfair text-2xl" style={{ color: config.colors.primary }}>
-                  Location
+                  Our Locations
                 </h3>
               </div>
-              <p className="font-inter text-lg leading-relaxed" style={{ color: config.colors.secondary }}>
-                {salonInfo.address}
-              </p>
+              <div className="space-y-4">
+                {siteSettings?.addresses && siteSettings.addresses.length > 0 ? (
+                  siteSettings.addresses.map((addr, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-lg border"
+                      style={{ borderColor: config.colors.border, backgroundColor: config.colors.light }}
+                    >
+                      <p className="font-inter text-lg font-semibold mb-2" style={{ color: config.colors.primary }}>
+                        {addr.address}
+                      </p>
+                      {addr.googleMapsLink && (
+                        <a
+                          href={addr.googleMapsLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-inter transition-colors hover:opacity-80 inline-flex items-center gap-1"
+                          style={{ color: config.colors.accent }}
+                        >
+                          <LocationIcon size={14} color={config.colors.accent} />
+                          View on Google Maps
+                        </a>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="font-inter text-lg leading-relaxed" style={{ color: config.colors.secondary }}>
+                    {salonInfo.address}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Business Hours */}
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="font-inter text-xl" style={{ color: config.colors.accent }}>⏰</span>
+                <ClockIcon size={28} color={config.colors.accent} />
                 <h3 className="font-playfair text-2xl" style={{ color: config.colors.primary }}>
                   Business Hours
                 </h3>

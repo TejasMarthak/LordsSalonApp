@@ -135,23 +135,35 @@ export default function ContactManager() {
     try {
       const token = localStorage.getItem('adminToken');
       
-      // Save admin info
+      // Save admin profile info
       await axios.put(
         `${adminConfig.api.baseUrl}/api/auth/update-profile`,
         { name: admin.name, phone: admin.phone },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Save addresses and social
+      // Save site settings with contact info, addresses, social, and business hours
       await axios.put(
         `${adminConfig.api.baseUrl}/api/site-settings`,
-        { addresses, social },
+        { 
+          contact: {
+            phone: admin.phone,
+            email: admin.email,
+            address: addresses[0]?.address || '',
+            latitude: addresses[0]?.latitude || '',
+            longitude: addresses[0]?.longitude || '',
+          },
+          addresses, 
+          social,
+          businessHours
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setSuccess('All information saved successfully!');
+      setSuccess('✅ All information saved successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
+      console.error('Save error:', err);
       setError(err.response?.data?.error || 'Failed to save information');
     } finally {
       setSaving(false);
