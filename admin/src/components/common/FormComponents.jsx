@@ -19,6 +19,7 @@ export const AdminInput = ({
   min = undefined,
   max = undefined,
   step = undefined,
+  readOnly = false,
 }) => {
   const isTextarea = type === 'textarea';
   const Component = isTextarea ? 'textarea' : 'input';
@@ -42,9 +43,10 @@ export const AdminInput = ({
         min={min}
         max={max}
         step={step}
-        className={`w-full px-3 py-1.5 border-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${className} ${isTextarea ? 'resize-none' : ''} bg-white text-black border-gray-300 placeholder-gray-400`}
+        readOnly={readOnly}
+        className={`w-full px-3 py-1.5 border-2 rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent ${className} ${isTextarea ? 'resize-none' : ''} ${readOnly ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'} text-black border-gray-300 placeholder-gray-400`}
         onFocus={(e) => {
-          if (!error) {
+          if (!error && !readOnly) {
             e.target.style.borderColor = '#000000';
             e.target.style.boxShadow = '0 0 0 2px rgba(0, 0, 0, 0.1)';
           }

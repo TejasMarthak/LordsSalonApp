@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import config from '../../config';
+import ResponsiveCarousel from '../utils/ResponsiveCarousel';
 
 // Service Card Component
 function ServiceCard({ number, title, price, duration, index, service }) {
@@ -125,8 +126,6 @@ function ServiceCard({ number, title, price, duration, index, service }) {
 export default function ServiceSection() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAll, setShowAll] = useState(false);
-  const [displayCount, setDisplayCount] = useState(8);
 
   // Default services data
   const defaultServices = [
@@ -143,6 +142,26 @@ export default function ServiceSection() {
     { id: 11, name: 'Manicure', duration: 45, price: 350 },
     { id: 12, name: 'Waxing', duration: 30, price: 250 },
   ];
+
+  // Get responsive item count based on screen size
+  const getItemsPerView = () => {
+    if (typeof window === 'undefined') return 4;
+    const width = window.innerWidth;
+    if (width < 640) return 2;    // Mobile
+    if (width < 1024) return 3;   // Tablet
+    return 4;                      // Desktop
+  };
+
+  const [itemsPerView, setItemsPerView] = useState(getItemsPerView());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerView(getItemsPerView());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchServices();
@@ -165,52 +184,20 @@ export default function ServiceSection() {
     }
   };
 
-  const displayedServices = services.slice(0, displayCount);
-  const hasMoreServices = services.length > displayCount;
-
-  const handleShowMore = () => {
-    setShowAll(!showAll);
-    if (!showAll) {
-      // Smooth scroll to ensure user sees the new services
-      setTimeout(() => {
-        const element = document.getElementById('service-section');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }, 100);
-      setDisplayCount(services.length);
-    } else {
-      setDisplayCount(8);
-    }
-  };
+  const renderServiceCard = (service, index) => (
+    <ServiceCard
+      number={index + 1}
+      title={service.name || service.title}
+      price={service.price}
+      duration={service.duration}
+      index={index}
+      service={service}
+    />
+  );
 
   return (
     <section id="service-section" className="py-20 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-16 sm:mb-20">
-          <div className="flex items-center justify-center gap-3 mb-4 sm:mb-6">
-            <div className="w-8 sm:w-12 h-1" style={{ backgroundColor: config.colors.accent }}></div>
-            <span
-              className="font-inter text-xs sm:text-sm uppercase tracking-widest"
-              style={{ color: config.colors.accent }}
-            >
-              Premium Services
-            </span>
-            <div className="w-8 sm:w-12 h-1" style={{ backgroundColor: config.colors.accent }}></div>
-          </div>
-          <h2
-            className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 sm:mb-6"
-            style={{ color: config.colors.primary }}
-          >
-            Our Services
-          </h2>
-          <p className="font-inter text-base sm:text-lg md:text-xl max-w-2xl mx-auto" style={{ color: config.colors.secondary }}>
-            Comprehensive beauty and wellness services designed to enhance your natural beauty
-          </p>
-        </div>
-
-        {/* Services Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-12 sm:py-16">
             <div className="text-center">
@@ -228,71 +215,19 @@ export default function ServiceSection() {
             </div>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16">
-              {displayedServices.map((service, index) => (
-                <div
-                  key={service.id || index}
-                  className="animate-fadeIn"
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                    animation: 'fadeIn 0.6s ease-out forwards',
-                    opacity: 0,
-                  }}
-                >
-                  <ServiceCard
-                    number={index + 1}
-                    title={service.name || service.title}
-                    price={service.price}
-                    duration={service.duration}
-                    index={index}
-                    service={service}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Show More Button */}
-            {hasMoreServices && (
-              <div className="flex justify-center mt-12 sm:mt-16">
-                <button
-                  onClick={handleShowMore}
-                  className="px-8 sm:px-10 py-3 sm:py-4 font-inter text-sm sm:text-base uppercase tracking-wider font-semibold rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95"
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    color: config.colors.primary,
-                    border: `2px solid ${config.colors.primary}`,
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = config.colors.primary;
-                    e.target.style.color = '#FFFFFF';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = '#FFFFFF';
-                    e.target.style.color = config.colors.primary;
-                  }}
-                >
-                  {showAll ? 'Show Less' : 'Show More'}
-                </button>
-              </div>
-            )}
-          </>
+          <ResponsiveCarousel
+            items={services}
+            itemsPerView={itemsPerView}
+            renderItem={renderServiceCard}
+            title="Our Services"
+            description="Comprehensive beauty and wellness services designed to enhance your natural beauty"
+            accent={true}
+          />
         )}
       </div>
 
-      {/* CSS Animation for fade-in */}
+      {/* CSS Animation for spin */}
       <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
         @keyframes spin {
           to {
             transform: rotate(360deg);

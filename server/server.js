@@ -17,6 +17,7 @@ import sitemapRoutes from "./routes/sitemap.js";
 import contentRoutes from "./routes/content.js";
 import siteSettingsRoutes from "./routes/site-settings.js";
 import uploadRoutes from "./routes/upload.js";
+import discountsRoutes from "./routes/discounts.js";
 
 // Get the directory name in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -49,6 +50,7 @@ app.get("/", (req, res) => {
       portfolio: "/api/portfolio",
       staff: "/api/staff",
       bookings: "/api/bookings",
+      discounts: "/api/discounts",
       ratings: "/api/ratings",
       content: "/api/content",
       siteSettings: "/api/site-settings",
@@ -71,6 +73,7 @@ app.use("/api/services", servicesRoutes);
 app.use("/api/portfolio", portfolioRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/bookings", bookingsRoutes);
+app.use("/api/discounts", discountsRoutes);
 app.use("/api/ratings", ratingsRoutes);
 app.use("/api/content", contentRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);

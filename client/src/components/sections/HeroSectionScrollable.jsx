@@ -6,43 +6,84 @@ import axios from 'axios';
 export default function HeroSectionScrollable() {
   const navigate = useNavigate();
   const [heroData, setHeroData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Fetch in background without blocking
     fetchHeroData();
   }, []);
 
   const fetchHeroData = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${config.api.baseUrl}/api/content/hero`);
       if (response.data) {
         setHeroData(response.data);
       }
     } catch (err) {
       console.error('Error fetching hero data:', err);
-      setHeroData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Default hero content
-  const heroContent = heroData || {
-    headline: 'Elevate Your Beauty',
-    subheadline: 'Professional Makeup & Salon Services',
-    description: 'Experience sophisticated beauty artistry. Elevate your appearance with expert craftsmanship and premium services tailored to perfection.',
-    ctaText: 'Book Appointment',
-    ctaLink: '/booking',
-    heroImages: []
-  };
+  // Only use hero data if it exists (no placeholder data)
+  const heroContent = heroData;
+
+  // If no hero data is saved from admin, don't display the section
+  if (!heroContent && !loading) {
+    return null;
+  }
 
   // Get images (max 2)
-  const images = (heroContent.heroImages || []).slice(0, 2);
+  const images = (heroContent?.heroImages || []).slice(0, 2);
   const hasImages = images.length > 0;
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   // Determine layout
   const textFullWidth = !hasImages;
+
+  // Skeleton Loader Component
+  if (loading && !heroContent) {
+    return (
+      <section className="relative w-full h-screen overflow-hidden bg-white animate-pulse">
+        <div className="relative z-10 h-full flex items-center justify-center px-4 md:px-8 lg:px-16">
+          <div className="w-full h-full flex items-center gap-8 md:gap-12 lg:gap-16 justify-center">
+            {/* Skeleton Text Content */}
+            <div className="w-full md:flex-1 text-center md:text-left space-y-4">
+              {/* Skeleton Headline */}
+              <div className="h-16 md:h-20 lg:h-24 bg-gray-300 rounded-lg max-w-2xl mx-auto md:mx-0"></div>
+              
+              {/* Skeleton Subheadline */}
+              <div className="h-6 bg-gray-300 rounded-lg max-w-xl mx-auto md:mx-0"></div>
+              
+              {/* Skeleton Description */}
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-300 rounded-lg max-w-lg mx-auto md:mx-0"></div>
+                <div className="h-4 bg-gray-300 rounded-lg max-w-lg mx-auto md:mx-0"></div>
+              </div>
+              
+              {/* Skeleton Buttons */}
+              <div className="flex gap-4 pt-4 justify-center md:justify-start">
+                <div className="h-12 w-32 bg-gray-400 rounded-lg"></div>
+                <div className="h-12 w-32 bg-gray-400 rounded-lg"></div>
+              </div>
+            </div>
+
+            {/* Skeleton Image (Desktop) */}
+            {!isMobile && (
+              <div className="hidden md:flex md:flex-1 h-full items-center justify-end pr-4 md:pr-8">
+                <div className="flex flex-col gap-6">
+                  <div className="w-80 h-96 bg-gray-300 rounded-2xl"></div>
+                  <div className="w-80 h-96 bg-gray-300 rounded-2xl translate-x-10 translate-y-5"></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -75,7 +116,7 @@ export default function HeroSectionScrollable() {
                   marginRight: textFullWidth ? 'auto' : '0'
                 }}
               >
-                {heroContent.headline}
+                {heroContent?.headline}
               </h1>
 
               {/* Subheadline */}
@@ -87,7 +128,7 @@ export default function HeroSectionScrollable() {
                   marginRight: textFullWidth ? 'auto' : '0'
                 }}
               >
-                {heroContent.subheadline}
+                {heroContent?.subheadline}
               </p>
 
               {/* Description */}
@@ -99,16 +140,16 @@ export default function HeroSectionScrollable() {
                   marginRight: textFullWidth ? 'auto' : '0'
                 }}
               >
-                {heroContent.description}
+                {heroContent?.description}
               </p>
 
               {/* CTA Buttons */}
               <div className={`flex gap-4 pt-4 ${textFullWidth ? 'justify-center' : 'justify-start'} flex-wrap`}>
                 <button
                   onClick={() => {
-                    if (heroContent.ctaLink === '/booking') {
+                    if (heroContent?.ctaLink === '/booking') {
                       navigate('/booking');
-                    } else if (heroContent.ctaLink?.startsWith('#')) {
+                    } else if (heroContent?.ctaLink?.startsWith('#')) {
                       const elementId = heroContent.ctaLink.substring(1);
                       const element = document.getElementById(elementId);
                       if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -120,7 +161,7 @@ export default function HeroSectionScrollable() {
                     color: 'white'
                   }}
                 >
-                  {heroContent.ctaText}
+                  {heroContent?.ctaText}
                 </button>
                 <button
                   onClick={() => {

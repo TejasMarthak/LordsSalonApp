@@ -11,6 +11,7 @@ export default function DiscountManager() {
       title: 'New Year Discount',
       description: '20% off on all services',
       discountPercentage: 20,
+      occasion: 'New Year',
       validFrom: '2026-01-01',
       validTo: '2026-01-31',
       isActive: true,
@@ -22,6 +23,7 @@ export default function DiscountManager() {
     title: '',
     description: '',
     discountPercentage: '',
+    occasion: '',
     validFrom: '',
     validTo: '',
     isActive: true,
@@ -100,6 +102,7 @@ export default function DiscountManager() {
         title: '',
         description: '',
         discountPercentage: '',
+        occasion: '',
         validFrom: '',
         validTo: '',
         isActive: true,
@@ -116,7 +119,7 @@ export default function DiscountManager() {
 
   const handleEditDiscount = (discount) => {
     setFormData(discount);
-    setEditingId(discount.id);
+    setEditingId(discount._id);
     setShowForm(true);
     setError('');
   };
@@ -129,7 +132,7 @@ export default function DiscountManager() {
       await axios.delete(`${adminConfig.api.baseUrl}/api/discounts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setDiscounts((prev) => prev.filter((d) => d.id !== id));
+      setDiscounts((prev) => prev.filter((d) => d._id !== id));
       setSuccess('Discount deleted successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -138,7 +141,7 @@ export default function DiscountManager() {
   };
 
   const handleToggleActive = async (id) => {
-    const discount = discounts.find((d) => d.id === id);
+    const discount = discounts.find((d) => d._id === id);
     const updatedDiscount = { ...discount, isActive: !discount.isActive };
 
     try {
@@ -149,7 +152,7 @@ export default function DiscountManager() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setDiscounts((prev) =>
-        prev.map((d) => (d.id === id ? updatedDiscount : d))
+        prev.map((d) => (d._id === id ? updatedDiscount : d))
       );
       setSuccess('Discount status updated!');
       setTimeout(() => setSuccess(''), 3000);
@@ -163,6 +166,7 @@ export default function DiscountManager() {
       title: '',
       description: '',
       discountPercentage: '',
+      occasion: '',
       validFrom: '',
       validTo: '',
       isActive: true,
@@ -256,6 +260,14 @@ export default function DiscountManager() {
               onChange={handleInputChange}
               placeholder="Describe the discount or offer"
               rows={3}
+            />
+
+            <AdminInput
+              label="Occasion (e.g., Women's Day, Wedding Season)"
+              name="occasion"
+              value={formData.occasion}
+              onChange={handleInputChange}
+              placeholder="e.g., Women's Day"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

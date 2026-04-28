@@ -27,17 +27,35 @@ export default function DiscountBanner() {
     }
   };
 
-  // Only show banner if discounts are enabled and exist
-  const discountsEnabled = siteSettings?.featureToggles?.discountsEnabled !== false;
-  const hasActiveDiscount = discounts.length > 0;
+  // Get active discounts (check dates)
+  const now = new Date();
+  const activeDiscounts = discounts.filter(d => {
+    const from = new Date(d.validFrom);
+    const to = new Date(d.validTo);
+    return d.isActive && from <= now && to >= now;
+  });
 
-  if (!discountsEnabled || !hasActiveDiscount || loading) {
+  // Only show banner if active discounts exist
+  if (loading || activeDiscounts.length === 0) {
     return null;
   }
 
+  // Format dates
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   // Create scrolling text from discounts
-  const scrollText = discounts
-    .map((d) => `${d.discountPercentage}% OFF on ${d.title} | Code: ${d.code}`)
+  const scrollText = activeDiscounts
+    .map((d) => {
+      const from = formatDate(d.validFrom);
+      const to = formatDate(d.validTo);
+      return `${d.discountPercentage}% discount on ${d.occasion || d.title} services from ${from} to ${to}`;
+    })
     .join(' • ');
 
   return (
@@ -67,11 +85,11 @@ export default function DiscountBanner() {
           }
         `}</style>
         <div className="scroll-text font-inter font-semibold text-white px-4">
-          ✨ {scrollText} ✨
+          {scrollText}
         </div>
         {/* Duplicate for seamless loop */}
         <div className="scroll-text font-inter font-semibold text-white px-4">
-          ✨ {scrollText} ✨
+          {scrollText}
         </div>
       </div>
     </div>

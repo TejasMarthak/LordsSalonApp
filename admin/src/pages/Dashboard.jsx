@@ -19,9 +19,13 @@ export default function Dashboard({ admin }) {
   const navigate = useNavigate();
   const [portfolioCount, setPortfolioCount] = useState(0);
   const [servicesCount, setServicesCount] = useState(0);
-  const [featuredCount, setFeaturedCount] = useState(0);
+  const [bookingsCount, setBookingsCount] = useState(0);
+  const [siteSettings, setSiteSettings] = useState(null);
   const [recentItems, setRecentItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editingCard, setEditingCard] = useState(null);
+  const [editValue, setEditValue] = useState('');
+  const [saving, setSaving] = useState(false);
 
   // Map navigation IDs to icons
   const getIconFromId = (id) => {
@@ -57,6 +61,42 @@ export default function Dashboard({ admin }) {
     navigate(getPathFromId(navId));
   };
 
+  const handleSaveEdit = async (cardId) => {
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('adminToken');
+      const headers = { Authorization: `Bearer ${token}` };
+
+      const updatedStats = { ...siteSettings.stats };
+      
+      if (cardId === 'happyClients') {
+        updatedStats.happyClients = parseInt(editValue);
+      } else if (cardId === 'totalBookings') {
+        updatedStats.totalBookings = parseInt(editValue);
+      } else if (cardId === 'rating') {
+        updatedStats.averageRating = parseFloat(editValue);
+      }
+
+      await axios.put(
+        `${adminConfig.api.baseUrl}/api/site-settings`,
+        { stats: updatedStats },
+        { headers }
+      );
+
+      // Update local state
+      setSiteSettings(prev => ({
+        ...prev,
+        stats: updatedStats
+      }));
+
+      setEditingCard(null);
+    } catch (err) {
+      console.error('Error saving edit:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
   }, []);
@@ -64,18 +104,22 @@ export default function Dashboard({ admin }) {
   const fetchStats = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('adminToken');
+      const headers = { Authorization: `Bearer ${token}` };
       
-      const [portfolioRes, servicesRes] = await Promise.all([
+      const [portfolioRes, servicesRes, settingsRes, bookingsRes] = await Promise.all([
         axios.get(`${adminConfig.api.baseUrl}/api/portfolio`),
         axios.get(`${adminConfig.api.baseUrl}/api/services`),
+        axios.get(`${adminConfig.api.baseUrl}/api/site-settings`),
+        axios.get(`${adminConfig.api.baseUrl}/api/bookings`, { headers }),
       ]);
 
       const portfolio = portfolioRes.data || [];
-      const featured = portfolio.filter((item) => item.featured).length;
       
       setPortfolioCount(portfolio.length);
-      setFeaturedCount(featured);
       setServicesCount(servicesRes.data?.length || 0);
+      setSiteSettings(settingsRes.data);
+      setBookingsCount(bookingsRes.data?.length || 0);
       setRecentItems(portfolio.slice(0, 5)); // Last 5 items
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -84,7 +128,7 @@ export default function Dashboard({ admin }) {
     }
   };
 
-  const StatCard = ({ label, value, icon: Icon }) => (
+  const StatCard = ({ label, value, icon: Icon, editable = false, cardId = null }) => (
     <div className="p-4 sm:p-5 rounded-lg border bg-white hover:shadow-md hover:border-gray-400 transition-all duration-300 group border-gray-200">
       <div className="flex items-start gap-3">
         <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-gray-50 flex-shrink-0 group-hover:scale-105 transition-transform">
@@ -94,9 +138,41 @@ export default function Dashboard({ admin }) {
           <p className="text-xs font-medium text-gray-600 truncate">
             {label}
           </p>
-          <p className="text-2xl font-bold mt-1 text-black group-hover:text-gray-800 truncate">
-            {value}
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-2xl font-bold text-black group-hover:text-gray-800 truncate">
+              {editingCard === cardId && editable ? (
+                <input
+                  type="number"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="w-full px-2 py-1 text-lg border border-black rounded"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveEdit(cardId);
+                    if (e.key === 'Escape') setEditingCard(null);
+                  }}
+                />
+              ) : (
+                value
+              )}
+            </p>
+            {editable && (
+              <button
+                onClick={() => {
+                  if (editingCard === cardId) {
+                    handleSaveEdit(cardId);
+                  } else {
+                    setEditingCard(cardId);
+                    setEditValue(value.toString());
+                  }
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
+                disabled={saving}
+              >
+                {editingCard === cardId ? (saving ? 'Saving...' : 'Save') : 'Edit'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -115,27 +191,38 @@ export default function Dashboard({ admin }) {
       </div>
 
       {/* Stats Grid */}
-      {!loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {!loading && siteSettings ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
           <StatCard
             label="Portfolio Items"
             value={portfolioCount}
             icon={GalleryIcon}
           />
           <StatCard
-            label="Featured Items"
-            value={featuredCount}
+            label="Ratings"
+            value={`${siteSettings?.stats?.averageRating || 4.8}/5`}
             icon={StarIcon}
+            editable={true}
+            cardId="rating"
           />
           <StatCard
-            label={`Live Services (${servicesCount})`}
+            label={`Services`}
             value={servicesCount}
             icon={BriefcaseIcon}
           />
           <StatCard
-            label="Admin Panels"
-            value="8"
+            label="Happy Clients"
+            value={siteSettings?.stats?.happyClients || 500}
             icon={SettingsIcon}
+            editable={true}
+            cardId="happyClients"
+          />
+          <StatCard
+            label="Total Bookings"
+            value={siteSettings?.stats?.totalBookings || bookingsCount}
+            icon={ImageIcon}
+            editable={true}
+            cardId="totalBookings"
           />
         </div>
       ) : (

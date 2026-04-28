@@ -59,6 +59,11 @@ const siteSettingsSchema = new mongoose.Schema(
       headerFont: { type: String, default: "Playfair Display" },
       bodyFont: { type: String, default: "Inter" },
     },
+    stats: {
+      happyClients: { type: Number, default: 500 },
+      totalBookings: { type: Number, default: 400 },
+      averageRating: { type: Number, default: 4.8 },
+    },
   },
   { timestamps: true },
 );

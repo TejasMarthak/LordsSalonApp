@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import config from '../../config';
+import ResponsiveCarousel from '../utils/ResponsiveCarousel';
 
 // Image Carousel Component for Before/After
 function ImageCarousel({ beforeImage, afterImage, title }) {
@@ -75,6 +76,66 @@ function ImageCarousel({ beforeImage, afterImage, title }) {
   );
 }
 
+// Portfolio Card Component
+function PortfolioCard({ item, onCardClick }) {
+  return (
+    <div
+      className="group cursor-pointer rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white h-full"
+      onClick={() => onCardClick(item._id)}
+    >
+      {/* Image Container with Carousel */}
+      <div 
+        className="relative w-full overflow-hidden" 
+        style={{ aspectRatio: '4/5', backgroundColor: config.colors.lightBg }}
+      >
+        <ImageCarousel 
+          beforeImage={item.beforeImageUrl}
+          afterImage={item.imageUrl}
+          title={item.title}
+        />
+        
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" 
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <button
+            className="px-6 py-3 rounded-lg font-semibold text-white transition-all hover:scale-105"
+            style={{ backgroundColor: config.colors.buttonColor }}
+          >
+            View Details
+          </button>
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="p-4 md:p-6">
+        {/* Category Badge */}
+        <p className="font-inter text-xs uppercase tracking-widest mb-2" style={{ color: config.colors.accent }}>
+          {item.category}
+        </p>
+        
+        {/* Title */}
+        <h3 className="font-playfair text-lg md:text-xl font-light mb-2" style={{ color: config.colors.primary }}>
+          {item.title}
+        </h3>
+
+        {/* Description */}
+        <p className="font-inter text-sm line-clamp-2" style={{ color: config.colors.secondary }}>
+          {item.description || 'Beautiful transformation in our lookbook'}
+        </p>
+
+        {/* Before/After Indicator */}
+        {item.beforeImageUrl && (
+          <div className="mt-4 pt-4 border-t" style={{ borderColor: config.colors.border }}>
+            <p className="font-inter text-xs" style={{ color: config.colors.textLight }}>
+              ✓ Before & After images • Switches every 5 seconds
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Lookbook() {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
@@ -82,6 +143,26 @@ export default function Lookbook() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+
+  // Get responsive item count based on screen size
+  const getItemsPerView = () => {
+    if (typeof window === 'undefined') return 3;
+    const width = window.innerWidth;
+    if (width < 640) return 1;    // Mobile
+    if (width < 1024) return 2;   // Tablet
+    return 3;                      // Desktop
+  };
+
+  const [itemsPerView, setItemsPerView] = useState(getItemsPerView());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerView(getItemsPerView());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     // Fetch categories (services) on mount
@@ -128,11 +209,15 @@ export default function Lookbook() {
     navigate(`/lookbook/${itemId}`);
   };
 
+  const renderPortfolioCard = (item) => (
+    <PortfolioCard item={item} onCardClick={handleCardClick} />
+  );
+
   return (
     <section className="py-24 px-6 md:px-12" style={{ backgroundColor: config.colors.white }}>
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-12 h-1" style={{ backgroundColor: config.colors.accent }}></div>
             <span className="font-inter text-xs uppercase tracking-widest" style={{ color: config.colors.accent }}>Gallery</span>
@@ -177,7 +262,7 @@ export default function Lookbook() {
           ))}
         </div>
 
-        {/* Grid of Portfolio Cards */}
+        {/* Portfolio Carousel */}
         {loading ? (
           <div className="text-center py-12">
             <p className="font-inter" style={{ color: config.colors.secondary }}>Loading portfolio...</p>
@@ -187,65 +272,14 @@ export default function Lookbook() {
             <p className="font-inter" style={{ color: config.colors.secondary }}>No portfolio items in this category</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((item) => (
-              <div
-                key={item._id}
-                className="group cursor-pointer rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 bg-white"
-                onClick={() => handleCardClick(item._id)}
-              >
-                {/* Image Container with Carousel */}
-                <div 
-                  className="relative w-full overflow-hidden" 
-                  style={{ aspectRatio: '4/5', backgroundColor: config.colors.lightBg }}
-                >
-                  <ImageCarousel 
-                    beforeImage={item.beforeImageUrl}
-                    afterImage={item.imageUrl}
-                    title={item.title}
-                  />
-                  
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center" 
-                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <button
-                      className="px-6 py-3 rounded-lg font-semibold text-white transition-all hover:scale-105"
-                      style={{ backgroundColor: config.colors.buttonColor }}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="p-4 md:p-6">
-                  {/* Category Badge */}
-                  <p className="font-inter text-xs uppercase tracking-widest mb-2" style={{ color: config.colors.accent }}>
-                    {item.category}
-                  </p>
-                  
-                  {/* Title */}
-                  <h3 className="font-playfair text-lg md:text-xl font-light mb-2" style={{ color: config.colors.primary }}>
-                    {item.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="font-inter text-sm line-clamp-2" style={{ color: config.colors.secondary }}>
-                    {item.description || 'Beautiful transformation in our lookbook'}
-                  </p>
-
-                  {/* Before/After Indicator */}
-                  {item.beforeImageUrl && (
-                    <div className="mt-4 pt-4 border-t" style={{ borderColor: config.colors.border }}>
-                      <p className="font-inter text-xs" style={{ color: config.colors.textLight }}>
-                        ✓ Before & After images • Switches every 5 seconds
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <ResponsiveCarousel
+            items={items}
+            itemsPerView={itemsPerView}
+            renderItem={renderPortfolioCard}
+            title={null}
+            description={null}
+            accent={false}
+          />
         )}
       </div>
     </section>

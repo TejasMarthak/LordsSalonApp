@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import config from '../../config';
 
-const Counter = ({ end, label, icon }) => {
+const Counter = ({ end, label, icon, isRating = false, showPlus = true }) => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -11,7 +11,8 @@ const Counter = ({ end, label, icon }) => {
 
     const animate = () => {
       setCount(prev => {
-        const newCount = Math.min(prev + Math.ceil(end / 30), end);
+        const increment = isRating ? 0.1 : Math.ceil(end / 30);
+        const newCount = Math.min(prev + increment, end);
         if (newCount < end && isMounted) {
           animationFrame = requestAnimationFrame(animate);
         }
@@ -35,7 +36,7 @@ const Counter = ({ end, label, icon }) => {
       cancelAnimationFrame(animationFrame);
       observer.disconnect();
     };
-  }, [end, label]);
+  }, [end, label, isRating]);
 
   return (
     <div
@@ -53,8 +54,17 @@ const Counter = ({ end, label, icon }) => {
         )}
       </div>
       <div className="font-playfair text-4xl md:text-5xl font-bold mb-2" style={{ color: config.colors.buttonColor }}>
-        {count}+
+        {isRating ? count.toFixed(1) : Math.floor(count)}{showPlus && !isRating ? '+' : ''}
       </div>
+      {isRating && (
+        <div className="flex justify-center gap-1 mb-2">
+          {[...Array(5)].map((_, i) => (
+            <span key={i} className="text-xl">
+              {i < Math.floor(count) ? '★' : i < count ? '✨' : '☆'}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="font-inter text-gray-600 text-sm md:text-base font-semibold uppercase tracking-wider">
         {label}
       </div>
@@ -64,24 +74,25 @@ const Counter = ({ end, label, icon }) => {
 
 export default function CustomerCounterSection() {
   const [stats, setStats] = useState({
-    totalClients: 500,
-    totalBookings: 1200,
+    happyClients: 500,
+    totalBookings: 400,
     totalServices: 8,
-    yearsExperience: 5,
+    averageRating: 4.8,
   });
 
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [bookingsRes, servicesRes] = await Promise.all([
-          axios.get(`${config.api.baseUrl}/api/bookings`).catch(() => ({ data: [] })),
+        const [settingsRes, servicesRes] = await Promise.all([
+          axios.get(`${config.api.baseUrl}/api/site-settings`).catch(() => ({ data: {} })),
           axios.get(`${config.api.baseUrl}/api/services`).catch(() => ({ data: [] })),
         ]);
 
         setStats(prev => ({
-          ...prev,
-          totalBookings: bookingsRes.data?.length || prev.totalBookings,
+          happyClients: settingsRes.data?.stats?.happyClients || prev.happyClients,
+          totalBookings: settingsRes.data?.stats?.totalBookings || prev.totalBookings,
           totalServices: servicesRes.data?.length || prev.totalServices,
+          averageRating: settingsRes.data?.stats?.averageRating || prev.averageRating,
         }));
       } catch (err) {
         console.error('Error loading statistics:', err);
@@ -107,8 +118,9 @@ export default function CustomerCounterSection() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           <Counter
-            end={stats.totalClients}
+            end={stats.happyClients}
             label="Happy Clients"
+            showPlus={true}
             icon={
               <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={config.colors.buttonColor} strokeWidth={2}>
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -122,6 +134,7 @@ export default function CustomerCounterSection() {
           <Counter
             end={stats.totalBookings}
             label="Total Bookings"
+            showPlus={true}
             icon={
               <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={config.colors.buttonColor} strokeWidth={2}>
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -134,7 +147,8 @@ export default function CustomerCounterSection() {
 
           <Counter
             end={stats.totalServices}
-            label="Services Offered"
+            label="Services"
+            showPlus={false}
             icon={
               <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={config.colors.buttonColor} strokeWidth={2}>
                 <path d="M6 9l6-7 6 7M9 20h6M9 17h6" />
@@ -143,12 +157,13 @@ export default function CustomerCounterSection() {
           />
 
           <Counter
-            end={stats.yearsExperience}
-            label="Years Experience"
+            end={stats.averageRating}
+            label="Average Rating"
+            isRating={true}
+            showPlus={false}
             icon={
               <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={config.colors.buttonColor} strokeWidth={2}>
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
+                <polygon points="12 2 15.09 10.26 23.77 10.26 17.43 15.62 20.53 23.78 12 18.42 3.47 23.78 6.57 15.62 0.23 10.26 8.91 10.26 12 2" />
               </svg>
             }
           />

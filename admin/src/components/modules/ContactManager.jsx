@@ -142,7 +142,7 @@ export default function ContactManager() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Save site settings with contact info, addresses, social, and business hours
+      // Save site settings with contact info, addresses, and social
       await axios.put(
         `${adminConfig.api.baseUrl}/api/site-settings`,
         { 
@@ -154,8 +154,7 @@ export default function ContactManager() {
             longitude: addresses[0]?.longitude || '',
           },
           addresses, 
-          social,
-          businessHours
+          social
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -233,7 +232,7 @@ export default function ContactManager() {
               label="Email Address"
               type="email"
               value={admin.email}
-              disabled={true}
+              readOnly={true}
               placeholder="contact@lordssalon.com"
               title="Email cannot be changed"
             />

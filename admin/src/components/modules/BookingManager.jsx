@@ -7,7 +7,6 @@ import { SaveIcon, AlertIcon, SuccessIcon, DeleteIcon, LoadingIcon, EditIcon } f
 export default function BookingManager() {
   const [bookings, setBookings] = useState([]);
   const [services, setServices] = useState([]);
-  const [staffMembers, setStaffMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +25,6 @@ export default function BookingManager() {
     notes: '',
     status: 'pending',
     paymentStatus: 'pending',
-    assignedStaff: '',
     createdFrom: 'website',
   });
 
@@ -44,15 +42,13 @@ export default function BookingManager() {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [bookingsRes, servicesRes, staffRes] = await Promise.all([
+      const [bookingsRes, servicesRes] = await Promise.all([
         axios.get(`${adminConfig.api.baseUrl}/api/bookings`, { headers }),
         axios.get(`${adminConfig.api.baseUrl}/api/services`, { headers }),
-        axios.get(`${adminConfig.api.baseUrl}/api/staff`, { headers }),
       ]);
 
       setBookings(bookingsRes.data || []);
       setServices(servicesRes.data || []);
-      setStaffMembers(staffRes.data || []);
     } catch (err) {
       console.error('Error loading data:', err);
       setError('Failed to load bookings');
@@ -80,7 +76,6 @@ export default function BookingManager() {
       notes: '',
       status: 'pending',
       paymentStatus: 'pending',
-      assignedStaff: '',
       createdFrom: 'website',
     });
     setEditingId(null);
@@ -117,7 +112,6 @@ export default function BookingManager() {
         notes: formData.notes,
         status: formData.status,
         paymentStatus: formData.paymentStatus,
-        assignedStaff: formData.assignedStaff || undefined,
         totalPrice: selectedService?.price || 0,
         createdFrom: formData.createdFrom,
       };
@@ -160,7 +154,6 @@ export default function BookingManager() {
       notes: booking.notes,
       status: booking.status,
       paymentStatus: booking.paymentStatus,
-      assignedStaff: booking.assignedStaff || '',
       createdFrom: booking.createdFrom,
     });
     setEditingId(booking._id);
@@ -359,38 +352,19 @@ export default function BookingManager() {
               </div>
             </div>
 
-            {/* Assigned Staff */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                  Assign Staff (Optional)
-                </label>
-                <select
-                  value={formData.assignedStaff}
-                  onChange={(e) => handleFormChange('assignedStaff', e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none"
-                  style={{ borderColor: adminConfig.colors.border }}
-                >
-                  <option value="">No staff assigned</option>
-                  {staffMembers.map(s => (
-                    <option key={s._id} value={s._id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                  Notes (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={formData.notes}
-                  onChange={(e) => handleFormChange('notes', e.target.value)}
-                  placeholder="Any special notes..."
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none"
-                  style={{ borderColor: adminConfig.colors.border }}
-                />
-              </div>
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
+                Notes (Optional)
+              </label>
+              <input
+                type="text"
+                value={formData.notes}
+                onChange={(e) => handleFormChange('notes', e.target.value)}
+                placeholder="Any special notes..."
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none"
+                style={{ borderColor: adminConfig.colors.border }}
+              />
             </div>
 
             {/* Action Buttons */}

@@ -14,13 +14,14 @@ export default function HeroManager() {
     heroImages: [],
   });
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
   useEffect(() => {
+    // Fetch in background without blocking render
     fetchHeroContent();
   }, []);
 
@@ -232,10 +233,10 @@ export default function HeroManager() {
         </div>
       )}
 
-      {fetching && !heroContent.headline && (
+      {fetching && (
         <div className="p-4 rounded-lg border-l-4 border-blue-500 bg-blue-50 flex items-start gap-2">
-          <LoadingIcon size={18} color="#0366D6" className="flex-shrink-0 mt-0.5" />
-          <p className="font-inter text-sm text-blue-700">Loading hero section...</p>
+          <LoadingIcon size={18} color="#0366D6" className="flex-shrink-0 mt-0.5 animate-spin" />
+          <p className="font-inter text-sm text-blue-700">Loading saved hero content...</p>
         </div>
       )}
 

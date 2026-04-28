@@ -54,14 +54,11 @@ export default function PortfolioManager() {
   const [items, setItems] = useState([]);
   const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({
-    title: '',
     category: '',
-    description: '',
     imageFile: null,
     imageUrl: '',
     beforeImageFile: null,
     beforeImageUrl: '',
-    featured: false,
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -183,12 +180,9 @@ export default function PortfolioManager() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const submitData = {
-        title: formData.title,
         category: formData.category,
-        description: formData.description,
         imageUrl,
         beforeImageUrl: beforeImageUrl || undefined,
-        featured: formData.featured,
       };
 
       if (editingId) {
@@ -219,14 +213,11 @@ export default function PortfolioManager() {
 
   const handleEdit = (item) => {
     setFormData({
-      title: item.title,
       category: item.category,
-      description: item.description,
       imageFile: null,
       imageUrl: item.imageUrl,
       beforeImageFile: null,
       beforeImageUrl: item.beforeImageUrl || '',
-      featured: item.featured || false,
     });
     setEditingId(item._id);
   };
@@ -250,14 +241,11 @@ export default function PortfolioManager() {
 
   const resetForm = () => {
     setFormData({
-      title: '',
       category: services.length > 0 ? services[0].name : '',
-      description: '',
       imageFile: null,
       imageUrl: '',
       beforeImageFile: null,
       beforeImageUrl: '',
-      featured: false,
     });
     setEditingId(null);
   };
@@ -301,21 +289,6 @@ export default function PortfolioManager() {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-bold mb-2 uppercase text-black">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Bridal Makeup Look"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
-                />
-              </div>
-
               {/* Category */}
               <div>
                 <label className="block text-sm font-bold mb-2 uppercase text-black">
@@ -375,34 +348,6 @@ export default function PortfolioManager() {
                     Current: {formData.beforeImageUrl.substring(0, 25)}...
                   </p>
                 )}
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-bold mb-2 uppercase text-black">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe this portfolio item"
-                  rows="3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
-                />
-              </div>
-
-              {/* Featured Checkbox */}
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  id="featured"
-                  checked={formData.featured}
-                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                  className="w-4 h-4 rounded accent-black"
-                />
-                <label htmlFor="featured" className="text-sm text-black font-medium">
-                  Featured on homepage
-                </label>
               </div>
 
               {/* Upload Progress */}
