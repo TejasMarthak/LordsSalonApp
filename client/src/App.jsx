@@ -18,7 +18,30 @@ import BookingPage from './pages/BookingPage';
 import axios from 'axios';
 
 // Home Page Component
+// OPTIMIZATION: Fetches hero data and passes it to HeroSectionScrollable
+// This eliminates the separate API call and race conditions
 function HomePage({ siteSettings }) {
+  const [heroData, setHeroData] = useState(null);
+  const [heroLoading, setHeroLoading] = useState(true);
+
+  // Fetch hero data when component mounts
+  useEffect(() => {
+    const fetchHero = async () => {
+      try {
+        setHeroLoading(true);
+        const response = await axios.get(`${config.api.baseUrl}/api/content/hero`);
+        if (response.data) {
+          setHeroData(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching hero data:', err);
+      } finally {
+        setHeroLoading(false);
+      }
+    };
+    fetchHero();
+  }, []);
+
   return (
     <>
       <SEO
@@ -31,8 +54,8 @@ function HomePage({ siteSettings }) {
       <div className="min-h-screen bg-white overflow-x-hidden">
         <Header />
         <DiscountBanner />
-        <main className="pt-0">
-          <HeroSectionScrollable />
+        <main className="pt-16 sm:pt-20 md:pt-0">
+          <HeroSectionScrollable heroData={heroData} isLoading={heroLoading} />
           <CustomerCounterSection />
           <section id="services">
             <ServiceSection />
@@ -59,7 +82,7 @@ export default function App() {
   useJsonLd(generateLocalBusinessSchema());
   useJsonLd(generateOrganizationSchema());
 
-  // Fetch site settings and content from MongoDB on mount
+  // Fetch site settings and content from MongoDB on mount (only once)
   useEffect(() => {
     const fetchSiteData = async () => {
       try {
@@ -80,9 +103,8 @@ export default function App() {
 
     fetchSiteData();
     
-    // Refresh site settings every 30 seconds (in case admin makes changes)
-    const interval = setInterval(fetchSiteData, 30000);
-    return () => clearInterval(interval);
+    // No polling - data updates happen via WebSocket events or manual refresh
+    // This eliminates 2,880 unnecessary API calls per user per day
   }, []);
 
   if (loading) {
@@ -96,7 +118,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Header />
-      <main className="pt-0">
+      <main className="pt-16 sm:pt-20 md:pt-0">
         <Routes>
           <Route path="/" element={<HomePage siteSettings={siteSettings} />} />
           <Route path="/booking" element={

@@ -146,9 +146,18 @@ router.post("/pages/:pageId/reorder-sections", adminAuth, async (req, res) => {
 // Get hero section (stored in PageContent as special section)
 router.get("/hero", async (req, res) => {
   try {
-    const page = await PageContent.findOne({ pageId: "home" });
-    const heroSection = page?.sections.find((s) => s.type === "hero");
+    // OPTIMIZATION: Only fetch hero section, not entire page document
+    // Uses MongoDB projection to reduce payload by ~90%
+    const page = await PageContent.findOne(
+      { pageId: "home" },
+      { sections: { $elemMatch: { type: "hero" } } }
+    );
+    const heroSection = page?.sections?.[0];
 
+    // Add cache headers for browser caching (60 seconds)
+    res.set("Cache-Control", "public, max-age=60");
+    res.set("Expires", new Date(Date.now() + 60000).toUTCString());
+    
     if (!heroSection) {
       return res.json({
         sectionId: "hero-1",

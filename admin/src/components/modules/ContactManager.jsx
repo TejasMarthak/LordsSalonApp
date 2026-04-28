@@ -232,11 +232,9 @@ export default function ContactManager() {
               label="Email Address"
               type="email"
               value={admin.email}
-              readOnly={true}
+              onChange={(e) => handleAdminChange('email', e.target.value)}
               placeholder="contact@lordssalon.com"
-              title="Email cannot be changed"
             />
-            <p className="text-xs text-gray-500 mt-1">Email address is read-only for security</p>
           </div>
         </div>
 

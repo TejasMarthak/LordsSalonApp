@@ -1,37 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../config';
-import axios from 'axios';
 
-export default function HeroSectionScrollable() {
+// OPTIMIZATION: HeroSectionScrollable now accepts heroData as prop (passed from parent)
+// This eliminates the separate API call, race conditions, and reduces network overhead
+// Props:
+//   - heroData: Hero section data object
+//   - isLoading: Loading state boolean
+export default function HeroSectionScrollable({ heroData = null, isLoading = false }) {
   const navigate = useNavigate();
-  const [heroData, setHeroData] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Fetch in background without blocking
-    fetchHeroData();
-  }, []);
-
-  const fetchHeroData = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${config.api.baseUrl}/api/content/hero`);
-      if (response.data) {
-        setHeroData(response.data);
-      }
-    } catch (err) {
-      console.error('Error fetching hero data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Only use hero data if it exists (no placeholder data)
+  // Use data from parent prop instead of separate fetch
   const heroContent = heroData;
 
   // If no hero data is saved from admin, don't display the section
-  if (!heroContent && !loading) {
+  if (!heroContent && !isLoading) {
     return null;
   }
 
@@ -44,9 +27,9 @@ export default function HeroSectionScrollable() {
   const textFullWidth = !hasImages;
 
   // Skeleton Loader Component
-  if (loading && !heroContent) {
+  if (isLoading && !heroContent) {
     return (
-      <section className="relative w-full h-screen overflow-hidden bg-white animate-pulse">
+      <section className="relative w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[700px] overflow-hidden bg-white animate-pulse">
         <div className="relative z-10 h-full flex items-center justify-center px-4 md:px-8 lg:px-16">
           <div className="w-full h-full flex items-center gap-8 md:gap-12 lg:gap-16 justify-center">
             {/* Skeleton Text Content */}
@@ -87,13 +70,13 @@ export default function HeroSectionScrollable() {
 
   return (
     <>
-      <section className="relative w-full h-screen overflow-hidden bg-white">
+      <section className="relative w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[700px] overflow-hidden bg-white">
 
         {/* Content Container */}
-        <div className="relative z-10 h-full flex items-center justify-center px-4 md:px-8 lg:px-16">
+        <div className="relative z-10 h-full flex items-start justify-center px-4 md:px-8 lg:px-16 pt-12 md:pt-16 lg:pt-20">
           {/* Main Layout Container */}
           <div
-            className={`w-full h-full flex items-center gap-8 md:gap-12 lg:gap-16 ${
+            className={`w-full h-full flex items-start gap-8 md:gap-12 lg:gap-16 ${
               textFullWidth ? 'justify-center' : 'justify-between'
             }`}
           >
@@ -109,11 +92,12 @@ export default function HeroSectionScrollable() {
 
               {/* Main Headline */}
               <h1
-                className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-tight mb-4 text-black"
+                className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light leading-tight mb-4 text-black mt-0"
                 style={{
                   maxWidth: textFullWidth ? '800px' : 'none',
                   marginLeft: textFullWidth ? 'auto' : '0',
-                  marginRight: textFullWidth ? 'auto' : '0'
+                  marginRight: textFullWidth ? 'auto' : '0',
+                  marginTop: '0'
                 }}
               >
                 {heroContent?.headline}
@@ -203,6 +187,7 @@ export default function HeroSectionScrollable() {
                           src={image}
                           alt={`Hero Image ${index + 1}`}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                         />
                         {/* Subtle overlay for depth */}
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10 pointer-events-none"></div>
@@ -236,6 +221,7 @@ export default function HeroSectionScrollable() {
                         src={image}
                         alt={`Hero Image ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                   ))}

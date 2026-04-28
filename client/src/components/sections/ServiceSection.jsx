@@ -100,12 +100,13 @@ function ServiceCard({ number, title, price, duration, index, service }) {
               onClick={() => navigate('/booking')}
               className="w-full mt-3 py-2.5 px-4 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300 hover:shadow-lg active:scale-95"
               style={{
-                backgroundColor: config.colors.accent,
-                color: '#FFFFFF',
+                backgroundColor: '#FFFFFF',
+                color: '#1A1A1A',
+                border: '1px solid #E5E7EB'
               }}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = `0 8px 16px rgba(212, 175, 55, 0.3)`;
+                e.target.style.boxShadow = `0 8px 16px rgba(0, 0, 0, 0.15)`;
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = 'translateY(0)';
@@ -139,15 +140,13 @@ export default function ServiceSection() {
     { id: 8, name: 'Hair Threading', duration: 30, price: 200 },
     { id: 9, name: 'Hair Coloring', duration: 120, price: 1200 },
     { id: 10, name: 'Facial Treatment', duration: 60, price: 800 },
-    { id: 11, name: 'Manicure', duration: 45, price: 350 },
-    { id: 12, name: 'Waxing', duration: 30, price: 250 },
   ];
 
   // Get responsive item count based on screen size
   const getItemsPerView = () => {
     if (typeof window === 'undefined') return 4;
     const width = window.innerWidth;
-    if (width < 640) return 2;    // Mobile
+    if (width < 640) return 1;    // Mobile
     if (width < 1024) return 3;   // Tablet
     return 4;                      // Desktop
   };

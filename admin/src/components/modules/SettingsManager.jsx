@@ -36,14 +36,29 @@ export default function SettingsManager() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await axios.get(`${adminConfig.api.baseUrl}/api/site-settings`);
+        const token = localStorage.getItem('adminToken');
+        
+        // Fetch admin info
+        const adminRes = await axios.get(`${adminConfig.api.baseUrl}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (adminRes.data) {
+          setUserInfo({
+            name: adminRes.data.name || 'Admin',
+            email: adminRes.data.email || 'admin@lords-salon.com',
+          });
+        }
+        
+        // Fetch site settings
+        const settingsRes = await axios.get(`${adminConfig.api.baseUrl}/api/site-settings`);
         // Only use API businessHours if they exist and are not empty
-        if (response.data.businessHours && response.data.businessHours.length > 0) {
-          setBusinessHours(response.data.businessHours);
+        if (settingsRes.data.businessHours && settingsRes.data.businessHours.length > 0) {
+          setBusinessHours(settingsRes.data.businessHours);
         }
         // Load feature toggles
-        if (response.data.featureToggles) {
-          setFeatureToggles(response.data.featureToggles);
+        if (settingsRes.data.featureToggles) {
+          setFeatureToggles(settingsRes.data.featureToggles);
         }
       } catch (err) {
         console.error('Failed to load settings:', err);

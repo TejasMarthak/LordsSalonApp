@@ -102,15 +102,11 @@ router.patch("/:id", adminAuth, async (req, res) => {
 // Cancel booking (admin only)
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status: "cancelled" },
-      { new: true },
-    );
+    const booking = await Booking.findByIdAndDelete(req.params.id);
 
     if (!booking) return res.status(404).json({ error: "Booking not found" });
 
-    res.json({ message: "Booking cancelled successfully", booking });
+    res.json({ message: "Booking deleted successfully", booking });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
