@@ -58,9 +58,6 @@ export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSide
             <h1 className="font-playfair text-2xl sm:text-3xl font-bold" style={{ color: adminConfig.colors.primary }}>
               Dashboard
             </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-            </div>
           </div>
         </div>
 
