@@ -45,13 +45,19 @@ router.post("/", adminAuth, upload.single("image"), async (req, res) => {
     }
 
     const imageId = path.parse(req.file.filename).name;
+    // Construct full URL including protocol and host
+    const protocol = req.protocol || 'http';
+    const host = req.get('host') || 'localhost:5000';
+    const fullUrl = `${protocol}://${host}/uploads/images/${req.file.filename}`;
+    const relativeUrl = `/uploads/images/${req.file.filename}`;
+    
     const uploadedImage = new UploadedImage({
       imageId,
       filename: req.file.filename,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      url: `/uploads/images/${req.file.filename}`,
+      url: relativeUrl,
       uploadedBy: req.adminId,
       metadata: {
         location: req.body.location || "general",
@@ -63,7 +69,7 @@ router.post("/", adminAuth, upload.single("image"), async (req, res) => {
     res.status(201).json({
       message: "Image uploaded successfully",
       imageId,
-      url: `/uploads/images/${req.file.filename}`,
+      url: fullUrl, // Return full URL so frontend can access it from any origin
       uploadedImage,
     });
   } catch (error) {

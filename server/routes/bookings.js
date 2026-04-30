@@ -14,12 +14,15 @@ router.post("/", async (req, res) => {
       clientPhone,
       serviceId,
       bookingDate,
+      duration,
       notes,
+      status,
+      paymentStatus,
+      createdFrom,
     } = req.body;
 
     if (
       !clientName ||
-      !clientEmail ||
       !clientPhone ||
       !serviceId ||
       !bookingDate
@@ -39,9 +42,12 @@ router.post("/", async (req, res) => {
       serviceId,
       serviceName: service.name,
       bookingDate: new Date(bookingDate),
-      duration: service.duration,
+      duration: duration || service.duration,
       notes,
       totalPrice: service.price,
+      status: status || "pending",
+      paymentStatus: paymentStatus || "pending",
+      createdFrom: createdFrom || "website",
     });
 
     await booking.save();
@@ -94,6 +100,56 @@ router.patch("/:id", adminAuth, async (req, res) => {
     if (!booking) return res.status(404).json({ error: "Booking not found" });
 
     res.json(booking);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update full booking (admin only)
+router.put("/:id", adminAuth, async (req, res) => {
+  try {
+    const {
+      clientName,
+      clientEmail,
+      clientPhone,
+      serviceId,
+      bookingDate,
+      duration,
+      notes,
+      status,
+      paymentStatus,
+      createdFrom,
+    } = req.body;
+
+    let booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // If serviceId is being updated, verify it exists
+    if (serviceId && serviceId !== booking.serviceId.toString()) {
+      const service = await Service.findById(serviceId);
+      if (!service) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+      booking.serviceId = serviceId;
+      booking.serviceName = service.name;
+      booking.totalPrice = service.price;
+    }
+
+    // Update booking fields
+    booking.clientName = clientName || booking.clientName;
+    booking.clientEmail = clientEmail || booking.clientEmail;
+    booking.clientPhone = clientPhone || booking.clientPhone;
+    booking.bookingDate = bookingDate ? new Date(bookingDate) : booking.bookingDate;
+    booking.duration = duration !== undefined ? duration : booking.duration;
+    booking.notes = notes !== undefined ? notes : booking.notes;
+    booking.status = status || booking.status;
+    booking.paymentStatus = paymentStatus || booking.paymentStatus;
+    booking.createdFrom = createdFrom || booking.createdFrom;
+
+    const updatedBooking = await booking.save();
+    res.json(updatedBooking);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

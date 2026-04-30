@@ -92,7 +92,7 @@ export default function BookingManager() {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
 
-      if (!formData.clientName || !formData.clientEmail || !formData.clientPhone || !formData.serviceId || !formData.bookingDate || !formData.bookingTime) {
+      if (!formData.clientName || !formData.clientPhone || !formData.serviceId || !formData.bookingDate || !formData.bookingTime) {
         setError('Please fill in all required fields');
         setSaving(false);
         return;
@@ -143,11 +143,14 @@ export default function BookingManager() {
   };
 
   const handleEdit = (booking) => {
+    // Handle serviceId - it could be a string or an object (from populate)
+    const serviceId = typeof booking.serviceId === 'object' ? booking.serviceId._id : booking.serviceId;
+    
     setFormData({
       clientName: booking.clientName,
       clientEmail: booking.clientEmail,
       clientPhone: booking.clientPhone,
-      serviceId: booking.serviceId,
+      serviceId: serviceId,
       bookingDate: new Date(booking.bookingDate).toISOString().split('T')[0],
       bookingTime: new Date(booking.bookingDate).toTimeString().slice(0, 5),
       duration: booking.duration,
@@ -238,12 +241,11 @@ export default function BookingManager() {
                 required
               />
               <AdminInput
-                label="Email"
+                label="Email (Optional)"
                 type="email"
                 value={formData.clientEmail}
                 onChange={(e) => handleFormChange('clientEmail', e.target.value)}
                 placeholder="client@example.com"
-                required
               />
               <AdminInput
                 label="Phone"

@@ -59,8 +59,8 @@ const Counter = ({ end, label, icon, isRating = false, showPlus = true }) => {
       {isRating && (
         <div className="flex justify-center gap-1 mb-2">
           {[...Array(5)].map((_, i) => (
-            <span key={i} className="text-xl">
-              {i < Math.floor(count) ? '★' : i < count ? '✨' : '☆'}
+            <span key={i} className="text-xl" style={{ color: i < Math.round(count) ? config.colors.buttonColor : '#D1D5DB' }}>
+              ★
             </span>
           ))}
         </div>
@@ -75,7 +75,6 @@ const Counter = ({ end, label, icon, isRating = false, showPlus = true }) => {
 export default function CustomerCounterSection() {
   const [stats, setStats] = useState({
     happyClients: 500,
-    totalBookings: 400,
     totalServices: 8,
     averageRating: 4.8,
   });
@@ -90,7 +89,6 @@ export default function CustomerCounterSection() {
 
         setStats(prev => ({
           happyClients: settingsRes.data?.stats?.happyClients || prev.happyClients,
-          totalBookings: settingsRes.data?.stats?.totalBookings || prev.totalBookings,
           totalServices: servicesRes.data?.length || prev.totalServices,
           averageRating: settingsRes.data?.stats?.averageRating || prev.averageRating,
         }));
@@ -116,7 +114,7 @@ export default function CustomerCounterSection() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           <Counter
             end={stats.happyClients}
             label="Happy Clients"
@@ -127,20 +125,6 @@ export default function CustomerCounterSection() {
                 <circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            }
-          />
-
-          <Counter
-            end={stats.totalBookings}
-            label="Total Bookings"
-            showPlus={true}
-            icon={
-              <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={config.colors.buttonColor} strokeWidth={2}>
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
               </svg>
             }
           />

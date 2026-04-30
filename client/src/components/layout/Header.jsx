@@ -14,9 +14,9 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 w-full z-40 bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <a href="/" className="group">
+      <div className="w-full px-12 py-4 flex justify-between items-center">
+        {/* Logo - Leftmost Aligned */}
+        <a href="/" className="group flex-shrink-0">
           <div className="font-playfair text-2xl font-bold" style={{ color: config.colors.primary }}>
             {config.salon.name.split(' ')[0] || 'Studio'}
           </div>
@@ -25,8 +25,8 @@ export default function Header() {
           </p>
         </a>
 
-        {/* Navigation - Desktop */}
-        <nav className="hidden md:flex items-center gap-8">
+        {/* Navigation - Desktop - Rightmost Aligned */}
+        <nav className="hidden md:flex items-center gap-12">
           <button onClick={() => scrollToSection('services')} className="font-inter text-sm uppercase tracking-wider transition-colors font-medium" style={{ color: config.colors.primary }}>
             Services
           </button>

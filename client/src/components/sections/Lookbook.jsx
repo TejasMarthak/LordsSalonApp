@@ -231,35 +231,26 @@ export default function Lookbook() {
           </p>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className="px-6 py-2 font-inter text-sm uppercase tracking-wider transition-all rounded-lg font-medium"
+        {/* Category Filter - Dropdown */}
+        <div className="flex justify-center mb-16">
+          <select
+            value={selectedCategory || ''}
+            onChange={(e) => setSelectedCategory(e.target.value || null)}
+            className="px-6 py-3 font-inter text-sm uppercase tracking-wider rounded-lg font-medium border-2 transition-all"
             style={{
-              backgroundColor: selectedCategory === null ? config.colors.primary : 'transparent',
-              color: selectedCategory === null ? config.colors.white : config.colors.primary,
-              borderWidth: selectedCategory === null ? '0px' : '2px',
               borderColor: config.colors.primary,
+              color: config.colors.primary,
+              backgroundColor: config.colors.white,
+              cursor: 'pointer',
             }}
           >
-            All
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className="px-6 py-2 font-inter text-sm uppercase tracking-wider transition-all rounded-lg font-medium"
-              style={{
-                backgroundColor: selectedCategory === category ? config.colors.primary : 'transparent',
-                color: selectedCategory === category ? config.colors.white : config.colors.primary,
-                borderWidth: selectedCategory === category ? '0px' : '2px',
-                borderColor: config.colors.primary,
-              }}
-            >
-              {category}
-            </button>
-          ))}
+            <option value="">All Services</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Portfolio Carousel */}

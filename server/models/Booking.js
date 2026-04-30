@@ -9,8 +9,8 @@ const bookingSchema = new mongoose.Schema(
     },
     clientEmail: {
       type: String,
-      required: true,
       lowercase: true,
+      default: "",
     },
     clientPhone: {
       type: String,

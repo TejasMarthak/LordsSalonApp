@@ -60,9 +60,6 @@ export default function AdminHeader({ admin, onLogout, sidebarOpen, onToggleSide
             </h1>
             <div className="flex items-center gap-2 mt-1">
               <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <p className="font-inter text-xs sm:text-sm" style={{ color: adminConfig.colors.textLight }}>
-                Live Data <span className="font-semibold">(2 updates)</span>
-              </p>
             </div>
           </div>
         </div>

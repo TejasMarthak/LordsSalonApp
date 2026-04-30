@@ -5,19 +5,7 @@ import { AdminInput, AdminButton } from '../common/FormComponents';
 import { SaveIcon, AlertIcon, SuccessIcon, DeleteIcon, EditIcon, LoadingIcon } from '../../utils/Icons';
 
 export default function DiscountManager() {
-  const [discounts, setDiscounts] = useState([
-    {
-      id: 1,
-      title: 'New Year Discount',
-      description: '20% off on all services',
-      discountPercentage: 20,
-      occasion: 'New Year',
-      validFrom: '2026-01-01',
-      validTo: '2026-01-31',
-      isActive: true,
-      applicableServices: ['All'],
-    },
-  ]);
+  const [discounts, setDiscounts] = useState([]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -83,7 +71,7 @@ export default function DiscountManager() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setDiscounts((prev) =>
-          prev.map((d) => (d.id === editingId ? { ...formData, id: editingId } : d))
+          prev.map((d) => (d._id === editingId ? { ...formData, _id: editingId } : d))
         );
         setSuccess('Discount updated successfully!');
         setEditingId(null);
@@ -373,7 +361,7 @@ export default function DiscountManager() {
                   </thead>
                   <tbody className="divide-y" style={{ divideColor: adminConfig.colors.border }}>
                     {discounts.map((discount) => (
-                      <tr key={discount.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={discount._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4 text-sm font-medium" style={{ color: adminConfig.colors.text }}>
                           {discount.title}
                         </td>
@@ -385,7 +373,7 @@ export default function DiscountManager() {
                         </td>
                         <td className="px-6 py-4 text-sm">
                           <button
-                            onClick={() => handleToggleActive(discount.id)}
+                            onClick={() => handleToggleActive(discount._id)}
                             className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
                               discount.isActive
                                 ? 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -404,7 +392,7 @@ export default function DiscountManager() {
                             <EditIcon size={18} color="#0366D6" />
                           </button>
                           <button
-                            onClick={() => handleDeleteDiscount(discount.id)}
+                            onClick={() => handleDeleteDiscount(discount._id)}
                             className="p-2 hover:bg-red-50 rounded transition-colors"
                             title="Delete"
                           >
@@ -421,7 +409,7 @@ export default function DiscountManager() {
               <div className="md:hidden space-y-3">
                 {discounts.map((discount) => (
                   <div
-                    key={discount.id}
+                    key={discount._id}
                     className="rounded-lg p-4 border"
                     style={{
                       backgroundColor: adminConfig.colors.background,
@@ -454,7 +442,7 @@ export default function DiscountManager() {
 
                       <div className="flex justify-between items-center gap-2">
                         <button
-                          onClick={() => handleToggleActive(discount.id)}
+                          onClick={() => handleToggleActive(discount._id)}
                           className={`flex-1 px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider transition-all ${
                             discount.isActive
                               ? 'bg-green-100 text-green-700'
@@ -471,7 +459,7 @@ export default function DiscountManager() {
                           <EditIcon size={16} color="#0366D6" />
                         </button>
                         <button
-                          onClick={() => handleDeleteDiscount(discount.id)}
+                          onClick={() => handleDeleteDiscount(discount._id)}
                           className="p-2 hover:bg-red-50 rounded transition-colors"
                           title="Delete"
                         >

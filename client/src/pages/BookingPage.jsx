@@ -312,35 +312,20 @@ export default function BookingPage() {
                   <label className="block text-sm font-semibold mb-3" style={{ color: config.colors.primary }}>
                     Phone Number * <span style={{ color: '#999', fontSize: '0.85em' }}>(10 digits)</span>
                   </label>
-                  <div className="flex gap-3">
-                    {/* Country Code - Read Only */}
-                    <input
-                      type="text"
-                      value="+91"
-                      disabled
-                      className="px-4 py-3 border rounded-lg bg-gray-100 text-center font-semibold text-base"
-                      style={{
-                        borderColor: config.colors.border,
-                        width: '70px',
-                        cursor: 'not-allowed',
-                      }}
-                    />
-                    {/* Phone Number - 10 digits */}
-                    <input
-                      type="tel"
-                      name="clientPhone"
-                      value={formData.clientPhone}
-                      onChange={handleChange}
-                      required
-                      placeholder="9876543210"
-                      maxLength="10"
-                      className="flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition text-base font-mono"
-                      style={{
-                        borderColor: config.colors.border,
-                        focusRingColor: config.colors.accent,
-                      }}
-                    />
-                  </div>
+                  <input
+                    type="tel"
+                    name="clientPhone"
+                    value={formData.clientPhone}
+                    onChange={handleChange}
+                    required
+                    placeholder="9876543210"
+                    maxLength="10"
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition text-base"
+                    style={{
+                      borderColor: config.colors.border,
+                      focusRingColor: config.colors.accent,
+                    }}
+                  />
                   <p className="text-xs text-gray-500 mt-1">Enter 10-digit mobile number</p>
                 </div>
               </div>

@@ -54,6 +54,7 @@ export default function PortfolioManager() {
   const [items, setItems] = useState([]);
   const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({
+    title: '',
     category: '',
     imageFile: null,
     imageUrl: '',
@@ -123,18 +124,21 @@ export default function PortfolioManager() {
     }
   };
 
-  // Upload file to Cloudinary
+  // Upload file via backend API (which uses Cloudinary with server credentials)
   const uploadFile = async (file) => {
     const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    formDataUpload.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'default_preset');
+    formDataUpload.append('image', file);
 
     try {
-      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'cloudinary_name';
+      const token = localStorage.getItem('adminToken');
       const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        `${adminConfig.api.baseUrl}/api/upload`,
         formDataUpload,
         {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total
@@ -143,9 +147,10 @@ export default function PortfolioManager() {
           },
         }
       );
-      return response.data.secure_url;
+      return response.data.url;
     } catch (err) {
-      throw new Error('File upload failed');
+      const errorMsg = err.response?.data?.error || 'File upload failed';
+      throw new Error(errorMsg);
     }
   };
 
@@ -180,6 +185,7 @@ export default function PortfolioManager() {
       const headers = { Authorization: `Bearer ${token}` };
 
       const submitData = {
+        title: formData.title,
         category: formData.category,
         imageUrl,
         beforeImageUrl: beforeImageUrl || undefined,
@@ -213,6 +219,7 @@ export default function PortfolioManager() {
 
   const handleEdit = (item) => {
     setFormData({
+      title: item.title,
       category: item.category,
       imageFile: null,
       imageUrl: item.imageUrl,
@@ -241,6 +248,7 @@ export default function PortfolioManager() {
 
   const resetForm = () => {
     setFormData({
+      title: '',
       category: services.length > 0 ? services[0].name : '',
       imageFile: null,
       imageUrl: '',
@@ -289,6 +297,21 @@ export default function PortfolioManager() {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-bold mb-2 uppercase text-black">
+                  Portfolio Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g., Wedding Day Glam, Summer Skincare"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black transition bg-white text-black"
+                />
+              </div>
+
               {/* Category */}
               <div>
                 <label className="block text-sm font-bold mb-2 uppercase text-black">

@@ -55,8 +55,8 @@ export default function HeroManager() {
       return;
     }
 
-    if (heroContent.heroImages.length >= 2) {
-      setError('Maximum 2 images allowed. Remove an image to add another.');
+    if (heroContent.heroImages.length >= 1) {
+      setError('Maximum 1 image allowed. Remove the image to add another.');
       return;
     }
 
@@ -83,16 +83,16 @@ export default function HeroManager() {
     if (!files) return;
 
     let addedCount = 0;
-    const maxAllowed = 2 - heroContent.heroImages.length;
+    const maxAllowed = 1 - heroContent.heroImages.length;
 
     if (maxAllowed <= 0) {
-      setError('Maximum 2 images allowed. Remove an image to add another.');
+      setError('Maximum 1 image allowed. Remove the image to add another.');
       return;
     }
 
     for (let file of files) {
       if (addedCount >= maxAllowed) {
-        setError(`Maximum 2 images allowed. Only ${maxAllowed} image(s) can be added.`);
+        setError(`Maximum 1 image allowed. Only ${maxAllowed} image can be added.`);
         break;
       }
 
@@ -336,8 +336,8 @@ export default function HeroManager() {
               <ImageIcon size={20} color={adminConfig.colors.primary} />
               <div>
                 <p className="font-inter text-sm font-bold">
-                  Images: <span style={{ color: adminConfig.colors.accent }}>{heroContent.heroImages.length}/2</span>
-                  {heroContent.heroImages.length === 2 && (
+                  Images: <span style={{ color: adminConfig.colors.accent }}>{heroContent.heroImages.length}/1</span>
+                  {heroContent.heroImages.length === 1 && (
                     <span style={{ color: adminConfig.colors.success }}> ✓ Maximum</span>
                   )}
                 </p>
@@ -357,7 +357,7 @@ export default function HeroManager() {
             {/* File Upload */}
             <div>
               <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
-                Upload Images (Multiple)
+                Upload Images (Single)
               </label>
               <input
                 type="file"
@@ -368,7 +368,7 @@ export default function HeroManager() {
                 style={{ borderColor: adminConfig.colors.border, color: adminConfig.colors.text }}
               />
               <p className="text-xs mt-2" style={{ color: adminConfig.colors.textLight }}>
-                Select up to 2 images. Max 5MB each.
+                Select up to 1 image. Max 5MB.
               </p>
             </div>
 
@@ -377,7 +377,7 @@ export default function HeroManager() {
               <label className="block text-sm font-semibold mb-2" style={{ color: adminConfig.colors.primary }}>
                 Or Paste Image URL
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={imageUrlInput}
@@ -390,7 +390,7 @@ export default function HeroManager() {
                 <button
                   type="button"
                   onClick={handleAddImageUrl}
-                  className="px-4 py-3 rounded-lg font-semibold text-white"
+                  className="px-6 py-3 rounded-lg font-semibold text-white w-full sm:w-auto"
                   style={{ backgroundColor: adminConfig.colors.accent }}
                 >
                   Add

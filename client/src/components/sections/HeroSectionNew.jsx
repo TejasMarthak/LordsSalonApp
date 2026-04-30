@@ -98,7 +98,7 @@ export default function HeroSectionNew() {
 
       {/* Content Overlay */}
       <div className="relative z-10 w-full h-full flex items-center justify-center px-4 sm:px-6 lg:px-12">
-        <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 py-20">
+        <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 py-20 md:mt-12 lg:mt-16 xl:mt-24">
 
 
           {/* Main Headline */}

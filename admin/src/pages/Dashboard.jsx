@@ -19,7 +19,6 @@ export default function Dashboard({ admin }) {
   const navigate = useNavigate();
   const [portfolioCount, setPortfolioCount] = useState(0);
   const [servicesCount, setServicesCount] = useState(0);
-  const [bookingsCount, setBookingsCount] = useState(0);
   const [siteSettings, setSiteSettings] = useState(null);
   const [recentItems, setRecentItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,8 +70,6 @@ export default function Dashboard({ admin }) {
       
       if (cardId === 'happyClients') {
         updatedStats.happyClients = parseInt(editValue);
-      } else if (cardId === 'totalBookings') {
-        updatedStats.totalBookings = parseInt(editValue);
       } else if (cardId === 'rating') {
         updatedStats.averageRating = parseFloat(editValue);
       }
@@ -107,11 +104,10 @@ export default function Dashboard({ admin }) {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
       
-      const [portfolioRes, servicesRes, settingsRes, bookingsRes] = await Promise.all([
+      const [portfolioRes, servicesRes, settingsRes] = await Promise.all([
         axios.get(`${adminConfig.api.baseUrl}/api/portfolio`),
         axios.get(`${adminConfig.api.baseUrl}/api/services`),
         axios.get(`${adminConfig.api.baseUrl}/api/site-settings`),
-        axios.get(`${adminConfig.api.baseUrl}/api/bookings`, { headers }),
       ]);
 
       const portfolio = portfolioRes.data || [];
@@ -119,7 +115,6 @@ export default function Dashboard({ admin }) {
       setPortfolioCount(portfolio.length);
       setServicesCount(servicesRes.data?.length || 0);
       setSiteSettings(settingsRes.data);
-      setBookingsCount(bookingsRes.data?.length || 0);
       setRecentItems(portfolio.slice(0, 5)); // Last 5 items
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -192,7 +187,7 @@ export default function Dashboard({ admin }) {
 
       {/* Stats Grid */}
       {!loading && siteSettings ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard
             label="Portfolio Items"
             value={portfolioCount}
@@ -216,13 +211,6 @@ export default function Dashboard({ admin }) {
             icon={SettingsIcon}
             editable={true}
             cardId="happyClients"
-          />
-          <StatCard
-            label="Total Bookings"
-            value={siteSettings?.stats?.totalBookings || bookingsCount}
-            icon={ImageIcon}
-            editable={true}
-            cardId="totalBookings"
           />
         </div>
       ) : (

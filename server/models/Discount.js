@@ -34,12 +34,7 @@ const discountSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    applicableServices: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Service',
-      },
-    ],
+    applicableServices: [String], // e.g., ['Bridal', 'Makeup', 'All']
     applicableCategories: [String], // e.g., ['womens', 'bridal']
   },
   { timestamps: true }
